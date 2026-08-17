@@ -1,4 +1,12 @@
-<h1 align="center">Angularity FW</h1>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset=".github/assets/logo_light.png">
+    <img
+        alt="Angularity FW"
+        src=".github/assets/logo_dark.png">
+  </picture>
+</p>
 
 <h2 align="center">
   <a href="#Install">Install</a> · <a href="#list-of-changes">Features</a> · <a href="#%EF%B8%8F-support">Donate</a>
