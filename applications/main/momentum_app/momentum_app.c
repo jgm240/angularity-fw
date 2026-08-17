@@ -163,8 +163,8 @@ static void
     momentum_app_push_mainmenu_app_raw(MomentumApp* app, FuriString* label, FuriString* exe) {
     CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(exe)));
     // Display logic mimics applications/services/gui/modules/menu.c
-    if(furi_string_equal(label, "Momentum")) {
-        furi_string_set(label, "MNTM");
+    if(furi_string_equal(label, "Angularity")) {
+        furi_string_set(label, "ANGLR");
     } else if(furi_string_equal(label, "125 kHz RFID")) {
         furi_string_set(label, "RFID");
     } else if(furi_string_equal(label, "Sub-GHz")) {
@@ -229,7 +229,7 @@ void momentum_app_load_mainmenu_apps(MomentumApp* app) {
                 } else if(furi_string_equal(line, "SubGHz")) {
                     furi_string_set(line, "Sub-GHz");
                 } else if(furi_string_equal(line, "Xtreme")) {
-                    furi_string_set(line, "Momentum");
+                    furi_string_set(line, "Angularity");
                 }
             }
             momentum_app_push_mainmenu_app(app, line);
@@ -404,7 +404,7 @@ MomentumApp* momentum_app_alloc() {
     // Need canvas to calculate text length
     Canvas* canvas = gui_direct_draw_acquire(app->gui);
     canvas_set_font(canvas, FontPrimary);
-    if(furi_string_equal(app->version_tag, "mntm-dev")) {
+    if(furi_string_equal(app->version_tag, "ang-dev")) {
         // Add space, add commit sha
         furi_string_cat_printf(app->version_tag, " %s", version_get_githash(NULL));
         // Make uppercase
@@ -419,7 +419,7 @@ MomentumApp* momentum_app_alloc() {
         }
     } else {
         // Make uppercase, add space, add build date
-        furi_string_replace(app->version_tag, "mntm", "MNTM");
+        furi_string_replace(app->version_tag, "ang", "ANG");
         furi_string_cat_printf(app->version_tag, " %s", version_get_builddate(NULL));
     }
     // Add spaces to align right

@@ -1,18 +1,10 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo_dark.png">
-    <source media="(prefers-color-scheme: light)" srcset=".github/assets/logo_light.png">
-    <img
-        alt="Momentum Firmware"
-        src=".github/assets/logo_dark.png">
-  </picture>
-</p>
+<h1 align="center">Angularity FW</h1>
 
 <h2 align="center">
-  <a href="#Install">Install</a> · <a href="#list-of-changes">Features</a> · <a href="https://discord.gg/momentum">Discord</a> · <a href="#%EF%B8%8F-support">Donate</a>
+  <a href="#Install">Install</a> · <a href="#list-of-changes">Features</a> · <a href="#%EF%B8%8F-support">Donate</a>
 </h2>
 
-This custom firmware is based on the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware) for [Flipper Zero](https://flipperzero.one/), and includes most of the awesome features from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware). It is a direct continuation of the Xtreme firmware, built by the same (and only) developers who made that project special.
+This custom firmware is a fork of [Momentum Firmware](https://github.com/Next-Flip/Momentum-Firmware) for [Flipper Zero](https://flipperzero.one/), which is itself based on the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware) and includes most of the awesome features from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware). All credit for the underlying feature set goes to the Momentum, Unleashed, Xtreme, and Official Firmware teams — Angularity FW rebrands and customizes that excellent work.
 
 <br>
 <h2 align="center">Modus Operandi</h2>
@@ -27,10 +19,10 @@ The goal of this firmware is to constantly push the bounds of what is possible w
 
 <br>
 
-Note that mentioned below are only a few of our staple additions to the firmware. For a full list check [down here](https://github.com/Next-Flip/Momentum-Firmware#List-of-Changes).
+Note that mentioned below are only a few of our staple additions to the firmware. For a full list check [down here](#list-of-changes).
 
 <br>
-<h2 align="center">Momentum Settings</h2>
+<h2 align="center">Angularity Settings</h2>
 
 We offer a powerful and easy-to-use application tailor-made for our firmware, that lets you configure everything you could dream of, and more:
 
@@ -52,7 +44,7 @@ We offer a powerful and easy-to-use application tailor-made for our firmware, th
 We created our own improved Animation / Asset system that lets you create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations, Icons and Fonts like never before. Think of it as a Theme system that's never been easier.
 
 <img src=".github/assets/packs-folder.png" align="left" width="200px"/>
-You can easily create your own pack, or find some community-made ones on <b><a href="https://momentum-fw.dev/asset-packs">our website</a> or on Discord</b>. Check <a href="https://github.com/Next-Flip/Momentum-Firmware/blob/dev/documentation/file_formats/AssetPacks.md">here</a> for a tutorial on creating your own. Essentially, each <code>Asset Pack</code> can configure its own <code>Anims</code>, <code>Icons</code> & <code>Fonts</code>.
+You can easily create your own pack, or find some community-made ones online. Check <a href="https://github.com/Next-Flip/Momentum-Firmware/blob/dev/documentation/file_formats/AssetPacks.md">here</a> for a tutorial on creating your own (the format is unchanged from upstream Momentum). Essentially, each <code>Asset Pack</code> can configure its own <code>Anims</code>, <code>Icons</code> & <code>Fonts</code>.
 
 <br clear="left"/>
 
@@ -67,7 +59,7 @@ Once you have some asset packs, upload them to your Flipper in <code>SD/asset_pa
 <br>
 
 <img src=".github/assets/packs-done.png" align="left" width="200px"/>
-After installing the packs to Flipper, hit the <code>Arrow Up</code> button on the main menu and go to <code>Momentum Settings > Interface > Graphics</code>. Here choose which asset pack you want and tweak the other settings how you prefer, then exit the app to reboot and enjoy your fully customized Flipper!
+After installing the packs to Flipper, hit the <code>Arrow Up</code> button on the main menu and go to <code>Angularity Settings > Interface > Graphics</code>. Here choose which asset pack you want and tweak the other settings how you prefer, then exit the app to reboot and enjoy your fully customized Flipper!
 
 <br clear="left"/>
 
@@ -86,14 +78,14 @@ In USB mode it also enables additional functionality to spoof the manufacturer a
 
 <h2 align="center">List of changes</h2>
 
-There are too many to name them all, this is a **non-comprehensive** list of the **most notable from an end-user perspective**. For a more detailed list, you can read through the [**changelogs**](https://github.com/Next-Flip/Momentum-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://momentum-fw.dev/).
+There are too many to name them all, this is a **non-comprehensive** list of the **most notable from an end-user perspective**, inherited from Momentum Firmware, which this fork is built on. For a more detailed list, you can read through Momentum's [**changelogs**](https://github.com/Next-Flip/Momentum-Firmware/releases) and commits/code.
 
 Note that this repo is always updated with the great work from our friends at [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and the latest changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware). Below are mentioned only **our** changes that we can actually be credited for, so make sure to check their fantastic additions aswell. And a huge thank you to both teams!
 
 ```txt
 [Added]
 
-- Momentum App (Easy configuration of features and behavior of the firmware)
+- Angularity App (Easy configuration of features and behavior of the firmware)
 - Asset Packs (Unparalleled theming and customization)
 - More UI customization, redesigns and optimizations
 - Bad-Keyboard App
@@ -137,41 +129,19 @@ Note that this repo is always updated with the great work from our friends at [U
 
 <h2 align="center">Install</h2>
 
-There are 4 methods to install Momentum, we recommend you use the **Web Updater**, but choose whichever one you prefer:
-
-> <details><summary><code>Web Updater (Chrome)</code></summary><ul>
->   <li>Make sure qFlipper is closed</li>
->   <li>Open the <a href="https://momentum-fw.dev/update">Web Updater</a></li>
->   <li>Click <code>Connect</code> and select your Flipper from the list</li>
->   <li>Select which update <code>Channel</code> you prefer from the dropdown</li>
->   <li>Click <code>Install</code> and wait for the update to complete</li>
-> </ul></details>
-
-> <details><summary><code>Flipper Lab/App (chrome/mobile)</code></summary><ul>
->   <li>(Desktop) Make sure qFlipper is closed</li>
->   <li>(Mobile) Make sure you have the <a href="https://docs.flipper.net/mobile-app">Flipper Mobile App</a> installed and paired</li>
->   <li>Open the <a href="https://github.com/Next-Flip/Momentum-Firmware/releases/latest">latest release page</a></li>
->   <li>Click the <code>☁️ Flipper Lab/App (chrome/mobile)</code> link</li>
->   <li>(Desktop) Click <code>Connect</code> and select your Flipper from the list</li>
->   <li>(Desktop) Click <code>Install</code> and wait for the update to complete</li>
->   <li>(Mobile) Accept the prompt to open the link in the Flipper Mobile App</li>
->   <li>(Mobile) Confirm to proceed with the install and wait for the update to complete</li>
-> </ul></details>
+Angularity FW has no hosted update server, so install it via **qFlipper** using a self-built package:
 
 > <details><summary><code>qFlipper Package (.tgz)</code></summary><ul>
->   <li>Download the qFlipper package (.tgz) from the <a href="https://github.com/Next-Flip/Momentum-Firmware/releases/latest">latest release page</a></li>
+>   <li>Build the package yourself (see <a href="#build-it-yourself">Build it yourself</a> below) — this produces a <code>.tgz</code> in the <code>dist/</code> folder</li>
 >   <li>Make sure the <code>WebUpdater</code> and <code>lab.flipper.net</code> are closed</li>
 >   <li>Open <a href="https://flipperzero.one/update">qFlipper</a> and connect your Flipper</li>
 >   <li>Click <code>Install from file</code></li>
->   <li>Select the .tgz you downloaded and wait for the update to complete</li>
+>   <li>Select the .tgz you built and wait for the update to complete</li>
 > </ul></details>
 
-> <details><summary><code>Zipped Archive (.zip)</code></summary><ul>
->   <li>Download the zipped archive (.zip) from the <a href="https://github.com/Next-Flip/Momentum-Firmware/releases/latest">latest release page</a></li>
->   <li>Extract the archive. This is now your new Firmware folder</li>
->   <li>Open <a href="https://flipperzero.one/update">qFlipper</a>, head to <code>SD/update</code> and simply move the firmware folder there</li>
->   <li>On the Flipper, hit the <code>Arrow Down</code> button, this will get you to the file menu. In there simply search for your updates folder</li>
->   <li>Inside that folder, select the Firmware you just moved onto it, and run the file thats simply called <code>Update</code></li>
+> <details><summary><code>Flash directly over USB</code></summary><ul>
+>   <li>Connect your Flipper via USB and make sure qFlipper is closed</li>
+>   <li>Run <code>./fbt flash_usb_full</code> from the repo root (see <a href="#build-it-yourself">Build it yourself</a> below)</li>
 > </ul></details>
 
 <br>
@@ -180,8 +150,8 @@ There are 4 methods to install Momentum, we recommend you use the **Web Updater*
 
 ```bash
 To download the repository:
-$ git clone --recursive --jobs 8 https://github.com/Next-Flip/Momentum-Firmware.git
-$ cd Momentum-Firmware/
+$ git clone --recursive --jobs 8 <your-Angularity-FW-repo-url>
+$ cd Angularity-FW/
 
 To flash directly to the Flipper (Needs to be connected via USB, qFlipper closed)
 $ ./fbt flash_usb_full
@@ -193,18 +163,12 @@ To build and launch a single app:
 $ ./fbt launch APPSRC=your_appid
 ```
 
-<h2 align="center">Stargazers over time</h2>
-
-[![Stargazers over time](https://starchart.cc/Next-Flip/Momentum-Firmware.svg?variant=adaptive)](https://starchart.cc/Next-Flip/Momentum-Firmware)
-
 <h2 align="center">❤️ Support</h2>
 
-If you enjoy the firmware please __**spread the word!**__ And if you really love it, maybe consider donating to the team? :D
+Angularity FW is a personal fork built on top of the incredible work from the Momentum Firmware team. If you enjoy it, please consider supporting **upstream Momentum Firmware**:
 
 > **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required
 
 > **[PayPal](https://paypal.me/willyjl1)**: One-off, Signup required
-
-> **BTC**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
 
 **Thank you <3**

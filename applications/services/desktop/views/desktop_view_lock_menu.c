@@ -111,7 +111,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             enabled = m->lock_menu->bt->bt_settings.enabled;
             break;
         case DesktopLockMenuIndexMomentum:
-            icon = &I_CC_Momentum_16x16;
+            icon = &I_CC_Angularity_16x16;
             break;
         case DesktopLockMenuIndexBrightness:
             icon = &I_Pin_star_7x7;
