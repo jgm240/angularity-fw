@@ -1,5 +1,7 @@
 # Pre-included Asset Packs
 
+- **`Angularity`** - The default Angularity FW branded pack (idle screen wordmark).
+
 - **`Momentum`** - Credits:
   - [Kuronons](https://github.com/Kuronons) for the [desktop animations](https://github.com/Kuronons/FZ_graphics/tree/main/Animations/Custom_Firmwares)
   - [Kuronons](https://github.com/Kuronons) for the [passport portraits](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)

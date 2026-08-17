@@ -118,12 +118,12 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventMomentum:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start_detached_with_gui_error(desktop->loader, "Momentum", NULL);
+            loader_start_detached_with_gui_error(desktop->loader, "Angularity", NULL);
             consumed = true;
             break;
         case DesktopLockMenuEventScreenSettings:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start_detached_with_gui_error(desktop->loader, "Momentum", "MiscScreen");
+            loader_start_detached_with_gui_error(desktop->loader, "Angularity", "MiscScreen");
             consumed = true;
             break;
         case DesktopLockMenuEventStealthModeOn:

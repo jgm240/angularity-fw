@@ -317,7 +317,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
                 } else if(furi_string_equal(line, "SubGHz")) {
                     furi_string_set(line, "Sub-GHz");
                 } else if(furi_string_equal(line, "Xtreme")) {
-                    furi_string_set(line, "Momentum");
+                    furi_string_set(line, "Angularity");
                 }
             }
             loader_menu_find_add_app(app, storage, line);

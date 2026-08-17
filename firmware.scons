@@ -121,6 +121,9 @@ lib_targets = env.BuildModules(
 env.Append(
     CPPDEFINES=[
         env.subst("FW_ORIGIN_${FIRMWARE_ORIGIN}"),
+        # Angularity is a Momentum-API-compatible fork; keep this define so
+        # third-party apps gating Momentum-specific integrations still see them.
+        "FW_ORIGIN_Momentum",
     ]
 )
 
