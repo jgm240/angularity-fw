@@ -7,7 +7,7 @@
 #define TAG "MomentumSettings"
 
 MomentumSettings momentum_settings = {
-    .asset_pack = "Angularity", // Default
+    .asset_pack = "", // Default
     .anim_speed = 100, // 100%
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
