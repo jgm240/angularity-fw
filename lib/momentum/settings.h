@@ -93,6 +93,8 @@ typedef struct {
     bool scroll_marquee;
     bool dark_mode;
     bool rgb_backlight;
+    bool charging_sound;
+    bool theft_alarm;
     uint32_t butthurt_timer;
     bool midnight_format_00;
     bool popup_overlay;

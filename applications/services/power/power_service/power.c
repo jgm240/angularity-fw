@@ -283,9 +283,16 @@ static void power_check_charging_state(Power* power) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     if(furi_hal_power_is_charging()) {
+        // USB is connected again: silence the theft alarm regardless of
+        // which charging sub-state we land in below
+        power->theft_alarm_active = false;
+
         if((power->info.charge == 100) || (furi_hal_power_is_charging_done())) {
             if(power->state != PowerStateCharged) {
                 notification_internal_message(notification, &sequence_charged);
+                if(power->state != PowerStateCharging && momentum_settings.charging_sound) {
+                    notification_message(notification, &sequence_charging_beep);
+                }
                 power->state = PowerStateCharged;
                 power->event.type = PowerEventTypeFullyCharged;
                 furi_pubsub_publish(power->event_pubsub, &power->event);
@@ -293,16 +300,31 @@ static void power_check_charging_state(Power* power) {
 
         } else if(power->state != PowerStateCharging) {
             notification_internal_message(notification, &sequence_charging);
+            if(momentum_settings.charging_sound) {
+                notification_message(notification, &sequence_charging_beep);
+            }
             power->state = PowerStateCharging;
             power->event.type = PowerEventTypeStartCharging;
             furi_pubsub_publish(power->event_pubsub, &power->event);
         }
 
     } else if(power->state != PowerStateNotCharging) {
+        bool was_connected = (power->state == PowerStateCharging) ||
+                              (power->state == PowerStateCharged);
         notification_internal_message(notification, &sequence_not_charging);
+        if(momentum_settings.charging_sound) {
+            notification_message(notification, &sequence_not_charging_beep);
+        }
+        if(momentum_settings.theft_alarm && was_connected) {
+            power->theft_alarm_active = true;
+        }
         power->state = PowerStateNotCharging;
         power->event.type = PowerEventTypeStopCharging;
         furi_pubsub_publish(power->event_pubsub, &power->event);
+    }
+
+    if(power->theft_alarm_active) {
+        notification_message(notification, &sequence_theft_alarm_burst);
     }
 
     furi_record_close(RECORD_NOTIFICATION);

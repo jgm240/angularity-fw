@@ -43,6 +43,7 @@ struct Power {
     FuriTimer* auto_poweroff_timer;
     bool app_running;
     bool charge_is_supressed;
+    bool theft_alarm_active;
     FuriPubSub* input_events_pubsub;
     FuriPubSub* ascii_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;

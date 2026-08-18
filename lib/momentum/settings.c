@@ -36,6 +36,8 @@ MomentumSettings momentum_settings = {
     .scroll_marquee = false, // OFF
     .dark_mode = false, // OFF
     .rgb_backlight = false, // OFF
+    .charging_sound = false, // OFF
+    .theft_alarm = false, // OFF
     .butthurt_timer = 21600, // 6 H
     .midnight_format_00 = true, // 00:XX
     .popup_overlay = true, // ON
@@ -110,6 +112,8 @@ static const struct {
     {setting_bool(scroll_marquee)},
     {setting_bool(dark_mode)},
     {setting_bool(rgb_backlight)},
+    {setting_bool(charging_sound)},
+    {setting_bool(theft_alarm)},
     {setting_uint(butthurt_timer, 0, 172800)},
     {setting_bool(midnight_format_00)},
     {setting_bool(popup_overlay)},

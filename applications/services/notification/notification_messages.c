@@ -296,6 +296,36 @@ const NotificationSequence sequence_not_charging = {
     NULL,
 };
 
+const NotificationSequence sequence_charging_beep = {
+    &message_note_c6,
+    &message_delay_50,
+    &message_note_e6,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_not_charging_beep = {
+    &message_note_e6,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+// Rapid beeps, meant to be re-triggered every second by the power service
+// tick for as long as the theft alarm stays armed and unplugged
+const NotificationSequence sequence_theft_alarm_burst = {
+    &message_note_c7, &message_delay_50, &message_sound_off, &message_delay_50,
+    &message_note_c7, &message_delay_50, &message_sound_off, &message_delay_50,
+    &message_note_c7, &message_delay_50, &message_sound_off, &message_delay_50,
+    &message_note_c7, &message_delay_50, &message_sound_off, &message_delay_50,
+    &message_note_c7, &message_delay_50, &message_sound_off, &message_delay_50,
+    &message_note_c7, &message_delay_50, &message_sound_off, &message_delay_50,
+    NULL,
+};
+
 // Light up
 const NotificationSequence sequence_set_only_red_255 = {
     &message_red_255,

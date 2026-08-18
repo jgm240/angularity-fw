@@ -97,6 +97,9 @@ extern const NotificationSequence sequence_display_backlight_enforce_auto;
 extern const NotificationSequence sequence_charging;
 extern const NotificationSequence sequence_charged;
 extern const NotificationSequence sequence_not_charging;
+extern const NotificationSequence sequence_charging_beep;
+extern const NotificationSequence sequence_not_charging_beep;
+extern const NotificationSequence sequence_theft_alarm_burst;
 
 // Light up
 extern const NotificationSequence sequence_set_only_red_255;

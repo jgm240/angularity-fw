@@ -429,6 +429,17 @@ void canvas_draw_u8g2_bitmap(
     if(u8g2_IsIntersection(u8g2, x, y, x + width, y + height) == 0) return;
 #endif /* U8G2_WITH_INTERSECTION */
 
+    // Icons/animations/bitmaps are pre-authored images (black ink on white),
+    // not simple UI chrome - draw them in their true colors instead of
+    // following the dark-mode Black/White swap from canvas_set_color().
+    // Otherwise every icon and animation frame renders as an inverted
+    // negative of itself. Text, borders, and shapes are unaffected: they
+    // don't go through this function.
+    uint8_t prev_color = u8g2->draw_color;
+    if(momentum_settings.dark_mode && prev_color != ColorXOR) {
+        u8g2->draw_color = ColorBlack;
+    }
+
     switch(rotation) {
     case IconRotation0:
         canvas_draw_u8g2_bitmap_int(u8g2, x, y, width, height, 0, 0, bitmap);
@@ -445,6 +456,8 @@ void canvas_draw_u8g2_bitmap(
     default:
         break;
     }
+
+    u8g2->draw_color = prev_color;
 }
 
 void canvas_draw_icon_ex(
