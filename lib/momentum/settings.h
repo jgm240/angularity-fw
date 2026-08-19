@@ -9,6 +9,9 @@
 
 #define ASSET_PACKS_NAME_LEN 32
 
+// Uppercase hex-encoded UID, up to a 10-byte UID (20 hex chars) + null
+#define NFC_UNLOCK_UID_LEN 24
+
 typedef enum {
     BatteryIconOff,
     BatteryIconBar,
@@ -88,6 +91,8 @@ typedef struct {
     bool lockscreen_prompt;
     bool lockscreen_transparent;
     bool lockscreen_skip_animation;
+    bool nfc_unlock_enabled;
+    char nfc_unlock_uid[NFC_UNLOCK_UID_LEN];
     BatteryIcon battery_icon;
     bool status_icons;
     bool bar_borders;

@@ -9,6 +9,7 @@ enum VarItemListIndex {
     VarItemListIndexShowDate,
     VarItemListIndexShowStatusbar,
     VarItemListIndexUnlockPrompt,
+    VarItemListIndexNfcUnlock,
 };
 
 void momentum_app_scene_interface_lockscreen_var_item_list_callback(void* context, uint32_t index) {
@@ -239,6 +240,9 @@ void momentum_app_scene_interface_lockscreen_on_enter(void* context) {
     variable_item_set_current_value_text(
         item, momentum_settings.lockscreen_skip_animation ? "ON" : "OFF");
 
+    item = variable_item_list_add(var_item_list, "NFC Unlock", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
     variable_item_list_set_enter_callback(
         var_item_list, momentum_app_scene_interface_lockscreen_var_item_list_callback, app);
 
@@ -258,6 +262,10 @@ bool momentum_app_scene_interface_lockscreen_on_event(void* context, SceneManage
             app->scene_manager, MomentumAppSceneInterfaceLockscreen, event.event);
         consumed = true;
         switch(event.event) {
+        case VarItemListIndexNfcUnlock:
+            scene_manager_next_scene(
+                app->scene_manager, MomentumAppSceneInterfaceLockscreenNfc);
+            break;
         default:
             break;
         }

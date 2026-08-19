@@ -241,6 +241,10 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
         if(pin_locked) {
             if(event->key == InputKeyUp) {
                 locked_view->callback(DesktopLockedEventShowPinInput, locked_view->context);
+            } else if(
+                event->key == InputKeyOk && event->type == InputTypeShort &&
+                momentum_settings.nfc_unlock_enabled) {
+                locked_view->callback(DesktopLockedEventNfcScan, locked_view->context);
             } else {
                 locked_view->lock_count = 0;
             }

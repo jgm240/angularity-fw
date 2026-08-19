@@ -24,6 +24,8 @@ MomentumSettings momentum_settings = {
     .lockscreen_prompt = true, // ON
     .lockscreen_transparent = false, // OFF
     .lockscreen_skip_animation = false, // OFF
+    .nfc_unlock_enabled = false, // OFF
+    .nfc_unlock_uid = "", // Default
     .battery_icon = BatteryIconBarPercent, // Bar %
     .status_icons = true, // ON
     .bar_borders = true, // ON
@@ -106,6 +108,8 @@ static const struct {
     {setting_bool(lockscreen_prompt)},
     {setting_bool(lockscreen_transparent)},
     {setting_bool(lockscreen_skip_animation)},
+    {setting_bool(nfc_unlock_enabled)},
+    {setting_str(nfc_unlock_uid)},
     {setting_enum(battery_icon, BatteryIconCount)},
     {setting_bool(status_icons)},
     {setting_bool(bar_borders)},

@@ -16,8 +16,101 @@
 
 #include <momentum/settings.h>
 
+#include <nfc/nfc.h>
+#include <nfc/nfc_poller.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+
 #define WRONG_PIN_HEADER_TIMEOUT 3000
 #define INPUT_PIN_VIEW_TIMEOUT   15000
+
+#define NFC_UNLOCK_SCAN_TIMEOUT_MS 5000
+#define NFC_UNLOCK_SCAN_FLAG_COMPLETE (1 << 0)
+#define NFC_UNLOCK_UID_MAX_LEN 10
+
+typedef struct {
+    FuriThreadId thread_id;
+    NfcPoller* poller;
+    bool detected;
+    Iso14443_3aData data;
+} NfcUnlockScanContext;
+
+static NfcCommand desktop_nfc_unlock_scan_callback(NfcGenericEvent event, void* context) {
+    NfcUnlockScanContext* ctx = context;
+    NfcCommand command = NfcCommandContinue;
+
+    if(event.protocol == NfcProtocolIso14443_3a) {
+        const Iso14443_3aPollerEvent* poller_event = event.event_data;
+        if(poller_event->type == Iso14443_3aPollerEventTypeReady) {
+            const NfcDeviceData* device_data = nfc_poller_get_data(ctx->poller);
+            if(device_data) {
+                iso14443_3a_copy(&ctx->data, (const Iso14443_3aData*)device_data);
+                ctx->detected = true;
+            }
+            furi_thread_flags_set(ctx->thread_id, NFC_UNLOCK_SCAN_FLAG_COMPLETE);
+            command = NfcCommandStop;
+        } else if(poller_event->type == Iso14443_3aPollerEventTypeError) {
+            furi_thread_flags_set(ctx->thread_id, NFC_UNLOCK_SCAN_FLAG_COMPLETE);
+            command = NfcCommandStop;
+        }
+    }
+
+    return command;
+}
+
+// Blocks the calling thread for up to NFC_UNLOCK_SCAN_TIMEOUT_MS waiting
+// for an ISO14443-3A tag. Returns true and fills uid_out/uid_len_out on
+// success. Only ever called from an explicit, user-initiated lock-screen
+// action (OK press with NFC unlock enabled) - never runs unattended.
+static bool desktop_nfc_unlock_scan(uint8_t* uid_out, size_t* uid_len_out) {
+    Nfc* nfc = nfc_alloc();
+    if(!nfc) {
+        return false;
+    }
+
+    NfcUnlockScanContext ctx = {0};
+    ctx.thread_id = furi_thread_get_current_id();
+
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolIso14443_3a);
+    ctx.poller = poller;
+    nfc_poller_start(poller, desktop_nfc_unlock_scan_callback, &ctx);
+
+    furi_thread_flags_wait(
+        NFC_UNLOCK_SCAN_FLAG_COMPLETE, FuriFlagWaitAny, NFC_UNLOCK_SCAN_TIMEOUT_MS);
+    furi_thread_flags_clear(NFC_UNLOCK_SCAN_FLAG_COMPLETE);
+
+    nfc_poller_stop(poller);
+    nfc_poller_free(poller);
+    nfc_free(nfc);
+
+    if(!ctx.detected) {
+        return false;
+    }
+
+    size_t uid_len = 0;
+    const uint8_t* uid = iso14443_3a_get_uid(&ctx.data, &uid_len);
+    if(!uid || uid_len == 0 || uid_len > NFC_UNLOCK_UID_MAX_LEN) {
+        return false;
+    }
+
+    memcpy(uid_out, uid, uid_len);
+    *uid_len_out = uid_len;
+    return true;
+}
+
+static bool desktop_nfc_unlock_uid_matches_setting(const uint8_t* uid, size_t uid_len) {
+    // Stored setting is an uppercase hex string, e.g. "04A1B2C3"
+    if(uid_len == 0 || strlen(momentum_settings.nfc_unlock_uid) != uid_len * 2) {
+        return false;
+    }
+
+    char uid_hex[NFC_UNLOCK_UID_MAX_LEN * 2 + 1];
+    for(size_t i = 0; i < uid_len; i++) {
+        snprintf(uid_hex + i * 2, 3, "%02X", uid[i]);
+    }
+
+    return strcmp(uid_hex, momentum_settings.nfc_unlock_uid) == 0;
+}
 
 static void desktop_scene_locked_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -110,6 +203,18 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(desktop->scene_manager, DesktopScenePinInput);
             consumed = true;
             break;
+        case DesktopLockedEventNfcScan: {
+            uint8_t uid[NFC_UNLOCK_UID_MAX_LEN];
+            size_t uid_len = 0;
+            if(desktop_nfc_unlock_scan(uid, &uid_len) &&
+               desktop_nfc_unlock_uid_matches_setting(uid, uid_len)) {
+                desktop_unlock(desktop);
+            } else {
+                notification_message(desktop->notification, &sequence_error);
+            }
+            consumed = true;
+            break;
+        }
         case DesktopAnimationEventNewIdleAnimation:
             animation_manager_new_idle_process(desktop->animation_manager);
             consumed = true;
