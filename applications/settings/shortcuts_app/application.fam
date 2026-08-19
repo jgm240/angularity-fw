@@ -1,0 +1,13 @@
+App(
+    appid="shortcuts_app",
+    name="Shortcuts",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="shortcuts_app",
+    requires=[
+        "gui",
+        "shortcuts",
+    ],
+    stack_size=2 * 1024,
+    order=45,
+    fap_category="assets",
+)

@@ -1,0 +1,36 @@
+#pragma once
+
+#include <furi.h>
+#include <gui/gui.h>
+#include <gui/view.h>
+#include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
+#include <gui/modules/variable_item_list.h>
+#include <gui/modules/dialog_ex.h>
+
+#include <shortcuts/shortcuts.h>
+
+#include "scenes/shortcuts_app_scene.h"
+
+typedef struct {
+    Shortcuts* shortcuts;
+    Gui* gui;
+    SceneManager* scene_manager;
+    ViewDispatcher* view_dispatcher;
+    VariableItemList* var_item_list;
+    DialogEx* dialog_ex;
+
+    // Scratch state for the Add scene
+    ShortcutTrigger new_trigger;
+    uint8_t new_pin1;
+    uint8_t new_pin2;
+    ShortcutAction new_action;
+
+    // Index targeted by the delete confirmation
+    size_t delete_index;
+} ShortcutsApp;
+
+typedef enum {
+    ShortcutsAppViewVarItemList,
+    ShortcutsAppViewDialogEx,
+} ShortcutsAppView;

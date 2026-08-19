@@ -337,6 +337,21 @@ const NotificationSequence sequence_theft_alarm_led = {
     NULL,
 };
 
+// Shortcuts app standalone actions: gentle, not alarm-like
+const NotificationSequence sequence_shortcut_beep = {
+    &message_note_e6,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_shortcut_blink_led = {
+    &message_blue_255,
+    &message_delay_250,
+    &message_blue_0,
+    NULL,
+};
+
 // Light up
 const NotificationSequence sequence_set_only_red_255 = {
     &message_red_255,

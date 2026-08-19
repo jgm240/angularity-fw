@@ -43,6 +43,7 @@ Header,+,applications/services/notification/notification.h,,
 Header,+,applications/services/notification/notification_messages.h,,
 Header,+,applications/services/power/power_service/power.h,,
 Header,+,applications/services/rpc/rpc_app.h,,
+Header,+,applications/services/shortcuts/shortcuts.h,,
 Header,+,applications/services/storage/storage.h,,
 Header,+,build/icons/assets_icons.h,,
 Header,+,lib/bit_lib/bit_lib.h,,
@@ -3350,6 +3351,10 @@ Function,-,setkey,void,const char*
 Function,-,setlinebuf,int,FILE*
 Function,-,setstate,char*,char*
 Function,-,setvbuf,int,"FILE*, char*, int, size_t"
+Function,+,shortcuts_add,_Bool,"Shortcuts*, const ShortcutRule*"
+Function,+,shortcuts_get,_Bool,"Shortcuts*, size_t, ShortcutRule*"
+Function,+,shortcuts_get_count,size_t,Shortcuts*
+Function,+,shortcuts_remove,void,"Shortcuts*, size_t"
 Function,+,signal_reader_alloc,SignalReader*,"const GpioPin*, uint32_t"
 Function,+,signal_reader_free,void,SignalReader*
 Function,+,signal_reader_set_polarity,void,"SignalReader*, SignalReaderPolarity"
@@ -4657,6 +4662,8 @@ Variable,+,sequence_set_only_green_255,const NotificationSequence,
 Variable,+,sequence_set_only_red_255,const NotificationSequence,
 Variable,+,sequence_set_red_255,const NotificationSequence,
 Variable,+,sequence_set_vibro_on,const NotificationSequence,
+Variable,+,sequence_shortcut_beep,const NotificationSequence,
+Variable,+,sequence_shortcut_blink_led,const NotificationSequence,
 Variable,+,sequence_single_vibro,const NotificationSequence,
 Variable,+,sequence_solid_yellow,const NotificationSequence,
 Variable,+,sequence_success,const NotificationSequence,

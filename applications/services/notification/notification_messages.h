@@ -101,6 +101,8 @@ extern const NotificationSequence sequence_charging_beep;
 extern const NotificationSequence sequence_not_charging_beep;
 extern const NotificationSequence sequence_theft_alarm_burst;
 extern const NotificationSequence sequence_theft_alarm_led;
+extern const NotificationSequence sequence_shortcut_beep;
+extern const NotificationSequence sequence_shortcut_blink_led;
 
 // Light up
 extern const NotificationSequence sequence_set_only_red_255;

@@ -1,0 +1,16 @@
+App(
+    appid="shortcuts",
+    name="ShortcutsSrv",
+    apptype=FlipperAppType.SERVICE,
+    entry_point="shortcuts_srv",
+    cdefines=["SRV_SHORTCUTS"],
+    requires=[
+        "gui",
+    ],
+    provides=[
+        "shortcuts_app",
+    ],
+    stack_size=1 * 1024,
+    order=115,
+    sdk_headers=["shortcuts.h"],
+)
