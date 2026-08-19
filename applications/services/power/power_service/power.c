@@ -6,6 +6,7 @@
 
 #include <update_util/update_operation.h>
 #include <notification/notification_messages.h>
+#include <desktop/desktop.h>
 
 #include <loader/loader.h>
 
@@ -279,8 +280,74 @@ static bool power_update_info(Power* power) {
     return need_refresh;
 }
 
+static void power_theft_alarm_trigger(Power* power) {
+    // Result: Lock - briefly show the trigger message, then hand off to
+    // the desktop service to lock the device (which itself only actually
+    // requires a PIN if one is set)
+    if(!momentum_settings.theft_alarm_result_lock) {
+        return;
+    }
+
+    view_holder_send_to_front(power->view_holder);
+    view_holder_set_view(
+        power->view_holder, power_theft_alarm_get_view(power->view_power_theft_alarm));
+    furi_delay_ms(1500);
+    view_holder_set_view(power->view_holder, NULL);
+
+    Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+    desktop_api_lock(desktop);
+    furi_record_close(RECORD_DESKTOP);
+}
+
+static const GpioPinRecord* power_theft_alarm_resolve_pin(uint32_t index) {
+    if(index >= gpio_pins_count) {
+        index = 0;
+    }
+    return &gpio_pins[index];
+}
+
+// GPIO Pull/Tether triggers: checked every tick alongside the charging
+// state. Unlike the unplug trigger, these don't depend on charging state
+// at all - they're purely about the physical wiring being intact.
+static void power_check_gpio_theft_trigger(Power* power) {
+    if(!momentum_settings.theft_alarm || power->theft_alarm_active) {
+        return;
+    }
+
+    TheftAlarmTrigger trigger = momentum_settings.theft_alarm_trigger;
+    bool triggered = false;
+
+    if(trigger == TheftAlarmTriggerGpioTether) {
+        // Single pin, internal pull-up: an external tether normally holds
+        // it LOW. If the tether is pulled/cut, it floats back HIGH.
+        const GpioPinRecord* pin =
+            power_theft_alarm_resolve_pin(momentum_settings.theft_alarm_gpio_pin1);
+        furi_hal_gpio_init(pin->pin, GpioModeInput, GpioPullUp, GpioSpeedLow);
+        triggered = furi_hal_gpio_read(pin->pin);
+
+    } else if(trigger == TheftAlarmTriggerGpioPull) {
+        // Two pins bridged by an external loop: pin1 drives HIGH, pin2
+        // reads it back through the loop. If the loop is pulled apart,
+        // pin2's internal pull-down takes over and it reads LOW.
+        const GpioPinRecord* pin1 =
+            power_theft_alarm_resolve_pin(momentum_settings.theft_alarm_gpio_pin1);
+        const GpioPinRecord* pin2 =
+            power_theft_alarm_resolve_pin(momentum_settings.theft_alarm_gpio_pin2);
+        furi_hal_gpio_init(pin1->pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_write(pin1->pin, true);
+        furi_hal_gpio_init(pin2->pin, GpioModeInput, GpioPullDown, GpioSpeedLow);
+        triggered = !furi_hal_gpio_read(pin2->pin);
+    }
+
+    if(triggered) {
+        power->theft_alarm_active = true;
+        power_theft_alarm_trigger(power);
+    }
+}
+
 static void power_check_charging_state(Power* power) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    bool just_armed_alarm = false;
 
     if(furi_hal_power_is_charging()) {
         // USB is connected again: silence the theft alarm regardless of
@@ -315,8 +382,10 @@ static void power_check_charging_state(Power* power) {
         if(momentum_settings.charging_sound) {
             notification_message(notification, &sequence_not_charging_beep);
         }
-        if(momentum_settings.theft_alarm && was_connected) {
+        if(momentum_settings.theft_alarm &&
+           momentum_settings.theft_alarm_trigger == TheftAlarmTriggerUnplug && was_connected) {
             power->theft_alarm_active = true;
+            just_armed_alarm = true;
         }
         power->state = PowerStateNotCharging;
         power->event.type = PowerEventTypeStopCharging;
@@ -324,10 +393,21 @@ static void power_check_charging_state(Power* power) {
     }
 
     if(power->theft_alarm_active) {
-        notification_message(notification, &sequence_theft_alarm_burst);
+        if(momentum_settings.theft_alarm_result_sound) {
+            notification_message(notification, &sequence_theft_alarm_burst);
+        }
+        if(momentum_settings.theft_alarm_result_led) {
+            notification_message(notification, &sequence_theft_alarm_led);
+        }
     }
 
     furi_record_close(RECORD_NOTIFICATION);
+
+    // Show the trigger message and lock the device outside the
+    // notification record scope, since this briefly blocks the tick
+    if(just_armed_alarm) {
+        power_theft_alarm_trigger(power);
+    }
 }
 
 static void power_check_low_battery(Power* power) {
@@ -606,6 +686,8 @@ static void power_tick_callback(void* context) {
     power_check_low_battery(power);
     // Check and notify about charging state
     power_check_charging_state(power);
+    // Check GPIO Pull/Tether theft alarm triggers
+    power_check_gpio_theft_trigger(power);
     // Check and notify about battery level change
     power_check_battery_level_change(power);
     // charge supress arm/disarm
@@ -685,6 +767,7 @@ static Power* power_alloc(void) {
     power->view_holder = view_holder_alloc();
     power->view_power_off = power_off_alloc();
     power->view_power_unplug_usb = power_unplug_usb_alloc();
+    power->view_power_theft_alarm = power_theft_alarm_alloc();
 
     view_holder_attach_to_gui(power->view_holder, gui);
     // Battery view port

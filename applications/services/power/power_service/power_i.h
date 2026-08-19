@@ -10,6 +10,7 @@
 
 #include "views/power_off.h"
 #include "views/power_unplug_usb.h"
+#include "views/power_theft_alarm.h"
 
 #include <power/power_service/power_settings.h>
 
@@ -28,6 +29,7 @@ struct Power {
     ViewPort* battery_view_port;
     PowerOff* view_power_off;
     PowerUnplugUsb* view_power_unplug_usb;
+    PowerTheftAlarm* view_power_theft_alarm;
 
     PowerEvent event;
     PowerState state;

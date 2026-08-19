@@ -21,6 +21,13 @@ typedef enum {
 } BatteryIcon;
 
 typedef enum {
+    TheftAlarmTriggerUnplug,
+    TheftAlarmTriggerGpioPull,
+    TheftAlarmTriggerGpioTether,
+    TheftAlarmTriggerCount,
+} TheftAlarmTrigger;
+
+typedef enum {
     MenuStyleList,
     MenuStyleWii,
     MenuStyleDsi,
@@ -95,6 +102,12 @@ typedef struct {
     bool rgb_backlight;
     bool charging_sound;
     bool theft_alarm;
+    TheftAlarmTrigger theft_alarm_trigger;
+    uint32_t theft_alarm_gpio_pin1;
+    uint32_t theft_alarm_gpio_pin2;
+    bool theft_alarm_result_sound;
+    bool theft_alarm_result_led;
+    bool theft_alarm_result_lock;
     uint32_t butthurt_timer;
     bool midnight_format_00;
     bool popup_overlay;

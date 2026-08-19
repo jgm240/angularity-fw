@@ -326,6 +326,17 @@ const NotificationSequence sequence_theft_alarm_burst = {
     NULL,
 };
 
+// Rapid red flash, meant to be re-triggered alongside sequence_theft_alarm_burst
+const NotificationSequence sequence_theft_alarm_led = {
+    &message_red_255, &message_delay_50, &message_red_0, &message_delay_50,
+    &message_red_255, &message_delay_50, &message_red_0, &message_delay_50,
+    &message_red_255, &message_delay_50, &message_red_0, &message_delay_50,
+    &message_red_255, &message_delay_50, &message_red_0, &message_delay_50,
+    &message_red_255, &message_delay_50, &message_red_0, &message_delay_50,
+    &message_red_255, &message_delay_50, &message_red_0, &message_delay_50,
+    NULL,
+};
+
 // Light up
 const NotificationSequence sequence_set_only_red_255 = {
     &message_red_255,

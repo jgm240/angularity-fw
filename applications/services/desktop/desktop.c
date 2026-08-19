@@ -146,6 +146,15 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
             desktop_lock(desktop, desktop->settings.auto_lock_with_pin);
         }
 
+    } else if(event == DesktopGlobalApiLock) {
+        // Theft alarm and other forced-lock triggers: lock regardless of
+        // app_running or usb_inhibit_auto_lock, always with PIN if one is
+        // set - unlike the passive auto-lock timer, this is only fired by
+        // an explicit security event
+        if(!desktop->locked) {
+            desktop_lock(desktop, true);
+        }
+
     } else if(event == DesktopGlobalSaveSettings) {
         desktop_settings_save(&desktop->settings);
         desktop_apply_settings(desktop);
@@ -517,6 +526,11 @@ bool desktop_api_is_locked(Desktop* instance) {
 void desktop_api_unlock(Desktop* instance) {
     furi_assert(instance);
     view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalApiUnlock);
+}
+
+void desktop_api_lock(Desktop* instance) {
+    furi_assert(instance);
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalApiLock);
 }
 
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {

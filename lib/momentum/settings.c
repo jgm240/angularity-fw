@@ -38,6 +38,12 @@ MomentumSettings momentum_settings = {
     .rgb_backlight = false, // OFF
     .charging_sound = false, // OFF
     .theft_alarm = false, // OFF
+    .theft_alarm_trigger = TheftAlarmTriggerUnplug, // Unplug
+    .theft_alarm_gpio_pin1 = 0, // PA7
+    .theft_alarm_gpio_pin2 = 1, // PA6
+    .theft_alarm_result_sound = true, // ON
+    .theft_alarm_result_led = true, // ON
+    .theft_alarm_result_lock = true, // ON
     .butthurt_timer = 21600, // 6 H
     .midnight_format_00 = true, // 00:XX
     .popup_overlay = true, // ON
@@ -114,6 +120,12 @@ static const struct {
     {setting_bool(rgb_backlight)},
     {setting_bool(charging_sound)},
     {setting_bool(theft_alarm)},
+    {setting_enum(theft_alarm_trigger, TheftAlarmTriggerCount)},
+    {setting_uint(theft_alarm_gpio_pin1, 0, 31)},
+    {setting_uint(theft_alarm_gpio_pin2, 0, 31)},
+    {setting_bool(theft_alarm_result_sound)},
+    {setting_bool(theft_alarm_result_led)},
+    {setting_bool(theft_alarm_result_lock)},
     {setting_uint(butthurt_timer, 0, 172800)},
     {setting_bool(midnight_format_00)},
     {setting_bool(popup_overlay)},
