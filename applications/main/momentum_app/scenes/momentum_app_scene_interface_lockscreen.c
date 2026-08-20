@@ -9,7 +9,12 @@ enum VarItemListIndex {
     VarItemListIndexShowDate,
     VarItemListIndexShowStatusbar,
     VarItemListIndexUnlockPrompt,
-    VarItemListIndexNfcUnlock,
+    // Several items between UnlockPrompt and here (Allow BLE RPC, Allow
+    // Poweroff, Transparent, Skip Animation) use their own change_callback
+    // directly and were never given enum entries, so this can't be assumed
+    // to sequentially follow UnlockPrompt - it must match its real add-order
+    // position, which is 12 (0-indexed) as of the item list below.
+    VarItemListIndexNfcUnlock = 12,
 };
 
 void momentum_app_scene_interface_lockscreen_var_item_list_callback(void* context, uint32_t index) {

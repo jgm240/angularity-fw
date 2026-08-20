@@ -104,6 +104,14 @@ extern const NotificationSequence sequence_theft_alarm_led;
 extern const NotificationSequence sequence_shortcut_beep;
 extern const NotificationSequence sequence_shortcut_blink_led;
 
+// Sound packs: Lock/Unlock chimes
+extern const NotificationSequence sequence_sound_pack_classic_unlock;
+extern const NotificationSequence sequence_sound_pack_classic_lock;
+extern const NotificationSequence sequence_sound_pack_chime_unlock;
+extern const NotificationSequence sequence_sound_pack_chime_lock;
+extern const NotificationSequence sequence_sound_pack_retro_unlock;
+extern const NotificationSequence sequence_sound_pack_retro_lock;
+
 // Light up
 extern const NotificationSequence sequence_set_only_red_255;
 extern const NotificationSequence sequence_set_only_green_255;

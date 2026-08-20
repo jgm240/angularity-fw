@@ -39,6 +39,7 @@ MomentumSettings momentum_settings = {
     .dark_mode = false, // OFF
     .rgb_backlight = false, // OFF
     .charging_sound = false, // OFF
+    .sound_pack = SoundPackOff, // Off
     .theft_alarm = false, // OFF
     .theft_alarm_trigger = TheftAlarmTriggerUnplug, // Unplug
     .theft_alarm_gpio_pin1 = 0, // PA7
@@ -123,6 +124,7 @@ static const struct {
     {setting_bool(dark_mode)},
     {setting_bool(rgb_backlight)},
     {setting_bool(charging_sound)},
+    {setting_enum(sound_pack, SoundPackCount)},
     {setting_bool(theft_alarm)},
     {setting_enum(theft_alarm_trigger, TheftAlarmTriggerCount)},
     {setting_uint(theft_alarm_gpio_pin1, 0, 31)},

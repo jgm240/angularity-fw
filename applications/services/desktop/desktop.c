@@ -7,6 +7,7 @@
 #include <locale/locale.h>
 #include <storage/storage.h>
 #include <momentum/settings.h>
+#include <notification/notification_messages.h>
 
 #include <assets_icons.h>
 
@@ -397,8 +398,33 @@ static Desktop* desktop_alloc(void) {
  * Private API
  */
 
+static void desktop_play_sound_pack_sequence(bool unlock) {
+    const NotificationSequence* sequence = NULL;
+    switch(momentum_settings.sound_pack) {
+    case SoundPackClassic:
+        sequence = unlock ? &sequence_sound_pack_classic_unlock : &sequence_sound_pack_classic_lock;
+        break;
+    case SoundPackChime:
+        sequence = unlock ? &sequence_sound_pack_chime_unlock : &sequence_sound_pack_chime_lock;
+        break;
+    case SoundPackRetro:
+        sequence = unlock ? &sequence_sound_pack_retro_unlock : &sequence_sound_pack_retro_lock;
+        break;
+    case SoundPackOff:
+    default:
+        break;
+    }
+
+    if(sequence) {
+        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+        notification_message(notification, sequence);
+        furi_record_close(RECORD_NOTIFICATION);
+    }
+}
+
 void desktop_lock(Desktop* desktop, bool with_pin) {
     furi_assert(!desktop->locked);
+    desktop_play_sound_pack_sequence(false);
 
     with_pin = with_pin && desktop_pin_code_is_set();
     if(with_pin) {
@@ -434,6 +460,7 @@ void desktop_lock(Desktop* desktop, bool with_pin) {
 
 void desktop_unlock(Desktop* desktop) {
     furi_assert(desktop->locked);
+    desktop_play_sound_pack_sequence(true);
 
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     Gui* gui = furi_record_open(RECORD_GUI);

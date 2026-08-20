@@ -3,6 +3,7 @@
 enum VarItemListIndex {
     VarItemListIndexScreen,
     VarItemListIndexPower,
+    VarItemListIndexSound,
     VarItemListIndexDolphin,
     VarItemListIndexSpoof,
     VarItemListIndexVgm,
@@ -23,6 +24,9 @@ void momentum_app_scene_misc_on_enter(void* context) {
     variable_item_set_current_value_text(item, ">");
 
     item = variable_item_list_add(var_item_list, "Power", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Sound", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
 
     item = variable_item_list_add(var_item_list, "Dolphin", 0, NULL, app);
@@ -60,6 +64,10 @@ bool momentum_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
         case VarItemListIndexPower:
             scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscPower, 0);
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscPower);
+            break;
+        case VarItemListIndexSound:
+            scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscSound, 0);
+            scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscSound);
             break;
         case VarItemListIndexDolphin:
             scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscDolphin, 0);

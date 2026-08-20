@@ -44,6 +44,14 @@ typedef enum {
 } MenuStyle;
 
 typedef enum {
+    SoundPackOff,
+    SoundPackClassic,
+    SoundPackChime,
+    SoundPackRetro,
+    SoundPackCount,
+} SoundPack;
+
+typedef enum {
     SpiDefault, // CS on pa4
     SpiExtra, // CS on pc3
     SpiCount,
@@ -106,6 +114,7 @@ typedef struct {
     bool dark_mode;
     bool rgb_backlight;
     bool charging_sound;
+    SoundPack sound_pack;
     bool theft_alarm;
     TheftAlarmTrigger theft_alarm_trigger;
     uint32_t theft_alarm_gpio_pin1;

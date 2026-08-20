@@ -352,6 +352,65 @@ const NotificationSequence sequence_shortcut_blink_led = {
     NULL,
 };
 
+// Sound packs: Lock/Unlock chimes
+const NotificationSequence sequence_sound_pack_classic_unlock = {
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_classic_lock = {
+    &message_note_c6,
+    &message_delay_50,
+    &message_note_g5,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_unlock = {
+    &message_note_c6,
+    &message_delay_50,
+    &message_note_e6,
+    &message_delay_50,
+    &message_note_g6,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_lock = {
+    &message_note_g6,
+    &message_delay_50,
+    &message_note_e6,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_unlock = {
+    &message_note_a4,
+    &message_delay_100,
+    &message_note_a5,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_lock = {
+    &message_note_a5,
+    &message_delay_100,
+    &message_note_a4,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
 // Light up
 const NotificationSequence sequence_set_only_red_255 = {
     &message_red_255,
