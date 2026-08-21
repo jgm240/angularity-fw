@@ -467,16 +467,25 @@ static void power_check_security_streak(void) {
     }
 
     bool secured = momentum_settings.theft_alarm || momentum_settings.nfc_unlock_enabled;
+    uint32_t new_days;
     if(secured && momentum_settings.security_streak_last_day != 0 &&
        today == momentum_settings.security_streak_last_day + 1) {
-        momentum_settings.security_streak_days++;
+        new_days = momentum_settings.security_streak_days + 1;
     } else if(secured) {
-        momentum_settings.security_streak_days = 1;
+        new_days = 1;
     } else {
-        momentum_settings.security_streak_days = 0;
+        new_days = 0;
     }
+
+    // Only touch flash when the streak actually changes - avoids an
+    // unconditional settings write on every single boot for users who
+    // don't have Theft Alarm or NFC Unlock enabled at all
+    bool changed = new_days != momentum_settings.security_streak_days;
+    momentum_settings.security_streak_days = new_days;
     momentum_settings.security_streak_last_day = today;
-    momentum_settings_save();
+    if(changed) {
+        momentum_settings_save();
+    }
 }
 
 static void power_check_low_battery(Power* power) {

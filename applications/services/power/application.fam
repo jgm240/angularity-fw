@@ -11,7 +11,7 @@ App(
     provides=[
         "power_settings",
     ],
-    stack_size=1 * 1024,
+    stack_size=2 * 1024,
     order=110,
     sdk_headers=["power_service/power.h"],
 )
