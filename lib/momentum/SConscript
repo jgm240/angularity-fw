@@ -4,6 +4,7 @@ env.Append(
     SDK_HEADERS=[
         File("../../icons/assets_icons.h"),
         File("momentum.h"),
+        File("security_log.h"),
     ],
     LINT_SOURCES=[
         Dir("."),

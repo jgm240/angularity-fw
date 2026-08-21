@@ -134,6 +134,7 @@ Header,+,lib/mlib/m-rbtree.h,,
 Header,+,lib/mlib/m-tuple.h,,
 Header,+,lib/mlib/m-variant.h,,
 Header,+,lib/momentum/momentum.h,,
+Header,+,lib/momentum/security_log.h,,
 Header,+,lib/music_worker/music_worker.h,,
 Header,+,lib/nanopb/pb.h,,
 Header,+,lib/nanopb/pb_decode.h,,
@@ -3343,6 +3344,8 @@ Function,+,scene_manager_set_scene_state,void,"SceneManager*, uint32_t, uint32_t
 Function,+,scene_manager_stop,void,SceneManager*
 Function,+,sd_api_get_fs_type_text,const char*,SDFsType
 Function,-,secure_getenv,char*,const char*
+Function,+,security_log_add,void,const char*
+Function,+,security_log_read,void,FuriString*
 Function,-,seed48,unsigned short*,unsigned short[3]
 Function,-,setbuf,void,"FILE*, char*"
 Function,-,setbuffer,void,"FILE*, char*, int"
