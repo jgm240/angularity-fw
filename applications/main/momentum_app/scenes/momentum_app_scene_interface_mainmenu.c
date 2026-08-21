@@ -24,6 +24,7 @@ const char* const menu_style_names[MenuStyleCount] = {
     "Compact",
     "MNTM",
     "CoverFlow",
+    "Angularity",
 };
 static void momentum_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);

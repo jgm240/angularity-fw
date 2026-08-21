@@ -569,6 +569,52 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
             break;
         }
+        case MenuStyleAngularity: {
+            // Triforce layout: two upright triangles (neighbors) at the
+            // bottom-left/right, one inverted triangle (selected) nested
+            // between them near the top
+            const size_t base = 38;
+            const size_t height = 32;
+            const struct {
+                int32_t x;
+                int32_t y;
+                CanvasDirection dir;
+            } slots[3] = {
+                {30, 50, CanvasDirectionBottomToTop}, // left neighbor
+                {64, 18, CanvasDirectionTopToBottom}, // center/selected
+                {98, 50, CanvasDirectionBottomToTop}, // right neighbor
+            };
+            const int8_t slot_shift[3] = {-1, 0, 1};
+
+            for(uint8_t s = 0; s < 3; s++) {
+                shift_position = (position + items_count + slot_shift[s]) % items_count;
+                item = MenuItemArray_get(model->items, shift_position);
+                bool selected = slot_shift[s] == 0;
+                int32_t x = slots[s].x;
+                int32_t y = slots[s].y;
+                CanvasDirection dir = slots[s].dir;
+
+                canvas_draw_triangle(canvas, x, y, base, height, dir);
+                if(selected) {
+                    // Bold outline: redraw slightly larger for emphasis
+                    canvas_draw_triangle(canvas, x, y, base + 2, height + 2, dir);
+                }
+
+                int32_t centroid_y = (dir == CanvasDirectionBottomToTop) ?
+                                          y - (int32_t)height / 3 :
+                                          y + (int32_t)height / 3;
+                menu_centered_icon(canvas, item, x - 7, centroid_y - 7, 14, 14);
+            }
+
+            canvas_set_font(canvas, FontSecondary);
+            item = MenuItemArray_get(model->items, position);
+            menu_get_name(item, name, false);
+            size_t scroll_counter = menu_scroll_counter(model, true);
+            elements_scrollable_text_line_centered(
+                canvas, 64, 60, 124, name, scroll_counter, false, true);
+
+            break;
+        }
         default:
             break;
         }
@@ -920,6 +966,7 @@ static void menu_process_left(Menu* menu) {
             case MenuStylePs4:
             case MenuStyleVertical:
             case MenuStyleCoverFlow:
+            case MenuStyleAngularity:
                 size_t vertical_offset = model->vertical_offset;
                 if(position > 0) {
                     position--;
@@ -985,6 +1032,7 @@ static void menu_process_right(Menu* menu) {
             case MenuStylePs4:
             case MenuStyleVertical:
             case MenuStyleCoverFlow:
+            case MenuStyleAngularity:
                 size_t vertical_offset = model->vertical_offset;
                 if(position < count - 1) {
                     position++;

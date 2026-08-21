@@ -47,6 +47,7 @@ typedef enum {
     MenuStyleCompact,
     MenuStyleMNTM,
     MenuStyleCoverFlow,
+    MenuStyleAngularity,
     MenuStyleCount,
 } MenuStyle;
 
