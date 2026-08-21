@@ -28,6 +28,12 @@ MomentumSettings momentum_settings = {
     .nfc_unlock_uid = "", // Default
     .gpio_mirror_mode = GpioMirrorOff, // Off
     .gpio_mirror_pin = 0, // PA7
+    .charge_cycles = 0, // None yet
+    .security_streak_days = 0, // None yet
+    .security_streak_last_day = 0, // Never
+    .theft_alarm_quiet_hours = false, // OFF
+    .theft_alarm_quiet_hours_start = 22, // 22:00
+    .theft_alarm_quiet_hours_end = 7, // 07:00
     .battery_icon = BatteryIconBarPercent, // Bar %
     .status_icons = true, // ON
     .bar_borders = true, // ON
@@ -115,6 +121,10 @@ static const struct {
     {setting_str(nfc_unlock_uid)},
     {setting_enum(gpio_mirror_mode, GpioMirrorCount)},
     {setting_uint(gpio_mirror_pin, 0, 31)},
+    {setting_uint(charge_cycles, 0, 999999)},
+    {setting_bool(theft_alarm_quiet_hours)},
+    {setting_uint(theft_alarm_quiet_hours_start, 0, 23)},
+    {setting_uint(theft_alarm_quiet_hours_end, 0, 23)},
     {setting_enum(battery_icon, BatteryIconCount)},
     {setting_bool(status_icons)},
     {setting_bool(bar_borders)},

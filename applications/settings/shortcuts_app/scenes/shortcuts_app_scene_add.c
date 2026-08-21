@@ -7,6 +7,8 @@ enum VarItemListIndex {
     VarItemListIndexTrigger,
     VarItemListIndexPin1,
     VarItemListIndexPin2,
+    VarItemListIndexHour,
+    VarItemListIndexMinute,
     VarItemListIndexAction,
     VarItemListIndexAppName,
     VarItemListIndexSave,
@@ -18,6 +20,7 @@ static const char* const shortcut_trigger_names[ShortcutTriggerCount] = {
     [ShortcutTriggerPluggedIn] = "Plugged In",
     [ShortcutTriggerUnplugged] = "Unplugged",
     [ShortcutTriggerNfcScanned] = "NFC Scanned",
+    [ShortcutTriggerScheduledTime] = "Scheduled Time",
 };
 
 static const char* const shortcut_action_names[ShortcutActionCount] = {
@@ -59,6 +62,16 @@ static void shortcuts_app_scene_add_update_pin_locks(ShortcutsApp* app) {
         variable_item_list_get(app->var_item_list, VarItemListIndexPin2),
         !gpio_used,
         "Needs GPIO Pull\ntrigger!");
+
+    bool time_used = app->new_trigger == ShortcutTriggerScheduledTime;
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexHour),
+        !time_used,
+        "Needs Scheduled\nTime trigger!");
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexMinute),
+        !time_used,
+        "Needs Scheduled\nTime trigger!");
 }
 
 static void shortcuts_app_scene_add_update_app_name_lock(ShortcutsApp* app) {
@@ -93,6 +106,24 @@ static void shortcuts_app_scene_add_pin2_changed(VariableItem* item) {
     uint8_t choice = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, gpio_pins[gpio_pin_choices[choice]].name);
     app->new_pin2 = gpio_pin_choices[choice];
+}
+
+static void shortcuts_app_scene_add_hour_changed(VariableItem* item) {
+    ShortcutsApp* app = variable_item_get_context(item);
+    uint8_t value = variable_item_get_current_value_index(item);
+    FuriString* text = furi_string_alloc_printf("%02u", value);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(text));
+    furi_string_free(text);
+    app->new_hour = value;
+}
+
+static void shortcuts_app_scene_add_minute_changed(VariableItem* item) {
+    ShortcutsApp* app = variable_item_get_context(item);
+    uint8_t value = variable_item_get_current_value_index(item);
+    FuriString* text = furi_string_alloc_printf("%02u", value);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(text));
+    furi_string_free(text);
+    app->new_minute = value;
 }
 
 static void shortcuts_app_scene_add_action_changed(VariableItem* item) {
@@ -140,6 +171,20 @@ void shortcuts_app_scene_add_on_enter(void* context) {
     variable_item_set_current_value_text(item, gpio_pins[gpio_pin_choices[pin2_choice]].name);
 
     item = variable_item_list_add(
+        var_item_list, "Hour", 24, shortcuts_app_scene_add_hour_changed, app);
+    variable_item_set_current_value_index(item, app->new_hour);
+    FuriString* hour_text = furi_string_alloc_printf("%02u", app->new_hour);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(hour_text));
+    furi_string_free(hour_text);
+
+    item = variable_item_list_add(
+        var_item_list, "Minute", 60, shortcuts_app_scene_add_minute_changed, app);
+    variable_item_set_current_value_index(item, app->new_minute);
+    FuriString* minute_text = furi_string_alloc_printf("%02u", app->new_minute);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(minute_text));
+    furi_string_free(minute_text);
+
+    item = variable_item_list_add(
         var_item_list, "Action", ShortcutActionCount, shortcuts_app_scene_add_action_changed, app);
     variable_item_set_current_value_index(item, app->new_action);
     variable_item_set_current_value_text(item, shortcut_action_names[app->new_action]);
@@ -172,10 +217,11 @@ bool shortcuts_app_scene_add_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(app->scene_manager, ShortcutsAppSceneAppName);
             }
         } else if(event.event == VarItemListIndexSave) {
+            bool scheduled = app->new_trigger == ShortcutTriggerScheduledTime;
             ShortcutRule rule = {
                 .trigger = app->new_trigger,
-                .gpio_pin1 = app->new_pin1,
-                .gpio_pin2 = app->new_pin2,
+                .gpio_pin1 = scheduled ? app->new_hour : app->new_pin1,
+                .gpio_pin2 = scheduled ? app->new_minute : app->new_pin2,
                 .action = app->new_action,
             };
             strlcpy(rule.app_name, app->new_app_name, SHORTCUT_APP_NAME_LEN);

@@ -436,6 +436,28 @@ static void desktop_play_sound_pack_sequence(bool unlock) {
     }
 }
 
+void desktop_play_error_sound(void) {
+    const NotificationSequence* sequence = &sequence_error;
+    switch(momentum_settings.sound_pack) {
+    case SoundPackClassic:
+        sequence = &sequence_sound_pack_classic_error;
+        break;
+    case SoundPackChime:
+        sequence = &sequence_sound_pack_chime_error;
+        break;
+    case SoundPackRetro:
+        sequence = &sequence_sound_pack_retro_error;
+        break;
+    case SoundPackOff:
+    default:
+        break;
+    }
+
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notification, sequence);
+    furi_record_close(RECORD_NOTIFICATION);
+}
+
 void desktop_lock(Desktop* desktop, bool with_pin) {
     furi_assert(!desktop->locked);
     desktop_play_sound_pack_sequence(false);

@@ -16,6 +16,7 @@ static const char* const shortcut_trigger_log_names[ShortcutTriggerCount] = {
     [ShortcutTriggerPluggedIn] = "plugged in",
     [ShortcutTriggerUnplugged] = "unplugged",
     [ShortcutTriggerNfcScanned] = "NFC scanned",
+    [ShortcutTriggerScheduledTime] = "scheduled time",
 };
 
 static const char* const shortcut_action_log_names[ShortcutActionCount] = {
@@ -201,6 +202,13 @@ void shortcuts_remove(Shortcuts* instance, size_t index) {
     shortcuts_save(instance);
 }
 
+void shortcuts_run(Shortcuts* instance, size_t index) {
+    ShortcutRule rule;
+    if(shortcuts_get(instance, index, &rule)) {
+        shortcuts_execute_action(&rule);
+    }
+}
+
 static void shortcuts_run_triggers(Shortcuts* instance, ShortcutTrigger trigger) {
     furi_mutex_acquire(instance->mutex, FuriWaitForever);
     ShortcutRule rules_to_run[SHORTCUTS_MAX];
@@ -242,8 +250,22 @@ static void shortcuts_power_callback(const void* message, void* context) {
 static void shortcuts_gpio_poll_callback(void* context) {
     Shortcuts* instance = context;
 
+    DateTime dt;
+    furi_hal_rtc_get_datetime(&dt);
+    uint16_t minute_of_day = dt.hour * 60 + dt.minute;
+    bool check_scheduled = minute_of_day != instance->last_scheduled_minute;
+    instance->last_scheduled_minute = minute_of_day;
+
     furi_mutex_acquire(instance->mutex, FuriWaitForever);
     for(size_t i = 0; i < instance->count; i++) {
+        if(instance->rules[i].trigger == ShortcutTriggerScheduledTime) {
+            if(check_scheduled && instance->rules[i].gpio_pin1 == dt.hour &&
+               instance->rules[i].gpio_pin2 == dt.minute) {
+                shortcuts_execute_action(&instance->rules[i]);
+            }
+            continue;
+        }
+
         if(instance->rules[i].trigger != ShortcutTriggerGpioPull) {
             continue;
         }
@@ -275,6 +297,7 @@ static Shortcuts* shortcuts_alloc(void) {
     Shortcuts* instance = malloc(sizeof(Shortcuts));
     instance->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     instance->count = 0;
+    instance->last_scheduled_minute = UINT16_MAX;
     return instance;
 }
 

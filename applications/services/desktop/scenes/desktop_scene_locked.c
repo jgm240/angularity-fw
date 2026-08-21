@@ -217,10 +217,10 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
                     desktop_unlock(desktop);
                 } else {
                     security_log_add("NFC unlock: wrong tag scanned");
-                    notification_message(desktop->notification, &sequence_error);
+                    desktop_play_error_sound();
                 }
             } else {
-                notification_message(desktop->notification, &sequence_error);
+                desktop_play_error_sound();
             }
             consumed = true;
             break;

@@ -94,6 +94,19 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + (xp_progress > 0), 5);
     canvas_set_color(canvas, ColorBlack);
+
+    if(momentum_settings.security_streak_days > 0) {
+        char streak_str[40];
+        snprintf(
+            streak_str,
+            sizeof(streak_str),
+            "Secured: %lu day%s",
+            momentum_settings.security_streak_days,
+            momentum_settings.security_streak_days == 1 ? "" : "s");
+        canvas_set_font(canvas, FontKeyboard);
+        canvas_draw_str(canvas, 59, 58, streak_str);
+        canvas_set_font(canvas, FontSecondary);
+    }
 }
 
 int32_t passport_app(void* p) {

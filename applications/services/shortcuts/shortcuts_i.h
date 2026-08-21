@@ -17,6 +17,10 @@ struct Shortcuts {
     bool gpio_rule_broken[SHORTCUTS_MAX];
     size_t count;
 
+    // Minute-of-day (0-1439) last checked for ScheduledTime rules, so each
+    // minute only fires once even though the poll timer ticks every second
+    uint16_t last_scheduled_minute;
+
     FuriPubSubSubscription* storage_subscription;
     FuriPubSubSubscription* power_subscription;
     FuriTimer* gpio_poll_timer;

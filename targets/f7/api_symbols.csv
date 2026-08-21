@@ -3356,6 +3356,7 @@ Function,+,shortcuts_get,_Bool,"Shortcuts*, size_t, ShortcutRule*"
 Function,+,shortcuts_get_count,size_t,Shortcuts*
 Function,+,shortcuts_notify_nfc_scanned,void,Shortcuts*
 Function,+,shortcuts_remove,void,"Shortcuts*, size_t"
+Function,+,shortcuts_run,void,"Shortcuts*, size_t"
 Function,+,signal_reader_alloc,SignalReader*,"const GpioPin*, uint32_t"
 Function,+,signal_reader_free,void,SignalReader*
 Function,+,signal_reader_set_polarity,void,"SignalReader*, SignalReaderPolarity"
@@ -4670,10 +4671,13 @@ Variable,+,sequence_shortcut_beep,const NotificationSequence,
 Variable,+,sequence_shortcut_blink_led,const NotificationSequence,
 Variable,+,sequence_single_vibro,const NotificationSequence,
 Variable,+,sequence_solid_yellow,const NotificationSequence,
+Variable,+,sequence_sound_pack_chime_error,const NotificationSequence,
 Variable,+,sequence_sound_pack_chime_lock,const NotificationSequence,
 Variable,+,sequence_sound_pack_chime_unlock,const NotificationSequence,
+Variable,+,sequence_sound_pack_classic_error,const NotificationSequence,
 Variable,+,sequence_sound_pack_classic_lock,const NotificationSequence,
 Variable,+,sequence_sound_pack_classic_unlock,const NotificationSequence,
+Variable,+,sequence_sound_pack_retro_error,const NotificationSequence,
 Variable,+,sequence_sound_pack_retro_lock,const NotificationSequence,
 Variable,+,sequence_sound_pack_retro_unlock,const NotificationSequence,
 Variable,+,sequence_success,const NotificationSequence,

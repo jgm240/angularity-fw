@@ -112,6 +112,9 @@ extern const NotificationSequence sequence_sound_pack_chime_unlock;
 extern const NotificationSequence sequence_sound_pack_chime_lock;
 extern const NotificationSequence sequence_sound_pack_retro_unlock;
 extern const NotificationSequence sequence_sound_pack_retro_lock;
+extern const NotificationSequence sequence_sound_pack_classic_error;
+extern const NotificationSequence sequence_sound_pack_chime_error;
+extern const NotificationSequence sequence_sound_pack_retro_error;
 
 // Light up
 extern const NotificationSequence sequence_set_only_red_255;

@@ -28,9 +28,11 @@ typedef struct {
     uint8_t new_pin2;
     ShortcutAction new_action;
     char new_app_name[SHORTCUT_APP_NAME_LEN];
+    uint8_t new_hour;
+    uint8_t new_minute;
 
-    // Index targeted by the delete confirmation
-    size_t delete_index;
+    // Index of the shortcut targeted by the item action / delete confirmation
+    size_t selected_index;
 } ShortcutsApp;
 
 typedef enum {

@@ -10,9 +10,13 @@ enum VarItemListIndex {
     VarItemListIndexTheftAlarmPin1,
     VarItemListIndexTheftAlarmPin2,
     VarItemListIndexTheftAlarmResult,
+    VarItemListIndexQuietHours,
+    VarItemListIndexQuietHoursStart,
+    VarItemListIndexQuietHoursEnd,
     VarItemListIndexGpioMirrorMode,
     VarItemListIndexGpioMirrorPin,
     VarItemListIndexSecurityLog,
+    VarItemListIndexBatteryHealth,
 };
 
 static const char* const gpio_mirror_mode_names[GpioMirrorCount] = {
@@ -65,6 +69,17 @@ static void momentum_app_scene_misc_power_update_pin_locks(MomentumApp* app) {
         "Needs GPIO Pull\ntrigger!");
 }
 
+static void momentum_app_scene_misc_power_update_quiet_hours_locks(MomentumApp* app) {
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexQuietHoursStart),
+        !momentum_settings.theft_alarm_quiet_hours,
+        "Needs Quiet Hours\nturned on!");
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexQuietHoursEnd),
+        !momentum_settings.theft_alarm_quiet_hours,
+        "Needs Quiet Hours\nturned on!");
+}
+
 static void momentum_app_scene_misc_power_update_mirror_pin_lock(MomentumApp* app) {
     variable_item_set_locked(
         variable_item_list_get(app->var_item_list, VarItemListIndexGpioMirrorPin),
@@ -115,6 +130,35 @@ static void momentum_app_scene_misc_power_pin2_changed(VariableItem* item) {
     uint8_t choice = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, gpio_pins[gpio_pin_choices[choice]].name);
     momentum_settings.theft_alarm_gpio_pin2 = gpio_pin_choices[choice];
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_misc_power_quiet_hours_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.theft_alarm_quiet_hours = value;
+    app->save_settings = true;
+    momentum_app_scene_misc_power_update_quiet_hours_locks(app);
+}
+
+static void momentum_app_scene_misc_power_quiet_hours_start_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    uint8_t value = variable_item_get_current_value_index(item);
+    FuriString* text = furi_string_alloc_printf("%02u:00", value);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(text));
+    furi_string_free(text);
+    momentum_settings.theft_alarm_quiet_hours_start = value;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_misc_power_quiet_hours_end_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    uint8_t value = variable_item_get_current_value_index(item);
+    FuriString* text = furi_string_alloc_printf("%02u:00", value);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(text));
+    furi_string_free(text);
+    momentum_settings.theft_alarm_quiet_hours_end = value;
     app->save_settings = true;
 }
 
@@ -193,6 +237,42 @@ void momentum_app_scene_misc_power_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
+        "Quiet Hours",
+        2,
+        momentum_app_scene_misc_power_quiet_hours_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.theft_alarm_quiet_hours);
+    variable_item_set_current_value_text(
+        item, momentum_settings.theft_alarm_quiet_hours ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Quiet From",
+        24,
+        momentum_app_scene_misc_power_quiet_hours_start_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.theft_alarm_quiet_hours_start);
+    FuriString* quiet_start_text =
+        furi_string_alloc_printf("%02lu:00", momentum_settings.theft_alarm_quiet_hours_start);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(quiet_start_text));
+    furi_string_free(quiet_start_text);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Quiet Until",
+        24,
+        momentum_app_scene_misc_power_quiet_hours_end_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.theft_alarm_quiet_hours_end);
+    FuriString* quiet_end_text =
+        furi_string_alloc_printf("%02lu:00", momentum_settings.theft_alarm_quiet_hours_end);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(quiet_end_text));
+    furi_string_free(quiet_end_text);
+
+    momentum_app_scene_misc_power_update_quiet_hours_locks(app);
+
+    item = variable_item_list_add(
+        var_item_list,
         "GPIO Mirror",
         GpioMirrorCount,
         momentum_app_scene_misc_power_mirror_mode_changed,
@@ -216,6 +296,9 @@ void momentum_app_scene_misc_power_on_enter(void* context) {
     momentum_app_scene_misc_power_update_mirror_pin_lock(app);
 
     item = variable_item_list_add(var_item_list, "Security Log", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Battery Health", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
 
     variable_item_list_set_enter_callback(
@@ -242,6 +325,9 @@ bool momentum_app_scene_misc_power_on_event(void* context, SceneManagerEvent eve
             break;
         case VarItemListIndexSecurityLog:
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscPowerSecurityLog);
+            break;
+        case VarItemListIndexBatteryHealth:
+            scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscPowerBatteryHealth);
             break;
         default:
             break;

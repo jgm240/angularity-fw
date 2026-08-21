@@ -110,6 +110,12 @@ typedef struct {
     char nfc_unlock_uid[NFC_UNLOCK_UID_LEN];
     GpioMirrorMode gpio_mirror_mode;
     uint32_t gpio_mirror_pin;
+    uint32_t charge_cycles;
+    uint32_t security_streak_days;
+    uint32_t security_streak_last_day;
+    bool theft_alarm_quiet_hours;
+    uint32_t theft_alarm_quiet_hours_start;
+    uint32_t theft_alarm_quiet_hours_end;
     BatteryIcon battery_icon;
     bool status_icons;
     bool bar_borders;

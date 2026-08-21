@@ -18,6 +18,7 @@ typedef enum {
     ShortcutTriggerPluggedIn,
     ShortcutTriggerUnplugged,
     ShortcutTriggerNfcScanned,
+    ShortcutTriggerScheduledTime,
     ShortcutTriggerCount,
 } ShortcutTrigger;
 
@@ -32,6 +33,8 @@ typedef enum {
 
 typedef struct {
     ShortcutTrigger trigger;
+    // For GpioPull/GpioTether: gpio_pins[] indices.
+    // For ScheduledTime: gpio_pin1 = hour (0-23), gpio_pin2 = minute (0-59).
     uint8_t gpio_pin1;
     uint8_t gpio_pin2;
     ShortcutAction action;
@@ -54,6 +57,9 @@ void shortcuts_remove(Shortcuts* instance, size_t index);
 
 /** Run all shortcuts configured for the NFC Scanned trigger. */
 void shortcuts_notify_nfc_scanned(Shortcuts* instance);
+
+/** Manually execute the action of the shortcut at index, ignoring its trigger. */
+void shortcuts_run(Shortcuts* instance, size_t index);
 
 #ifdef __cplusplus
 }

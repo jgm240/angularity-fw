@@ -4,6 +4,7 @@
 #include <furi_hal.h>
 #include <momentum/momentum.h>
 #include <momentum/security_log.h>
+#include <lib/datetime/datetime.h>
 
 #include <update_util/update_operation.h>
 #include <notification/notification_messages.h>
@@ -363,6 +364,26 @@ static void power_check_gpio_mirror(void) {
     furi_hal_gpio_write(pin->pin, furi_hal_power_is_charging());
 }
 
+static bool power_theft_alarm_in_quiet_hours(void) {
+    if(!momentum_settings.theft_alarm_quiet_hours) {
+        return false;
+    }
+
+    DateTime dt;
+    furi_hal_rtc_get_datetime(&dt);
+    uint32_t start = momentum_settings.theft_alarm_quiet_hours_start;
+    uint32_t end = momentum_settings.theft_alarm_quiet_hours_end;
+
+    if(start == end) {
+        return true; // 24h quiet
+    } else if(start < end) {
+        return dt.hour >= start && dt.hour < end;
+    } else {
+        // Overnight span, e.g. 22 -> 7
+        return dt.hour >= start || dt.hour < end;
+    }
+}
+
 static void power_check_charging_state(Power* power) {
     power_check_gpio_mirror();
 
@@ -379,6 +400,12 @@ static void power_check_charging_state(Power* power) {
                 notification_internal_message(notification, &sequence_charged);
                 if(power->state != PowerStateCharging && momentum_settings.charging_sound) {
                     notification_message(notification, &sequence_charging_beep);
+                }
+                if(power->state == PowerStateCharging) {
+                    // Only count a real charge cycle - not a device that
+                    // booted already sitting at 100%
+                    momentum_settings.charge_cycles++;
+                    momentum_settings_save();
                 }
                 power->state = PowerStateCharged;
                 power->event.type = PowerEventTypeFullyCharged;
@@ -413,7 +440,7 @@ static void power_check_charging_state(Power* power) {
     }
 
     if(power->theft_alarm_active) {
-        if(momentum_settings.theft_alarm_result_sound) {
+        if(momentum_settings.theft_alarm_result_sound && !power_theft_alarm_in_quiet_hours()) {
             notification_message(notification, &sequence_theft_alarm_burst);
         }
         if(momentum_settings.theft_alarm_result_led) {
@@ -428,6 +455,28 @@ static void power_check_charging_state(Power* power) {
     if(just_armed_alarm) {
         power_theft_alarm_trigger(power);
     }
+}
+
+static void power_check_security_streak(void) {
+    DateTime dt;
+    furi_hal_rtc_get_datetime(&dt);
+    uint32_t today = datetime_datetime_to_timestamp(&dt) / 86400;
+
+    if(today == momentum_settings.security_streak_last_day) {
+        return;
+    }
+
+    bool secured = momentum_settings.theft_alarm || momentum_settings.nfc_unlock_enabled;
+    if(secured && momentum_settings.security_streak_last_day != 0 &&
+       today == momentum_settings.security_streak_last_day + 1) {
+        momentum_settings.security_streak_days++;
+    } else if(secured) {
+        momentum_settings.security_streak_days = 1;
+    } else {
+        momentum_settings.security_streak_days = 0;
+    }
+    momentum_settings.security_streak_last_day = today;
+    momentum_settings_save();
 }
 
 static void power_check_low_battery(Power* power) {
@@ -708,6 +757,8 @@ static void power_tick_callback(void* context) {
     power_check_charging_state(power);
     // Check GPIO Pull/Tether theft alarm triggers
     power_check_gpio_theft_trigger(power);
+    // Advance the "days secured" streak once per calendar day
+    power_check_security_streak();
     // Check and notify about battery level change
     power_check_battery_level_change(power);
     // charge supress arm/disarm

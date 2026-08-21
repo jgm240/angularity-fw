@@ -23,3 +23,7 @@ FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance);
 void desktop_api_get_settings(Desktop* instance, DesktopSettings* settings);
 
 void desktop_api_set_settings(Desktop* instance, const DesktopSettings* settings);
+
+// Plays the active sound pack's failure cue (or the generic error beep if no
+// pack is selected). Used for wrong NFC tag / PIN attempts.
+void desktop_play_error_sound(void);

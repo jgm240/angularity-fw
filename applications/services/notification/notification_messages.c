@@ -375,8 +375,10 @@ const NotificationSequence sequence_find_my_flipper = {
 
 // Sound packs: Lock/Unlock chimes
 const NotificationSequence sequence_sound_pack_classic_unlock = {
+    &message_vibro_on,
     &message_note_g5,
     &message_delay_50,
+    &message_vibro_off,
     &message_note_c6,
     &message_delay_100,
     &message_sound_off,
@@ -384,8 +386,10 @@ const NotificationSequence sequence_sound_pack_classic_unlock = {
 };
 
 const NotificationSequence sequence_sound_pack_classic_lock = {
+    &message_vibro_on,
     &message_note_c6,
     &message_delay_50,
+    &message_vibro_off,
     &message_note_g5,
     &message_delay_100,
     &message_sound_off,
@@ -393,41 +397,102 @@ const NotificationSequence sequence_sound_pack_classic_lock = {
 };
 
 const NotificationSequence sequence_sound_pack_chime_unlock = {
+    &message_vibro_on,
     &message_note_c6,
     &message_delay_50,
+    &message_vibro_off,
     &message_note_e6,
     &message_delay_50,
+    &message_vibro_on,
     &message_note_g6,
-    &message_delay_100,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_delay_50,
     &message_sound_off,
     NULL,
 };
 
 const NotificationSequence sequence_sound_pack_chime_lock = {
+    &message_vibro_on,
     &message_note_g6,
     &message_delay_50,
+    &message_vibro_off,
     &message_note_e6,
     &message_delay_50,
+    &message_vibro_on,
     &message_note_c6,
-    &message_delay_100,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_delay_50,
     &message_sound_off,
     NULL,
 };
 
 const NotificationSequence sequence_sound_pack_retro_unlock = {
+    &message_vibro_on,
     &message_note_a4,
     &message_delay_100,
     &message_note_a5,
     &message_delay_100,
+    &message_vibro_off,
     &message_sound_off,
     NULL,
 };
 
 const NotificationSequence sequence_sound_pack_retro_lock = {
+    &message_vibro_on,
     &message_note_a5,
     &message_delay_100,
     &message_note_a4,
     &message_delay_100,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_classic_error = {
+    &message_vibro_on,
+    &message_note_a4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_gs4,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_error = {
+    &message_vibro_on,
+    &message_note_g6,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_e6,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_note_gs4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_error = {
+    &message_vibro_on,
+    &message_note_a4,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_note_a3,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_note_a2,
+    &message_delay_100,
+    &message_vibro_off,
     &message_sound_off,
     NULL,
 };

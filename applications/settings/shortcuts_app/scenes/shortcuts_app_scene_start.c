@@ -6,6 +6,7 @@ static const char* const shortcut_trigger_names[ShortcutTriggerCount] = {
     [ShortcutTriggerPluggedIn] = "Plugged In",
     [ShortcutTriggerUnplugged] = "Unplugged",
     [ShortcutTriggerNfcScanned] = "NFC Scanned",
+    [ShortcutTriggerScheduledTime] = "Scheduled Time",
 };
 
 static const char* const shortcut_action_names[ShortcutActionCount] = {
@@ -31,11 +32,20 @@ void shortcuts_app_scene_start_on_enter(void* context) {
     for(size_t i = 0; i < count; i++) {
         ShortcutRule rule;
         shortcuts_get(app->shortcuts, i, &rule);
-        furi_string_printf(
-            label,
-            "%s->%s",
-            shortcut_trigger_names[rule.trigger],
-            shortcut_action_names[rule.action]);
+        if(rule.trigger == ShortcutTriggerScheduledTime) {
+            furi_string_printf(
+                label,
+                "%02u:%02u->%s",
+                rule.gpio_pin1,
+                rule.gpio_pin2,
+                shortcut_action_names[rule.action]);
+        } else {
+            furi_string_printf(
+                label,
+                "%s->%s",
+                shortcut_trigger_names[rule.trigger],
+                shortcut_action_names[rule.action]);
+        }
         item = variable_item_list_add(var_item_list, furi_string_get_cstr(label), 0, NULL, app);
         variable_item_set_current_value_text(item, ">");
     }
@@ -63,10 +73,12 @@ bool shortcuts_app_scene_start_on_event(void* context, SceneManagerEvent event) 
             app->new_pin2 = 1;
             app->new_action = ShortcutActionMakeSound;
             app->new_app_name[0] = '\0';
+            app->new_hour = 0;
+            app->new_minute = 0;
             scene_manager_next_scene(app->scene_manager, ShortcutsAppSceneAdd);
         } else if(event.event < count) {
-            app->delete_index = event.event;
-            scene_manager_next_scene(app->scene_manager, ShortcutsAppSceneConfirmDelete);
+            app->selected_index = event.event;
+            scene_manager_next_scene(app->scene_manager, ShortcutsAppSceneItemAction);
         }
         consumed = true;
     }

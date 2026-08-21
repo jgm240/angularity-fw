@@ -26,7 +26,7 @@ bool shortcuts_app_scene_confirm_delete_on_event(void* context, SceneManagerEven
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultRight) {
-            shortcuts_remove(app->shortcuts, app->delete_index);
+            shortcuts_remove(app->shortcuts, app->selected_index);
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, ShortcutsAppSceneStart);
         } else if(event.event == DialogExResultLeft) {
