@@ -5,12 +5,15 @@ static const char* const shortcut_trigger_names[ShortcutTriggerCount] = {
     [ShortcutTriggerGpioPull] = "GPIO Pull",
     [ShortcutTriggerPluggedIn] = "Plugged In",
     [ShortcutTriggerUnplugged] = "Unplugged",
+    [ShortcutTriggerNfcScanned] = "NFC Scanned",
 };
 
 static const char* const shortcut_action_names[ShortcutActionCount] = {
     [ShortcutActionTriggerAlarm] = "Trigger Alarm",
     [ShortcutActionBlinkLed] = "Blink LED",
     [ShortcutActionMakeSound] = "Make Sound",
+    [ShortcutActionLaunchApp] = "Launch App",
+    [ShortcutActionToggleDarkMode] = "Toggle Dark Mode",
 };
 
 void shortcuts_app_scene_start_var_item_list_callback(void* context, uint32_t index) {
@@ -59,6 +62,7 @@ bool shortcuts_app_scene_start_on_event(void* context, SceneManagerEvent event) 
             app->new_pin1 = 0;
             app->new_pin2 = 1;
             app->new_action = ShortcutActionMakeSound;
+            app->new_app_name[0] = '\0';
             scene_manager_next_scene(app->scene_manager, ShortcutsAppSceneAdd);
         } else if(event.event < count) {
             app->delete_index = event.event;

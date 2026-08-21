@@ -103,6 +103,7 @@ extern const NotificationSequence sequence_theft_alarm_burst;
 extern const NotificationSequence sequence_theft_alarm_led;
 extern const NotificationSequence sequence_shortcut_beep;
 extern const NotificationSequence sequence_shortcut_blink_led;
+extern const NotificationSequence sequence_find_my_flipper;
 
 // Sound packs: Lock/Unlock chimes
 extern const NotificationSequence sequence_sound_pack_classic_unlock;

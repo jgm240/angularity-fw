@@ -17,6 +17,7 @@
 #include <gui/modules/number_input.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/text_box.h>
 
 #include <momentum/asset_packs.h>
 #include <loader/loader_menu.h>
@@ -63,6 +64,8 @@ typedef struct {
     NumberInput* number_input;
     Popup* popup;
     DialogEx* dialog_ex;
+    TextBox* text_box;
+    FuriString* text_box_scratch;
 
     CharList_t asset_pack_names;
     uint8_t asset_pack_index;
@@ -107,6 +110,7 @@ typedef enum {
     MomentumAppViewNumberInput,
     MomentumAppViewPopup,
     MomentumAppViewDialogEx,
+    MomentumAppViewTextBox,
 } MomentumAppView;
 
 bool momentum_app_apply(MomentumApp* app);

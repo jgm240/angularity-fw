@@ -8,6 +8,7 @@ extern "C" {
 
 #define RECORD_SHORTCUTS "shortcuts"
 #define SHORTCUTS_MAX 16
+#define SHORTCUT_APP_NAME_LEN 32
 
 typedef struct Shortcuts Shortcuts;
 
@@ -16,6 +17,7 @@ typedef enum {
     ShortcutTriggerGpioPull,
     ShortcutTriggerPluggedIn,
     ShortcutTriggerUnplugged,
+    ShortcutTriggerNfcScanned,
     ShortcutTriggerCount,
 } ShortcutTrigger;
 
@@ -23,6 +25,8 @@ typedef enum {
     ShortcutActionTriggerAlarm,
     ShortcutActionBlinkLed,
     ShortcutActionMakeSound,
+    ShortcutActionLaunchApp,
+    ShortcutActionToggleDarkMode,
     ShortcutActionCount,
 } ShortcutAction;
 
@@ -31,6 +35,9 @@ typedef struct {
     uint8_t gpio_pin1;
     uint8_t gpio_pin2;
     ShortcutAction action;
+    // Only used when action == ShortcutActionLaunchApp; matches an app's
+    // FlipperAppType `name` field (e.g. "NFC", "125 kHz RFID") exactly.
+    char app_name[SHORTCUT_APP_NAME_LEN];
 } ShortcutRule;
 
 /** Number of shortcuts currently configured */
@@ -44,6 +51,9 @@ bool shortcuts_add(Shortcuts* instance, const ShortcutRule* rule);
 
 /** Remove the shortcut at index. Persists to storage. */
 void shortcuts_remove(Shortcuts* instance, size_t index);
+
+/** Run all shortcuts configured for the NFC Scanned trigger. */
+void shortcuts_notify_nfc_scanned(Shortcuts* instance);
 
 #ifdef __cplusplus
 }

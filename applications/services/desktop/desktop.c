@@ -8,6 +8,7 @@
 #include <storage/storage.h>
 #include <momentum/settings.h>
 #include <notification/notification_messages.h>
+#include <furi_hal.h>
 
 #include <assets_icons.h>
 
@@ -398,6 +399,19 @@ static Desktop* desktop_alloc(void) {
  * Private API
  */
 
+static void desktop_update_gpio_mirror(bool locked) {
+    if(momentum_settings.gpio_mirror_mode != GpioMirrorLocked) {
+        return;
+    }
+    uint32_t index = momentum_settings.gpio_mirror_pin;
+    if(index >= gpio_pins_count) {
+        index = 0;
+    }
+    const GpioPin* pin = gpio_pins[index].pin;
+    furi_hal_gpio_init(pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_write(pin, locked);
+}
+
 static void desktop_play_sound_pack_sequence(bool unlock) {
     const NotificationSequence* sequence = NULL;
     switch(momentum_settings.sound_pack) {
@@ -425,6 +439,7 @@ static void desktop_play_sound_pack_sequence(bool unlock) {
 void desktop_lock(Desktop* desktop, bool with_pin) {
     furi_assert(!desktop->locked);
     desktop_play_sound_pack_sequence(false);
+    desktop_update_gpio_mirror(true);
 
     with_pin = with_pin && desktop_pin_code_is_set();
     if(with_pin) {
@@ -461,6 +476,7 @@ void desktop_lock(Desktop* desktop, bool with_pin) {
 void desktop_unlock(Desktop* desktop) {
     furi_assert(desktop->locked);
     desktop_play_sound_pack_sequence(true);
+    desktop_update_gpio_mirror(false);
 
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     Gui* gui = furi_record_open(RECORD_GUI);

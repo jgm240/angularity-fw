@@ -96,6 +96,17 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     if(!momentum_settings.lockscreen_transparent) {
         canvas_draw_icon(canvas, 0, 0 + y, &I_Lockscreen);
     }
+    // Armed-feature indicators, top-right corner, stacked if both are on
+    {
+        int32_t indicator_y = 1 + y;
+        if(momentum_settings.theft_alarm) {
+            canvas_draw_icon(canvas, 118, indicator_y, &I_StatusAlarmArmed_8x8);
+            indicator_y += 10;
+        }
+        if(momentum_settings.nfc_unlock_enabled) {
+            canvas_draw_icon(canvas, 118, indicator_y, &I_StatusNfcArmed_8x8);
+        }
+    }
     if(momentum_settings.lockscreen_time) {
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str(canvas, 0, 64 + y, time_str);
@@ -236,6 +247,10 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
             if(event->type == InputTypeLong) {
                 locked_view->callback(DesktopLockedEventOpenPowerOff, locked_view->context);
             }
+        }
+
+        if(event->key == InputKeyDown && event->type == InputTypeLong) {
+            locked_view->callback(DesktopLockedEventFindMyFlipper, locked_view->context);
         }
 
         if(pin_locked) {

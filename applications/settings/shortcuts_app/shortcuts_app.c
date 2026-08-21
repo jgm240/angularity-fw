@@ -37,6 +37,12 @@ static ShortcutsApp* shortcuts_app_alloc(void) {
     view_dispatcher_add_view(
         app->view_dispatcher, ShortcutsAppViewDialogEx, dialog_ex_get_view(app->dialog_ex));
 
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, ShortcutsAppViewTextInput, text_input_get_view(app->text_input));
+
+    app->new_app_name[0] = '\0';
+
     scene_manager_next_scene(app->scene_manager, ShortcutsAppSceneStart);
     return app;
 }
@@ -49,6 +55,9 @@ static void shortcuts_app_free(ShortcutsApp* app) {
 
     view_dispatcher_remove_view(app->view_dispatcher, ShortcutsAppViewDialogEx);
     dialog_ex_free(app->dialog_ex);
+
+    view_dispatcher_remove_view(app->view_dispatcher, ShortcutsAppViewTextInput);
+    text_input_free(app->text_input);
 
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);

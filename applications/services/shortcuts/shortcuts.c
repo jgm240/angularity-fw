@@ -4,10 +4,38 @@
 #include <notification/notification_messages.h>
 #include <power/power_service/power.h>
 #include <desktop/desktop.h>
+#include <loader/loader.h>
+#include <momentum/settings.h>
+#include <momentum/security_log.h>
 
 #define TAG "Shortcuts"
 
-void shortcuts_execute_action(ShortcutAction action) {
+static const char* const shortcut_trigger_log_names[ShortcutTriggerCount] = {
+    [ShortcutTriggerSdCardRemoved] = "SD card removed",
+    [ShortcutTriggerGpioPull] = "GPIO pull",
+    [ShortcutTriggerPluggedIn] = "plugged in",
+    [ShortcutTriggerUnplugged] = "unplugged",
+    [ShortcutTriggerNfcScanned] = "NFC scanned",
+};
+
+static const char* const shortcut_action_log_names[ShortcutActionCount] = {
+    [ShortcutActionTriggerAlarm] = "trigger alarm",
+    [ShortcutActionBlinkLed] = "blink LED",
+    [ShortcutActionMakeSound] = "make sound",
+    [ShortcutActionLaunchApp] = "launch app",
+    [ShortcutActionToggleDarkMode] = "toggle dark mode",
+};
+
+void shortcuts_execute_action(const ShortcutRule* rule) {
+    ShortcutAction action = rule->action;
+
+    FuriString* log_line = furi_string_alloc_printf(
+        "Shortcut: %s -> %s",
+        shortcut_trigger_log_names[rule->trigger],
+        shortcut_action_log_names[action]);
+    security_log_add(furi_string_get_cstr(log_line));
+    furi_string_free(log_line);
+
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     switch(action) {
@@ -31,6 +59,15 @@ void shortcuts_execute_action(ShortcutAction action) {
         Desktop* desktop = furi_record_open(RECORD_DESKTOP);
         desktop_api_lock(desktop);
         furi_record_close(RECORD_DESKTOP);
+    } else if(action == ShortcutActionLaunchApp) {
+        if(rule->app_name[0]) {
+            Loader* loader = furi_record_open(RECORD_LOADER);
+            loader_start(loader, rule->app_name, NULL, NULL);
+            furi_record_close(RECORD_LOADER);
+        }
+    } else if(action == ShortcutActionToggleDarkMode) {
+        momentum_settings.dark_mode = !momentum_settings.dark_mode;
+        momentum_settings_save();
     }
 }
 
@@ -46,7 +83,7 @@ void shortcuts_load(Shortcuts* instance) {
         uint32_t version;
         if(stream_read_line(stream, line) &&
            sscanf(furi_string_get_cstr(line), "Shortcuts Version %lu", &version) == 1 &&
-           version == 1) {
+           (version == 1 || version == 2)) {
             while(instance->count < SHORTCUTS_MAX && stream_read_line(stream, line)) {
                 unsigned trigger, pin1, pin2, action;
                 if(sscanf(
@@ -62,6 +99,15 @@ void shortcuts_load(Shortcuts* instance) {
                     rule->gpio_pin1 = (uint8_t)pin1;
                     rule->gpio_pin2 = (uint8_t)pin2;
                     rule->action = (ShortcutAction)action;
+                    rule->app_name[0] = '\0';
+                    if(version == 2 && rule->action == ShortcutActionLaunchApp &&
+                       stream_read_line(stream, line)) {
+                        furi_string_trim(line);
+                        strlcpy(
+                            rule->app_name,
+                            furi_string_get_cstr(line),
+                            SHORTCUT_APP_NAME_LEN);
+                    }
                     instance->gpio_rule_broken[instance->count] = false;
                     instance->count++;
                 }
@@ -84,7 +130,7 @@ void shortcuts_save(Shortcuts* instance) {
 
     if(file_stream_open(stream, SHORTCUTS_FILE_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         FuriString* line = furi_string_alloc();
-        furi_string_printf(line, "Shortcuts Version 1\n");
+        furi_string_printf(line, "Shortcuts Version 2\n");
         stream_write_string(stream, line);
         for(size_t i = 0; i < instance->count; i++) {
             const ShortcutRule* rule = &instance->rules[i];
@@ -96,6 +142,10 @@ void shortcuts_save(Shortcuts* instance) {
                 (unsigned)rule->gpio_pin2,
                 (unsigned)rule->action);
             stream_write_string(stream, line);
+            if(rule->action == ShortcutActionLaunchApp) {
+                furi_string_printf(line, "%s\n", rule->app_name);
+                stream_write_string(stream, line);
+            }
         }
         furi_string_free(line);
     }
@@ -153,18 +203,22 @@ void shortcuts_remove(Shortcuts* instance, size_t index) {
 
 static void shortcuts_run_triggers(Shortcuts* instance, ShortcutTrigger trigger) {
     furi_mutex_acquire(instance->mutex, FuriWaitForever);
-    ShortcutAction actions_to_run[SHORTCUTS_MAX];
-    size_t actions_to_run_count = 0;
+    ShortcutRule rules_to_run[SHORTCUTS_MAX];
+    size_t rules_to_run_count = 0;
     for(size_t i = 0; i < instance->count; i++) {
         if(instance->rules[i].trigger == trigger) {
-            actions_to_run[actions_to_run_count++] = instance->rules[i].action;
+            rules_to_run[rules_to_run_count++] = instance->rules[i];
         }
     }
     furi_mutex_release(instance->mutex);
 
-    for(size_t i = 0; i < actions_to_run_count; i++) {
-        shortcuts_execute_action(actions_to_run[i]);
+    for(size_t i = 0; i < rules_to_run_count; i++) {
+        shortcuts_execute_action(&rules_to_run[i]);
     }
+}
+
+void shortcuts_notify_nfc_scanned(Shortcuts* instance) {
+    shortcuts_run_triggers(instance, ShortcutTriggerNfcScanned);
 }
 
 static void shortcuts_storage_callback(const void* message, void* context) {
@@ -209,7 +263,7 @@ static void shortcuts_gpio_poll_callback(void* context) {
 
         if(!loop_intact && !instance->gpio_rule_broken[i]) {
             instance->gpio_rule_broken[i] = true;
-            shortcuts_execute_action(instance->rules[i].action);
+            shortcuts_execute_action(&instance->rules[i]);
         } else if(loop_intact) {
             instance->gpio_rule_broken[i] = false;
         }

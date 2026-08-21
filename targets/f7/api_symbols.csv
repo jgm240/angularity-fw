@@ -3354,6 +3354,7 @@ Function,-,setvbuf,int,"FILE*, char*, int, size_t"
 Function,+,shortcuts_add,_Bool,"Shortcuts*, const ShortcutRule*"
 Function,+,shortcuts_get,_Bool,"Shortcuts*, size_t, ShortcutRule*"
 Function,+,shortcuts_get_count,size_t,Shortcuts*
+Function,+,shortcuts_notify_nfc_scanned,void,Shortcuts*
 Function,+,shortcuts_remove,void,"Shortcuts*, size_t"
 Function,+,signal_reader_alloc,SignalReader*,"const GpioPin*, uint32_t"
 Function,+,signal_reader_free,void,SignalReader*
@@ -4220,6 +4221,8 @@ Variable,+,I_SmallArrowUp_3x5,const Icon,
 Variable,+,I_Smile_18x18,const Icon,
 Variable,+,I_Space_65x18,const Icon,
 Variable,+,I_Static_9x7,const Icon,
+Variable,+,I_StatusAlarmArmed_8x8,const Icon,
+Variable,+,I_StatusNfcArmed_8x8,const Icon,
 Variable,+,I_Temperature_16x16,const Icon,
 Variable,+,I_Unlock_7x8,const Icon,
 Variable,+,I_Unplug_bg_bottom_128x10,const Icon,
@@ -4644,6 +4647,7 @@ Variable,+,sequence_display_backlight_on,const NotificationSequence,
 Variable,+,sequence_double_vibro,const NotificationSequence,
 Variable,+,sequence_empty,const NotificationSequence,
 Variable,+,sequence_error,const NotificationSequence,
+Variable,+,sequence_find_my_flipper,const NotificationSequence,
 Variable,+,sequence_lcd_contrast_update,const NotificationSequence,
 Variable,+,sequence_not_charging,const NotificationSequence,
 Variable,+,sequence_not_charging_beep,const NotificationSequence,

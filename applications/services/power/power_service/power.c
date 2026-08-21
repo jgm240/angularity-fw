@@ -3,6 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <momentum/momentum.h>
+#include <momentum/security_log.h>
 
 #include <update_util/update_operation.h>
 #include <notification/notification_messages.h>
@@ -280,7 +281,15 @@ static bool power_update_info(Power* power) {
     return need_refresh;
 }
 
+static const char* const power_theft_alarm_trigger_names[TheftAlarmTriggerCount] = {
+    [TheftAlarmTriggerUnplug] = "Theft alarm: unplugged",
+    [TheftAlarmTriggerGpioPull] = "Theft alarm: GPIO pull loop broken",
+    [TheftAlarmTriggerGpioTether] = "Theft alarm: GPIO tether pulled",
+};
+
 static void power_theft_alarm_trigger(Power* power) {
+    security_log_add(power_theft_alarm_trigger_names[momentum_settings.theft_alarm_trigger]);
+
     // Result: Lock - briefly show the trigger message, then hand off to
     // the desktop service to lock the device (which itself only actually
     // requires a PIN if one is set)
@@ -345,7 +354,18 @@ static void power_check_gpio_theft_trigger(Power* power) {
     }
 }
 
+static void power_check_gpio_mirror(void) {
+    if(momentum_settings.gpio_mirror_mode != GpioMirrorCharging) {
+        return;
+    }
+    const GpioPinRecord* pin = power_theft_alarm_resolve_pin(momentum_settings.gpio_mirror_pin);
+    furi_hal_gpio_init(pin->pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_write(pin->pin, furi_hal_power_is_charging());
+}
+
 static void power_check_charging_state(Power* power) {
+    power_check_gpio_mirror();
+
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     bool just_armed_alarm = false;
 

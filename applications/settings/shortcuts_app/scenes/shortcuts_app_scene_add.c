@@ -8,6 +8,7 @@ enum VarItemListIndex {
     VarItemListIndexPin1,
     VarItemListIndexPin2,
     VarItemListIndexAction,
+    VarItemListIndexAppName,
     VarItemListIndexSave,
 };
 
@@ -16,12 +17,15 @@ static const char* const shortcut_trigger_names[ShortcutTriggerCount] = {
     [ShortcutTriggerGpioPull] = "GPIO Pull",
     [ShortcutTriggerPluggedIn] = "Plugged In",
     [ShortcutTriggerUnplugged] = "Unplugged",
+    [ShortcutTriggerNfcScanned] = "NFC Scanned",
 };
 
 static const char* const shortcut_action_names[ShortcutActionCount] = {
     [ShortcutActionTriggerAlarm] = "Trigger Alarm",
     [ShortcutActionBlinkLed] = "Blink LED",
     [ShortcutActionMakeSound] = "Make Sound",
+    [ShortcutActionLaunchApp] = "Launch App",
+    [ShortcutActionToggleDarkMode] = "Toggle Dark Mode",
 };
 
 static uint8_t gpio_pin_choices[GPIO_PIN_CHOICES_MAX];
@@ -57,6 +61,13 @@ static void shortcuts_app_scene_add_update_pin_locks(ShortcutsApp* app) {
         "Needs GPIO Pull\ntrigger!");
 }
 
+static void shortcuts_app_scene_add_update_app_name_lock(ShortcutsApp* app) {
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexAppName),
+        app->new_action != ShortcutActionLaunchApp,
+        "Needs Launch App\naction!");
+}
+
 void shortcuts_app_scene_add_var_item_list_callback(void* context, uint32_t index) {
     ShortcutsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -89,6 +100,7 @@ static void shortcuts_app_scene_add_action_changed(VariableItem* item) {
     uint8_t value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, shortcut_action_names[value]);
     app->new_action = value;
+    shortcuts_app_scene_add_update_app_name_lock(app);
 }
 
 void shortcuts_app_scene_add_on_enter(void* context) {
@@ -134,6 +146,12 @@ void shortcuts_app_scene_add_on_enter(void* context) {
 
     shortcuts_app_scene_add_update_pin_locks(app);
 
+    item = variable_item_list_add(var_item_list, "App Name", 0, NULL, app);
+    variable_item_set_current_value_text(
+        item, app->new_app_name[0] ? app->new_app_name : "<none>");
+
+    shortcuts_app_scene_add_update_app_name_lock(app);
+
     item = variable_item_list_add(var_item_list, "Save Shortcut", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
 
@@ -149,13 +167,18 @@ bool shortcuts_app_scene_add_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        if(event.event == VarItemListIndexSave) {
+        if(event.event == VarItemListIndexAppName) {
+            if(app->new_action == ShortcutActionLaunchApp) {
+                scene_manager_next_scene(app->scene_manager, ShortcutsAppSceneAppName);
+            }
+        } else if(event.event == VarItemListIndexSave) {
             ShortcutRule rule = {
                 .trigger = app->new_trigger,
                 .gpio_pin1 = app->new_pin1,
                 .gpio_pin2 = app->new_pin2,
                 .action = app->new_action,
             };
+            strlcpy(rule.app_name, app->new_app_name, SHORTCUT_APP_NAME_LEN);
             shortcuts_add(app->shortcuts, &rule);
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, ShortcutsAppSceneStart);

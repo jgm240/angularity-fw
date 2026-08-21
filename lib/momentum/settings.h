@@ -31,6 +31,13 @@ typedef enum {
 } TheftAlarmTrigger;
 
 typedef enum {
+    GpioMirrorOff,
+    GpioMirrorCharging,
+    GpioMirrorLocked,
+    GpioMirrorCount,
+} GpioMirrorMode;
+
+typedef enum {
     MenuStyleList,
     MenuStyleWii,
     MenuStyleDsi,
@@ -101,6 +108,8 @@ typedef struct {
     bool lockscreen_skip_animation;
     bool nfc_unlock_enabled;
     char nfc_unlock_uid[NFC_UNLOCK_UID_LEN];
+    GpioMirrorMode gpio_mirror_mode;
+    uint32_t gpio_mirror_pin;
     BatteryIcon battery_icon;
     bool status_icons;
     bool bar_borders;

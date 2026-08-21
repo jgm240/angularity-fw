@@ -24,4 +24,4 @@ struct Shortcuts {
 
 void shortcuts_load(Shortcuts* instance);
 void shortcuts_save(Shortcuts* instance);
-void shortcuts_execute_action(ShortcutAction action);
+void shortcuts_execute_action(const ShortcutRule* rule);

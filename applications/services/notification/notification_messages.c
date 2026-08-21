@@ -352,6 +352,27 @@ const NotificationSequence sequence_shortcut_blink_led = {
     NULL,
 };
 
+// Find My Flipper: alternating high chirps, locator-beacon style, ~5s total
+const NotificationSequence sequence_find_my_flipper = {
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    &message_note_c7, &message_delay_100, &message_sound_off, &message_delay_100,
+    &message_note_a6, &message_delay_100, &message_sound_off, &message_delay_250,
+    NULL,
+};
+
 // Sound packs: Lock/Unlock chimes
 const NotificationSequence sequence_sound_pack_classic_unlock = {
     &message_note_g5,

@@ -15,6 +15,8 @@
 #include "desktop_scene_locked.h"
 
 #include <momentum/settings.h>
+#include <momentum/security_log.h>
+#include <shortcuts/shortcuts.h>
 
 #include <nfc/nfc.h>
 #include <nfc/nfc_poller.h>
@@ -206,15 +208,28 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
         case DesktopLockedEventNfcScan: {
             uint8_t uid[NFC_UNLOCK_UID_MAX_LEN];
             size_t uid_len = 0;
-            if(desktop_nfc_unlock_scan(uid, &uid_len) &&
-               desktop_nfc_unlock_uid_matches_setting(uid, uid_len)) {
-                desktop_unlock(desktop);
+            if(desktop_nfc_unlock_scan(uid, &uid_len)) {
+                Shortcuts* shortcuts = furi_record_open(RECORD_SHORTCUTS);
+                shortcuts_notify_nfc_scanned(shortcuts);
+                furi_record_close(RECORD_SHORTCUTS);
+
+                if(desktop_nfc_unlock_uid_matches_setting(uid, uid_len)) {
+                    desktop_unlock(desktop);
+                } else {
+                    security_log_add("NFC unlock: wrong tag scanned");
+                    notification_message(desktop->notification, &sequence_error);
+                }
             } else {
                 notification_message(desktop->notification, &sequence_error);
             }
             consumed = true;
             break;
         }
+        case DesktopLockedEventFindMyFlipper:
+            security_log_add("Find My Flipper activated");
+            notification_message(desktop->notification, &sequence_find_my_flipper);
+            consumed = true;
+            break;
         case DesktopAnimationEventNewIdleAnimation:
             animation_manager_new_idle_process(desktop->animation_manager);
             consumed = true;

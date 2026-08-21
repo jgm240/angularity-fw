@@ -7,6 +7,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/text_input.h>
 
 #include <shortcuts/shortcuts.h>
 
@@ -19,12 +20,14 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
     DialogEx* dialog_ex;
+    TextInput* text_input;
 
     // Scratch state for the Add scene
     ShortcutTrigger new_trigger;
     uint8_t new_pin1;
     uint8_t new_pin2;
     ShortcutAction new_action;
+    char new_app_name[SHORTCUT_APP_NAME_LEN];
 
     // Index targeted by the delete confirmation
     size_t delete_index;
@@ -33,4 +36,5 @@ typedef struct {
 typedef enum {
     ShortcutsAppViewVarItemList,
     ShortcutsAppViewDialogEx,
+    ShortcutsAppViewTextInput,
 } ShortcutsAppView;

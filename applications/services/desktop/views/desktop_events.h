@@ -22,6 +22,7 @@ typedef enum {
     DesktopLockedEventShowPinInput,
     DesktopLockedEventCoversClosed,
     DesktopLockedEventNfcScan,
+    DesktopLockedEventFindMyFlipper,
 
     DesktopPinInputEventResetWrongPinLabel,
     DesktopPinInputEventUnlocked,
