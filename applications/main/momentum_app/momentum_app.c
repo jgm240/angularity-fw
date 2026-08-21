@@ -425,7 +425,18 @@ MomentumApp* momentum_app_alloc() {
     } else {
         // Make uppercase, add space, add build date
         furi_string_replace(app->version_tag, "ang", "ANG");
+        size_t tag_only_size = furi_string_size(app->version_tag);
         furi_string_cat_printf(app->version_tag, " %s", version_get_builddate(NULL));
+        if(canvas_string_width(canvas, furi_string_get_cstr(app->version_tag)) >=
+           canvas_width(canvas) - 8) {
+            // Doesn't fit with the build date - drop it, keep just the tag
+            furi_string_left(app->version_tag, tag_only_size);
+        }
+        // Trim from the right if the tag alone is still too wide
+        while(canvas_string_width(canvas, furi_string_get_cstr(app->version_tag)) >=
+              canvas_width(canvas) - 8) {
+            furi_string_left(app->version_tag, furi_string_size(app->version_tag) - 1);
+        }
     }
     // Add spaces to align right
     while(canvas_string_width(canvas, furi_string_get_cstr(app->version_tag)) <=
