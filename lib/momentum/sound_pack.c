@@ -112,29 +112,61 @@ void sound_pack_play_click(void) {
     play(sequence);
 }
 
-void sound_pack_play_app_open_settings(void) {
-    const NotificationSequence* sequence = NULL;
-    switch(momentum_settings.sound_pack) {
-    case SoundPackClassic:
-        sequence = &sequence_sound_pack_classic_app_open;
-        break;
-    case SoundPackChime:
-        sequence = &sequence_sound_pack_chime_app_open;
-        break;
-    case SoundPackRetro:
-        sequence = &sequence_sound_pack_retro_app_open;
-        break;
-    case SoundPackMinimal:
-        sequence = &sequence_sound_pack_minimal_app_open;
-        break;
-    case SoundPackArcade:
-        sequence = &sequence_sound_pack_arcade_app_open;
-        break;
-    case SoundPackOff:
-    default:
-        break;
-    }
-    play(sequence);
+// Indexed [AppSound][SoundPack]; SoundPackOff entries are left NULL (play()
+// already no-ops on NULL), so only Classic..Arcade need populating.
+static const NotificationSequence* const app_open_sequences[6][SoundPackCount] = {
+    [AppSoundSettings] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_open,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_open,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_open,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_open,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_open,
+        },
+    [AppSoundSubGhz] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_subghz,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_subghz,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_subghz,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_subghz,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_subghz,
+        },
+    [AppSoundInfrared] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_infrared,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_infrared,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_infrared,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_infrared,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_infrared,
+        },
+    [AppSoundIButton] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_ibutton,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_ibutton,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_ibutton,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_ibutton,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_ibutton,
+        },
+    [AppSoundU2f] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_u2f,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_u2f,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_u2f,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_u2f,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_u2f,
+        },
+    [AppSoundBadUsb] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_badusb,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_badusb,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_badusb,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_badusb,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_badusb,
+        },
+};
+
+void sound_pack_play_app_open(AppSound app) {
+    play(app_open_sequences[app][momentum_settings.sound_pack]);
 }
 
 void sound_pack_play_boot(void) {

@@ -16,6 +16,7 @@
 #include <gui/modules/file_browser.h>
 #include <core/dangerous_defines.h>
 #include <momentum/momentum.h>
+#include <momentum/sound_pack.h>
 #include <gui/icon_i.h>
 #include <m-list.h>
 
@@ -196,6 +197,7 @@ static void loader_menu_set_view_pending(void* context, uint32_t arg) {
 static void loader_menu_switch_to_settings(void* context, uint32_t index) {
     UNUSED(index);
     LoaderMenuApp* app = context;
+    sound_pack_play_app_open(AppSoundSettings);
     furi_timer_pending_callback(
         loader_menu_set_view_pending, app, (uint32_t)submenu_get_view(app->settings_menu));
     app->loader_menu->current_view = LoaderMenuViewSettings;

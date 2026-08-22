@@ -821,6 +821,302 @@ const NotificationSequence sequence_sound_pack_arcade_shutdown = {
     NULL,
 };
 
+// App-open cue: Sub-GHz (Morse-style dot-dot-dot-dash radio beep)
+const NotificationSequence sequence_sound_pack_classic_app_subghz = {
+    &message_note_a5,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a5,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a5,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a5,  &message_delay_100, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_subghz = {
+    &message_note_a6,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a6,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a6,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a6,  &message_delay_100, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_subghz = {
+    &message_note_a4,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a4,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a4,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a4,  &message_delay_100, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_subghz = {
+    &message_note_a5,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_a5,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_subghz = {
+    &message_note_e5,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_e5,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_e5,  &message_delay_25, &message_sound_off, &message_delay_25,
+    &message_note_a5,  &message_delay_100, &message_sound_off,
+    NULL,
+};
+
+// App-open cue: Infrared (descending sci-fi laser zap)
+const NotificationSequence sequence_sound_pack_classic_app_infrared = {
+    &message_note_c7,
+    &message_delay_10,
+    &message_note_a6,
+    &message_delay_10,
+    &message_note_f6,
+    &message_delay_10,
+    &message_note_d6,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_infrared = {
+    &message_note_c8,
+    &message_delay_10,
+    &message_note_a7,
+    &message_delay_10,
+    &message_note_f7,
+    &message_delay_10,
+    &message_note_d7,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_infrared = {
+    &message_vibro_on,
+    &message_note_c5,
+    &message_delay_10,
+    &message_note_a4,
+    &message_delay_10,
+    &message_note_f4,
+    &message_delay_10,
+    &message_note_d4,
+    &message_delay_25,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_infrared = {
+    &message_note_c7,
+    &message_delay_10,
+    &message_note_f6,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_infrared = {
+    &message_note_c7,
+    &message_delay_10,
+    &message_note_a6,
+    &message_delay_10,
+    &message_note_f6,
+    &message_delay_10,
+    &message_note_d6,
+    &message_delay_10,
+    &message_note_c6,
+    &message_delay_10,
+    &message_note_a5,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+// App-open cue: iButton (the thunk of a big button being pressed)
+const NotificationSequence sequence_sound_pack_classic_app_ibutton = {
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_ibutton = {
+    &message_vibro_on,
+    &message_note_e4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_ibutton = {
+    &message_vibro_on,
+    &message_note_c3,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_ibutton = {
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_25,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_ibutton = {
+    &message_vibro_on,
+    &message_note_g3,
+    &message_delay_25,
+    &message_vibro_off,
+    &message_note_c4,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+// App-open cue: U2F (a lock opening - click, click, then the bolt sliding)
+const NotificationSequence sequence_sound_pack_classic_app_u2f = {
+    &message_note_c7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_c7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_u2f = {
+    &message_note_e7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_e7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_vibro_on,
+    &message_note_e4,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_u2f = {
+    &message_vibro_on,
+    &message_note_a5,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_a5,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_a3,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_u2f = {
+    &message_note_c7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_u2f = {
+    &message_note_c7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_e7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_g7,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_25,
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+// App-open cue: Bad KB (rapid staccato typing blips)
+const NotificationSequence sequence_sound_pack_classic_app_badusb = {
+    &message_note_c6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_d6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_c6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_e6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_c6,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_badusb = {
+    &message_note_c7,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_d7,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_c7,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_e7,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_c7,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_badusb = {
+    &message_note_c4,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_d4,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_c4,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_e4,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_c4,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_badusb = {
+    &message_note_c6,
+    &message_delay_25,
+    &message_sound_off,
+    &message_delay_10,
+    &message_note_e6,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_badusb = {
+    &message_note_c6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_d6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_e6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_d6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_c6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_e6,  &message_delay_25, &message_sound_off, &message_delay_10,
+    &message_note_g6,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
 // Light up
 const NotificationSequence sequence_set_only_red_255 = {
     &message_red_255,

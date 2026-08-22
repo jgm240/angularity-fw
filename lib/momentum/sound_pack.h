@@ -15,8 +15,17 @@ void sound_pack_play_error(void);
 /** Short UI navigation click. No-op when sound_pack is Off. */
 void sound_pack_play_click(void);
 
-/** "Gears turning" cue for opening the Angularity Settings app. */
-void sound_pack_play_app_open_settings(void);
+typedef enum {
+    AppSoundSettings, // Gears turning
+    AppSoundSubGhz, // Morse-style radio beep
+    AppSoundInfrared, // Descending laser zap
+    AppSoundIButton, // Big-button thunk
+    AppSoundU2f, // Lock opening
+    AppSoundBadUsb, // Rapid typing blips
+} AppSound;
+
+/** Contextual "opening this app" cue, matched by the main menu's app name. */
+void sound_pack_play_app_open(AppSound app);
 
 void sound_pack_play_boot(void);
 

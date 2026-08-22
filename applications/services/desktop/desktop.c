@@ -23,15 +23,37 @@ static void desktop_auto_lock_inhibit(Desktop*);
 static void desktop_start_auto_lock_timer(Desktop*);
 static void desktop_apply_settings(Desktop*);
 
+static const struct {
+    const char* name;
+    AppSound sound;
+} desktop_app_open_sounds[] = {
+    {"Angularity", AppSoundSettings},
+    {"momentum_app", AppSoundSettings},
+    {"Sub-GHz", AppSoundSubGhz},
+    {"subghz", AppSoundSubGhz},
+    {"Infrared", AppSoundInfrared},
+    {"infrared", AppSoundInfrared},
+    {"iButton", AppSoundIButton},
+    {"ibutton", AppSoundIButton},
+    {"U2F", AppSoundU2f},
+    {"u2f", AppSoundU2f},
+    {"Bad KB", AppSoundBadUsb},
+    {"bad_kb", AppSoundBadUsb},
+};
+
 static void desktop_loader_callback(const void* message, void* context) {
     furi_assert(context);
     Desktop* desktop = context;
     const LoaderEvent* event = message;
 
     if(event->type == LoaderEventTypeApplicationBeforeLoad) {
-        if(event->name &&
-           (strcmp(event->name, "Angularity") == 0 || strcmp(event->name, "momentum_app") == 0)) {
-            sound_pack_play_app_open_settings();
+        if(event->name) {
+            for(size_t i = 0; i < COUNT_OF(desktop_app_open_sounds); i++) {
+                if(strcmp(event->name, desktop_app_open_sounds[i].name) == 0) {
+                    sound_pack_play_app_open(desktop_app_open_sounds[i].sound);
+                    break;
+                }
+            }
         }
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalBeforeAppStarted);
         furi_check(furi_semaphore_acquire(desktop->animation_semaphore, 3000) == FuriStatusOk);

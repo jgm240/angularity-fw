@@ -148,6 +148,41 @@ extern const NotificationSequence sequence_sound_pack_retro_shutdown;
 extern const NotificationSequence sequence_sound_pack_minimal_shutdown;
 extern const NotificationSequence sequence_sound_pack_arcade_shutdown;
 
+// Sound packs: Sub-GHz app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_subghz;
+extern const NotificationSequence sequence_sound_pack_chime_app_subghz;
+extern const NotificationSequence sequence_sound_pack_retro_app_subghz;
+extern const NotificationSequence sequence_sound_pack_minimal_app_subghz;
+extern const NotificationSequence sequence_sound_pack_arcade_app_subghz;
+
+// Sound packs: Infrared app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_infrared;
+extern const NotificationSequence sequence_sound_pack_chime_app_infrared;
+extern const NotificationSequence sequence_sound_pack_retro_app_infrared;
+extern const NotificationSequence sequence_sound_pack_minimal_app_infrared;
+extern const NotificationSequence sequence_sound_pack_arcade_app_infrared;
+
+// Sound packs: iButton app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_ibutton;
+extern const NotificationSequence sequence_sound_pack_chime_app_ibutton;
+extern const NotificationSequence sequence_sound_pack_retro_app_ibutton;
+extern const NotificationSequence sequence_sound_pack_minimal_app_ibutton;
+extern const NotificationSequence sequence_sound_pack_arcade_app_ibutton;
+
+// Sound packs: U2F app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_u2f;
+extern const NotificationSequence sequence_sound_pack_chime_app_u2f;
+extern const NotificationSequence sequence_sound_pack_retro_app_u2f;
+extern const NotificationSequence sequence_sound_pack_minimal_app_u2f;
+extern const NotificationSequence sequence_sound_pack_arcade_app_u2f;
+
+// Sound packs: Bad KB app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_badusb;
+extern const NotificationSequence sequence_sound_pack_chime_app_badusb;
+extern const NotificationSequence sequence_sound_pack_retro_app_badusb;
+extern const NotificationSequence sequence_sound_pack_minimal_app_badusb;
+extern const NotificationSequence sequence_sound_pack_arcade_app_badusb;
+
 // Light up
 extern const NotificationSequence sequence_set_only_red_255;
 extern const NotificationSequence sequence_set_only_green_255;
