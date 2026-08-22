@@ -13,6 +13,7 @@
 #include <m-array.h>
 #include <momentum/momentum.h>
 #include <m-string.h>
+#include <math.h>
 
 struct Menu {
     View* view;
@@ -615,6 +616,42 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
             break;
         }
+        case MenuStyleWheel: {
+            // Radial "wheel" layout: 5 icons fanned along a shallow upward
+            // arc, the selected app at the apex (largest, circled), shrinking
+            // toward the outer neighbors for a sense of depth
+            const int32_t pivot_x = 64;
+            const int32_t pivot_y = 85;
+            const int32_t radius = 55;
+            const float angle_step_deg = 22.0f;
+            const float base_angle_deg = -90.0f;
+
+            for(int8_t i = -2; i <= 2; i++) {
+                shift_position = (position + items_count + i) % items_count;
+                item = MenuItemArray_get(model->items, shift_position);
+
+                float angle = (base_angle_deg + i * angle_step_deg) * (float)M_PI / 180.0f;
+                int32_t x = pivot_x + (int32_t)(radius * cosf(angle));
+                int32_t y = pivot_y + (int32_t)(radius * sinf(angle));
+
+                uint8_t scale = (i == 0) ? 100 : ((i == -1 || i == 1) ? 80 : 60);
+
+                if(i == 0) {
+                    canvas_draw_circle(canvas, x, y, 10);
+                }
+                menu_centered_icon_scaled(canvas, item, x - 7, y - 7, 14, 14, scale, scale);
+            }
+
+            canvas_set_font(canvas, FontSecondary);
+            item = MenuItemArray_get(model->items, position);
+            menu_get_name(item, name, false);
+            size_t scroll_counter = menu_scroll_counter(model, true);
+            elements_scrollable_text_line_centered(
+                canvas, 64, 8, 124, name, scroll_counter, false, true);
+
+            elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
+            break;
+        }
         default:
             break;
         }
@@ -967,6 +1004,7 @@ static void menu_process_left(Menu* menu) {
             case MenuStyleVertical:
             case MenuStyleCoverFlow:
             case MenuStyleAngularity:
+            case MenuStyleWheel:
                 size_t vertical_offset = model->vertical_offset;
                 if(position > 0) {
                     position--;
@@ -1033,6 +1071,7 @@ static void menu_process_right(Menu* menu) {
             case MenuStyleVertical:
             case MenuStyleCoverFlow:
             case MenuStyleAngularity:
+            case MenuStyleWheel:
                 size_t vertical_offset = model->vertical_offset;
                 if(position < count - 1) {
                     position++;

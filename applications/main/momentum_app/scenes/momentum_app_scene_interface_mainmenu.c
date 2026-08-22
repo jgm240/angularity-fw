@@ -2,6 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexMenuStyle,
+    VarItemListIndexDummyMode,
     VarItemListIndexResetMenu,
     VarItemListIndexItem,
     VarItemListIndexAddItem,
@@ -25,12 +26,21 @@ const char* const menu_style_names[MenuStyleCount] = {
     "MNTM",
     "CoverFlow",
     "Angularity",
+    "Wheel",
 };
 static void momentum_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, menu_style_names[index]);
     momentum_settings.menu_style = index;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_interface_mainmenu_dummy_mode_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.dummy_mode = value;
     app->save_settings = true;
 }
 
@@ -80,6 +90,15 @@ void momentum_app_scene_interface_mainmenu_on_enter(void* context) {
         app);
     variable_item_set_current_value_text(item, menu_style_names[momentum_settings.menu_style]);
     variable_item_set_current_value_index(item, momentum_settings.menu_style);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Dummy Mode",
+        2,
+        momentum_app_scene_interface_mainmenu_dummy_mode_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.dummy_mode);
+    variable_item_set_current_value_text(item, momentum_settings.dummy_mode ? "ON" : "OFF");
 
     variable_item_list_add(var_item_list, "Reset Menu", 0, NULL, app);
 

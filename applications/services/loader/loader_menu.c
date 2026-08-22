@@ -293,60 +293,93 @@ static void loader_menu_find_add_app(LoaderMenuApp* app, Storage* storage, FuriS
     }
 }
 
-static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
-    menu_add_item(
-        app->primary_menu,
-        LOADER_APPLICATIONS_NAME,
-        &A_Plugins_14,
-        LoaderMenuIndexApplications,
-        loader_menu_applications_callback,
-        NULL);
+// Dummy Mode: a decoy main menu of real, playable games for public
+// demo/retail use, so a stranger picking up the device can't reach
+// Sub-GHz/NFC/RFID/etc. Paths match where the firmware's own resource
+// bundle installs these on every update (resources/apps/Games/*.fap).
+static const char* const loader_menu_dummy_mode_games[] = {
+    "/ext/apps/Games/snake20.fap",
+    "/ext/apps/Games/tetris.fap",
+    "/ext/apps/Games/game_2048.fap",
+    "/ext/apps/Games/flappy_bird.fap",
+    "/ext/apps/Games/arkanoid.fap",
+    "/ext/apps/Games/flipper_pong.fap",
+    "/ext/apps/Games/tictactoe.fap",
+    "/ext/apps/Games/doom.fap",
+    "/ext/apps/Games/chess.fap",
+    "/ext/apps/Games/solitaire.fap",
+};
 
+static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
     MenuAppList_init(app->apps_list);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    Stream* stream = file_stream_alloc(storage);
-    FuriString* line = furi_string_alloc();
-    uint32_t version;
-    if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
-       stream_read_line(stream, line) &&
-       sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) == 1 &&
-       version <= 1) {
-        while(stream_read_line(stream, line)) {
-            furi_string_trim(line);
-            if(version == 0) {
-                if(furi_string_equal(line, "RFID")) {
-                    furi_string_set(line, "125 kHz RFID");
-                } else if(furi_string_equal(line, "SubGHz")) {
-                    furi_string_set(line, "Sub-GHz");
-                } else if(furi_string_equal(line, "Xtreme")) {
-                    furi_string_set(line, "Angularity");
-                }
-            }
+
+    if(momentum_settings.dummy_mode) {
+        // No "Apps" archive tile and no real-app fallback here on purpose -
+        // both would expose the real tools Dummy Mode is meant to hide.
+        // "Settings" is added unconditionally below, so turning Dummy Mode
+        // back off is always just a menu away.
+        FuriString* line = furi_string_alloc();
+        for(size_t i = 0; i < COUNT_OF(loader_menu_dummy_mode_games); i++) {
+            furi_string_set(line, loader_menu_dummy_mode_games[i]);
             loader_menu_find_add_app(app, storage, line);
         }
+        furi_string_free(line);
     } else {
-        for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-            loader_menu_add_app_entry(app, FLIPPER_APPS[i].name, FLIPPER_APPS[i].icon, NULL);
+        menu_add_item(
+            app->primary_menu,
+            LOADER_APPLICATIONS_NAME,
+            &A_Plugins_14,
+            LoaderMenuIndexApplications,
+            loader_menu_applications_callback,
+            NULL);
+
+        Stream* stream = file_stream_alloc(storage);
+        FuriString* line = furi_string_alloc();
+        uint32_t version;
+        if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
+           stream_read_line(stream, line) &&
+           sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) == 1 &&
+           version <= 1) {
+            while(stream_read_line(stream, line)) {
+                furi_string_trim(line);
+                if(version == 0) {
+                    if(furi_string_equal(line, "RFID")) {
+                        furi_string_set(line, "125 kHz RFID");
+                    } else if(furi_string_equal(line, "SubGHz")) {
+                        furi_string_set(line, "Sub-GHz");
+                    } else if(furi_string_equal(line, "Xtreme")) {
+                        furi_string_set(line, "Angularity");
+                    }
+                }
+                loader_menu_find_add_app(app, storage, line);
+            }
+        } else {
+            for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+                loader_menu_add_app_entry(app, FLIPPER_APPS[i].name, FLIPPER_APPS[i].icon, NULL);
+            }
+            // Until count - 1 because last app is hardcoded below
+            for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
+                loader_menu_add_app_entry(
+                    app, FLIPPER_EXTERNAL_APPS[i].name, FLIPPER_EXTERNAL_APPS[i].icon, NULL);
+            }
         }
-        // Until count - 1 because last app is hardcoded below
-        for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
-            loader_menu_add_app_entry(
-                app, FLIPPER_EXTERNAL_APPS[i].name, FLIPPER_EXTERNAL_APPS[i].icon, NULL);
-        }
+        furi_string_free(line);
+        stream_free(stream);
+
+        const FlipperExternalApplication* last =
+            &FLIPPER_EXTERNAL_APPS[FLIPPER_EXTERNAL_APPS_COUNT - 1];
+        menu_add_item(
+            app->primary_menu,
+            last->name,
+            last->icon,
+            LoaderMenuIndexLast,
+            loader_menu_last_callback,
+            NULL);
     }
-    furi_string_free(line);
-    stream_free(stream);
+
     furi_record_close(RECORD_STORAGE);
 
-    const FlipperExternalApplication* last =
-        &FLIPPER_EXTERNAL_APPS[FLIPPER_EXTERNAL_APPS_COUNT - 1];
-    menu_add_item(
-        app->primary_menu,
-        last->name,
-        last->icon,
-        LoaderMenuIndexLast,
-        loader_menu_last_callback,
-        NULL);
     menu_add_item(
         app->primary_menu,
         "Settings",

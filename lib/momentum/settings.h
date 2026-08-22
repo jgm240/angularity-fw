@@ -48,6 +48,7 @@ typedef enum {
     MenuStyleMNTM,
     MenuStyleCoverFlow,
     MenuStyleAngularity,
+    MenuStyleWheel,
     MenuStyleCount,
 } MenuStyle;
 
@@ -97,6 +98,7 @@ typedef struct {
     int32_t cycle_anims;
     bool unlock_anims;
     MenuStyle menu_style;
+    bool dummy_mode;
     bool lock_on_boot;
     bool bad_pins_format;
     bool allow_locked_rpc_usb;

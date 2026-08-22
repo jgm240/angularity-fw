@@ -12,6 +12,7 @@ MomentumSettings momentum_settings = {
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
     .menu_style = MenuStyleDsi, // DSi
+    .dummy_mode = false, // OFF
     .lock_on_boot = true, // ON
     .bad_pins_format = false, // OFF
     .allow_locked_rpc_usb = false, // OFF
@@ -105,6 +106,7 @@ static const struct {
     {setting_int(cycle_anims, -1, 86400)},
     {setting_bool(unlock_anims)},
     {setting_enum(menu_style, MenuStyleCount)},
+    {setting_bool(dummy_mode)},
     {setting_bool(bad_pins_format)},
     {setting_bool(allow_locked_rpc_usb)},
     {setting_bool(allow_locked_rpc_ble)},
