@@ -9,6 +9,8 @@ static const char* const sound_pack_names[SoundPackCount] = {
     [SoundPackClassic] = "Classic",
     [SoundPackChime] = "Chime",
     [SoundPackRetro] = "Retro",
+    [SoundPackMinimal] = "Minimal",
+    [SoundPackArcade] = "Arcade",
 };
 
 void momentum_app_scene_misc_sound_var_item_list_callback(void* context, uint32_t index) {

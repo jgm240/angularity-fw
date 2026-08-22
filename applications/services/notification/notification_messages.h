@@ -115,6 +115,38 @@ extern const NotificationSequence sequence_sound_pack_retro_lock;
 extern const NotificationSequence sequence_sound_pack_classic_error;
 extern const NotificationSequence sequence_sound_pack_chime_error;
 extern const NotificationSequence sequence_sound_pack_retro_error;
+extern const NotificationSequence sequence_sound_pack_minimal_unlock;
+extern const NotificationSequence sequence_sound_pack_minimal_lock;
+extern const NotificationSequence sequence_sound_pack_minimal_error;
+extern const NotificationSequence sequence_sound_pack_arcade_unlock;
+extern const NotificationSequence sequence_sound_pack_arcade_lock;
+extern const NotificationSequence sequence_sound_pack_arcade_error;
+
+// Sound packs: UI click
+extern const NotificationSequence sequence_sound_pack_classic_click;
+extern const NotificationSequence sequence_sound_pack_chime_click;
+extern const NotificationSequence sequence_sound_pack_retro_click;
+extern const NotificationSequence sequence_sound_pack_minimal_click;
+extern const NotificationSequence sequence_sound_pack_arcade_click;
+
+// Sound packs: Settings app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_open;
+extern const NotificationSequence sequence_sound_pack_chime_app_open;
+extern const NotificationSequence sequence_sound_pack_retro_app_open;
+extern const NotificationSequence sequence_sound_pack_minimal_app_open;
+extern const NotificationSequence sequence_sound_pack_arcade_app_open;
+
+// Sound packs: power on/off
+extern const NotificationSequence sequence_sound_pack_classic_boot;
+extern const NotificationSequence sequence_sound_pack_chime_boot;
+extern const NotificationSequence sequence_sound_pack_retro_boot;
+extern const NotificationSequence sequence_sound_pack_minimal_boot;
+extern const NotificationSequence sequence_sound_pack_arcade_boot;
+extern const NotificationSequence sequence_sound_pack_classic_shutdown;
+extern const NotificationSequence sequence_sound_pack_chime_shutdown;
+extern const NotificationSequence sequence_sound_pack_retro_shutdown;
+extern const NotificationSequence sequence_sound_pack_minimal_shutdown;
+extern const NotificationSequence sequence_sound_pack_arcade_shutdown;
 
 // Light up
 extern const NotificationSequence sequence_set_only_red_255;

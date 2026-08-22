@@ -497,6 +497,330 @@ const NotificationSequence sequence_sound_pack_retro_error = {
     NULL,
 };
 
+// Sound packs: Minimal (very light, single soft tick per event)
+const NotificationSequence sequence_sound_pack_minimal_unlock = {
+    &message_note_e5,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_lock = {
+    &message_note_c5,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_error = {
+    &message_note_c4,
+    &message_delay_50,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_c4,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+// Sound packs: Arcade (playful 8-bit arpeggios)
+const NotificationSequence sequence_sound_pack_arcade_unlock = {
+    &message_vibro_on,
+    &message_note_c5,
+    &message_delay_25,
+    &message_note_e5,
+    &message_delay_25,
+    &message_note_g5,
+    &message_delay_25,
+    &message_vibro_off,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_lock = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_25,
+    &message_note_g5,
+    &message_delay_25,
+    &message_note_e5,
+    &message_delay_25,
+    &message_vibro_off,
+    &message_note_c5,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_error = {
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_50,
+    &message_note_b3,
+    &message_delay_50,
+    &message_note_c4,
+    &message_delay_50,
+    &message_note_b3,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+// Click (UI navigation) - short, no vibro, only Off skips it entirely
+const NotificationSequence sequence_sound_pack_classic_click = {
+    &message_note_c6,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_click = {
+    &message_note_e6,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_click = {
+    &message_note_a4,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_click = {
+    &message_note_c5,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_click = {
+    &message_note_e6,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+// App-open cue for the Settings app (a little "gears turning" trill)
+const NotificationSequence sequence_sound_pack_classic_app_open = {
+    &message_note_g5,
+    &message_delay_25,
+    &message_note_a5,
+    &message_delay_25,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_open = {
+    &message_note_c6,
+    &message_delay_25,
+    &message_note_d6,
+    &message_delay_25,
+    &message_note_e6,
+    &message_delay_25,
+    &message_note_d6,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_open = {
+    &message_vibro_on,
+    &message_note_a3,
+    &message_delay_25,
+    &message_note_a4,
+    &message_delay_25,
+    &message_note_a3,
+    &message_delay_25,
+    &message_note_a4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_open = {
+    &message_note_c5,
+    &message_delay_25,
+    &message_note_e5,
+    &message_delay_25,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_open = {
+    &message_note_c5,
+    &message_delay_25,
+    &message_note_e5,
+    &message_delay_25,
+    &message_note_g5,
+    &message_delay_25,
+    &message_note_c6,
+    &message_delay_25,
+    &message_note_g5,
+    &message_delay_25,
+    &message_note_e5,
+    &message_delay_25,
+    &message_note_c5,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+// Power on (boot)
+const NotificationSequence sequence_sound_pack_classic_boot = {
+    &message_vibro_on,
+    &message_note_c5,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_e5,
+    &message_delay_50,
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_boot = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_e6,
+    &message_delay_50,
+    &message_note_g6,
+    &message_delay_50,
+    &message_note_c7,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_boot = {
+    &message_vibro_on,
+    &message_note_a3,
+    &message_delay_50,
+    &message_note_a4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_a5,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_boot = {
+    &message_note_c5,
+    &message_delay_50,
+    &message_note_g5,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_boot = {
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_25,
+    &message_vibro_off,
+    &message_note_e4,
+    &message_delay_25,
+    &message_note_g4,
+    &message_delay_25,
+    &message_note_c5,
+    &message_delay_25,
+    &message_note_e5,
+    &message_delay_25,
+    &message_note_g5,
+    &message_delay_25,
+    &message_note_c6,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+// Power off (shutdown) - played blocking, right before the cutoff
+const NotificationSequence sequence_sound_pack_classic_shutdown = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_e5,
+    &message_delay_50,
+    &message_note_c5,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_shutdown = {
+    &message_vibro_on,
+    &message_note_c7,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_g6,
+    &message_delay_50,
+    &message_note_e6,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_shutdown = {
+    &message_vibro_on,
+    &message_note_a5,
+    &message_delay_50,
+    &message_note_a4,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_note_a3,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_shutdown = {
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_c5,
+    &message_delay_50,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_shutdown = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_25,
+    &message_vibro_off,
+    &message_note_g5,
+    &message_delay_25,
+    &message_note_e5,
+    &message_delay_25,
+    &message_note_c5,
+    &message_delay_25,
+    &message_note_g4,
+    &message_delay_25,
+    &message_note_e4,
+    &message_delay_25,
+    &message_note_c4,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
+
 // Light up
 const NotificationSequence sequence_set_only_red_255 = {
     &message_red_255,

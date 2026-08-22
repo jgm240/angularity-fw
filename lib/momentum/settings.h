@@ -56,6 +56,8 @@ typedef enum {
     SoundPackClassic,
     SoundPackChime,
     SoundPackRetro,
+    SoundPackMinimal,
+    SoundPackArcade,
     SoundPackCount,
 } SoundPack;
 

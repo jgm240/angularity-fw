@@ -27,6 +27,10 @@ typedef enum {
 
 typedef struct {
     LoaderEventType type;
+    // Only populated for LoaderEventTypeApplicationBeforeLoad. Points into
+    // the caller's own storage for the duration of the (synchronous)
+    // publish only - do not retain this pointer past the callback.
+    const char* name;
 } LoaderEvent;
 
 typedef enum {

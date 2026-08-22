@@ -2,6 +2,10 @@
 
 - **`Angularity`** - The default Angularity FW branded pack (idle screen wordmark).
 
+- **`Neon`** - Angularity wordmark, inverted (white on black).
+
+- **`Retro`** - Angularity wordmark with 8-bit corner-bracket framing.
+
 - **`Momentum`** - Credits:
   - [Kuronons](https://github.com/Kuronons) for the [desktop animations](https://github.com/Kuronons/FZ_graphics/tree/main/Animations/Custom_Firmwares)
   - [Kuronons](https://github.com/Kuronons) for the [passport portraits](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20profile%20pictures)

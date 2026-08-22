@@ -642,6 +642,7 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
         loader->app.fap = NULL;
         LoaderEvent event;
         event.type = LoaderEventTypeApplicationLoadFailed;
+        event.name = NULL;
         furi_pubsub_publish(loader->pubsub, &event);
         if(loader->app.unloaded_asset_packs) {
             asset_packs_init();
@@ -724,6 +725,7 @@ static LoaderMessageLoaderStatusResult loader_do_start_by_name(
 
         LoaderEvent event;
         event.type = LoaderEventTypeApplicationBeforeLoad;
+        event.name = name;
         furi_pubsub_publish(loader->pubsub, &event);
 
         // Translate app names (mainly for RPC)
@@ -790,6 +792,7 @@ static void loader_do_emit_queue_empty_event(Loader* loader) {
     FURI_LOG_I(TAG, "Launch queue empty");
     LoaderEvent event;
     event.type = LoaderEventTypeNoMoreAppsInQueue;
+    event.name = NULL;
     furi_pubsub_publish(loader->pubsub, &event);
 }
 
@@ -869,6 +872,7 @@ static void loader_do_app_closed(Loader* loader) {
 
     LoaderEvent event;
     event.type = LoaderEventTypeApplicationStopped;
+    event.name = NULL;
     furi_pubsub_publish(loader->pubsub, &event);
     if(loader->app.unloaded_asset_packs) {
         asset_packs_init();

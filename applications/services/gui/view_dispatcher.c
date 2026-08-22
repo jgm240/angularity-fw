@@ -1,4 +1,5 @@
 #include "view_dispatcher_i.h"
+#include <momentum/sound_pack.h>
 
 #define TAG "ViewDispatcher"
 
@@ -300,6 +301,10 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
        view_dispatcher->ongoing_input_view == view_dispatcher->current_view) {
         // Dispatch input to current view
         bool is_consumed = view_input(view_dispatcher->current_view, event);
+
+        if(event->type == InputTypeShort) {
+            sound_pack_play_click();
+        }
 
         // Navigate if input is not consumed
         if(!is_consumed && (event->key == InputKeyBack) &&

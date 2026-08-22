@@ -1,5 +1,6 @@
 #include "view_holder.h"
 #include <gui/view_i.h>
+#include <momentum/sound_pack.h>
 
 #define TAG "ViewHolder"
 
@@ -166,6 +167,10 @@ static void view_holder_input_callback(InputEvent* event, void* context) {
 
     if(view_holder->view) {
         is_consumed = view_input(view_holder->view, event);
+    }
+
+    if(event->type == InputTypeShort) {
+        sound_pack_play_click();
     }
 
     if(!is_consumed && event->type == InputTypeShort) {

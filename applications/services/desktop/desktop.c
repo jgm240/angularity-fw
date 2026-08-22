@@ -7,6 +7,7 @@
 #include <locale/locale.h>
 #include <storage/storage.h>
 #include <momentum/settings.h>
+#include <momentum/sound_pack.h>
 #include <notification/notification_messages.h>
 #include <furi_hal.h>
 
@@ -28,6 +29,10 @@ static void desktop_loader_callback(const void* message, void* context) {
     const LoaderEvent* event = message;
 
     if(event->type == LoaderEventTypeApplicationBeforeLoad) {
+        if(event->name &&
+           (strcmp(event->name, "Angularity") == 0 || strcmp(event->name, "momentum_app") == 0)) {
+            sound_pack_play_app_open_settings();
+        }
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalBeforeAppStarted);
         furi_check(furi_semaphore_acquire(desktop->animation_semaphore, 3000) == FuriStatusOk);
     } else if(event->type == LoaderEventTypeNoMoreAppsInQueue) {
@@ -412,55 +417,13 @@ static void desktop_update_gpio_mirror(bool locked) {
     furi_hal_gpio_write(pin, locked);
 }
 
-static void desktop_play_sound_pack_sequence(bool unlock) {
-    const NotificationSequence* sequence = NULL;
-    switch(momentum_settings.sound_pack) {
-    case SoundPackClassic:
-        sequence = unlock ? &sequence_sound_pack_classic_unlock : &sequence_sound_pack_classic_lock;
-        break;
-    case SoundPackChime:
-        sequence = unlock ? &sequence_sound_pack_chime_unlock : &sequence_sound_pack_chime_lock;
-        break;
-    case SoundPackRetro:
-        sequence = unlock ? &sequence_sound_pack_retro_unlock : &sequence_sound_pack_retro_lock;
-        break;
-    case SoundPackOff:
-    default:
-        break;
-    }
-
-    if(sequence) {
-        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-        notification_message(notification, sequence);
-        furi_record_close(RECORD_NOTIFICATION);
-    }
-}
-
 void desktop_play_error_sound(void) {
-    const NotificationSequence* sequence = &sequence_error;
-    switch(momentum_settings.sound_pack) {
-    case SoundPackClassic:
-        sequence = &sequence_sound_pack_classic_error;
-        break;
-    case SoundPackChime:
-        sequence = &sequence_sound_pack_chime_error;
-        break;
-    case SoundPackRetro:
-        sequence = &sequence_sound_pack_retro_error;
-        break;
-    case SoundPackOff:
-    default:
-        break;
-    }
-
-    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-    notification_message(notification, sequence);
-    furi_record_close(RECORD_NOTIFICATION);
+    sound_pack_play_error();
 }
 
 void desktop_lock(Desktop* desktop, bool with_pin) {
     furi_assert(!desktop->locked);
-    desktop_play_sound_pack_sequence(false);
+    sound_pack_play_lock();
     desktop_update_gpio_mirror(true);
 
     with_pin = with_pin && desktop_pin_code_is_set();
@@ -497,7 +460,7 @@ void desktop_lock(Desktop* desktop, bool with_pin) {
 
 void desktop_unlock(Desktop* desktop) {
     furi_assert(desktop->locked);
-    desktop_play_sound_pack_sequence(true);
+    sound_pack_play_unlock();
     desktop_update_gpio_mirror(false);
 
     view_port_enabled_set(desktop->lock_icon_viewport, false);
@@ -682,6 +645,8 @@ int32_t desktop_srv(void* p) {
     if(desktop->app_running && animation_manager_is_animation_loaded(desktop->animation_manager)) {
         animation_manager_unload_and_stall_animation(desktop->animation_manager);
     }
+
+    sound_pack_play_boot();
 
     view_dispatcher_run(desktop->view_dispatcher);
 
