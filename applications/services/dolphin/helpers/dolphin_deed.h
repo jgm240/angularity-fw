@@ -62,6 +62,8 @@ typedef enum {
     DolphinDeedPluginGameWin,
     // Only for pentesting apps, yielded by loader
     DolphinDeedPluginInternalStart,
+    // Awarded once per Dummy Mode game, the first time it's launched
+    DolphinDeedPluginFirstGameLaunch,
 
     DolphinDeedMAX,
 

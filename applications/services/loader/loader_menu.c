@@ -18,6 +18,8 @@
 #include <momentum/momentum.h>
 #include <momentum/sound_pack.h>
 #include <gui/icon_i.h>
+#include <furi_hal.h>
+#include <lib/datetime/datetime.h>
 #include <m-list.h>
 
 #define TAG "LoaderMenu"
@@ -319,8 +321,16 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         // both would expose the real tools Dummy Mode is meant to hide.
         // "Settings" is added unconditionally below, so turning Dummy Mode
         // back off is always just a menu away.
+        // Featured game rotation: shift which game leads the list based on
+        // the date, so a different one is front-and-center each day
+        DateTime dt;
+        furi_hal_rtc_get_datetime(&dt);
+        uint32_t day_count = datetime_datetime_to_timestamp(&dt) / 86400;
+        size_t featured_offset = day_count % COUNT_OF(loader_menu_dummy_mode_games);
+
         FuriString* line = furi_string_alloc();
-        for(size_t i = 0; i < COUNT_OF(loader_menu_dummy_mode_games); i++) {
+        for(size_t n = 0; n < COUNT_OF(loader_menu_dummy_mode_games); n++) {
+            size_t i = (featured_offset + n) % COUNT_OF(loader_menu_dummy_mode_games);
             furi_string_set(line, loader_menu_dummy_mode_games[i]);
             loader_menu_find_add_app(app, storage, line);
         }

@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,8 +28,9 @@ typedef struct {
 extern const GameStatsEntry game_stats_entries[GAME_STATS_COUNT];
 
 /** Call with the loader's app "name" on every app launch. No-ops if it
- * doesn't match a tracked game. */
-void game_stats_notify_launch(const char* app_name);
+ * doesn't match a tracked game. Returns true if this was the very first
+ * launch of that game (useful for awarding a one-time bonus). */
+bool game_stats_notify_launch(const char* app_name);
 
 uint32_t game_stats_get_play_count(size_t index);
 

@@ -46,6 +46,8 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
     {0, DolphinAppPlugin}, // DolphinDeedPluginGameWin
     // Only for pentesting apps, yielded by loader
     {2, DolphinAppPlugin}, // DolphinDeedPluginInternalStart
+    // Awarded once per Dummy Mode game, the first time it's launched
+    {2, DolphinAppPlugin}, // DolphinDeedPluginFirstGameLaunch
 };
 
 static uint8_t dolphin_deed_limits[] = {

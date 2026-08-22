@@ -254,6 +254,9 @@ extern const NotificationSequence sequence_lcd_contrast_update;
 // Wait for notification queue become empty
 extern const NotificationSequence sequence_empty;
 
+// Once-a-year device birthday surprise
+extern const NotificationSequence sequence_happy_birthday;
+
 #ifdef __cplusplus
 }
 #endif

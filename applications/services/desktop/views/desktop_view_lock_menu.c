@@ -21,11 +21,17 @@ typedef enum {
     DesktopLockMenuIndexLock,
     DesktopLockMenuIndexBluetooth,
     DesktopLockMenuIndexMomentum,
+    // Lone 4th-column tile, no row partner - see the grid math in
+    // desktop_lock_menu_draw_callback and the special-cased navigation
+    // for it in desktop_lock_menu_input_callback
+    DesktopLockMenuIndexDummyMode,
     DesktopLockMenuIndexBrightness,
     DesktopLockMenuIndexVolume,
 
     DesktopLockMenuIndexTotalCount
 } DesktopLockMenuIndex;
+
+#define DESKTOP_LOCK_MENU_TOGGLE_COUNT (DesktopLockMenuIndexDummyMode + 1)
 
 void desktop_lock_menu_set_callback(
     DesktopLockMenuView* lock_menu,
@@ -76,15 +82,18 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
     const Icon* icon = NULL;
     for(size_t i = 0; i < DesktopLockMenuIndexTotalCount; ++i) {
         selected = m->idx == i;
-        toggle = i < 6;
+        toggle = i < DESKTOP_LOCK_MENU_TOGGLE_COUNT;
         if(toggle) {
-            x = 2 + 32 * (i / 2);
-            y = 2 + 32 * (i % 2);
-            w = 28;
-            h = 28;
+            // 4 columns x 2 rows, last column has only one tile (idx
+            // DummyMode) - pitch shrunk from the original 3x2/32px grid so
+            // the new column still ends before the sliders at x=98
+            x = 2 + 24 * (i / 2);
+            y = 2 + 24 * (i % 2);
+            w = 20;
+            h = 20;
             enabled = false;
         } else {
-            x = 98 + 16 * (i % 2);
+            x = (i == DesktopLockMenuIndexBrightness) ? 98 : 114;
             y = 2;
             w = 12;
             h = 60;
@@ -112,6 +121,10 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             break;
         case DesktopLockMenuIndexMomentum:
             icon = &I_CC_Angularity_16x16;
+            break;
+        case DesktopLockMenuIndexDummyMode:
+            icon = &I_CC_DummyMode_16x16;
+            enabled = momentum_settings.dummy_mode;
             break;
         case DesktopLockMenuIndexBrightness:
             icon = &I_Pin_star_7x7;
@@ -221,7 +234,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 } else {
                     if(model->idx == DesktopLockMenuIndexLock && event->key == InputKeyOk) {
                         model->show_lock_popup = true;
-                    } else if(model->idx < 6) {
+                    } else if(model->idx < DesktopLockMenuIndexDummyMode) {
+                        // 3 full columns (idx 0-5)
                         if(event->key == InputKeyUp || event->key == InputKeyDown) {
                             if(model->idx % 2) {
                                 model->idx--;
@@ -230,23 +244,35 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                             }
                         } else if(event->key == InputKeyLeft) {
                             if(model->idx < 2) {
-                                model->idx = 7;
+                                model->idx = DesktopLockMenuIndexVolume;
                             } else {
                                 model->idx -= 2;
                             }
                         } else if(event->key == InputKeyRight) {
                             if(model->idx >= 4) {
-                                model->idx = 6;
+                                model->idx = DesktopLockMenuIndexDummyMode;
                             } else {
                                 model->idx += 2;
                             }
                         }
-                    } else {
+                    } else if(model->idx == DesktopLockMenuIndexDummyMode) {
+                        // Lone 4th-column tile, no row partner - Up/Down no-op
                         if(event->key == InputKeyLeft) {
-                            model->idx--;
+                            model->idx = DesktopLockMenuIndexBluetooth;
                         } else if(event->key == InputKeyRight) {
-                            if(model->idx >= 7) {
-                                model->idx = 1;
+                            model->idx = DesktopLockMenuIndexBrightness;
+                        }
+                    } else {
+                        // Sliders
+                        if(event->key == InputKeyLeft) {
+                            if(model->idx == DesktopLockMenuIndexBrightness) {
+                                model->idx = DesktopLockMenuIndexDummyMode;
+                            } else {
+                                model->idx--;
+                            }
+                        } else if(event->key == InputKeyRight) {
+                            if(model->idx >= DesktopLockMenuIndexVolume) {
+                                model->idx = DesktopLockMenuIndexLefthandedMode;
                             } else {
                                 model->idx++;
                             }
@@ -307,6 +333,10 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             case DesktopLockMenuIndexMomentum:
                 desktop_event = DesktopLockMenuEventMomentum;
                 break;
+            case DesktopLockMenuIndexDummyMode:
+                momentum_settings.dummy_mode = !momentum_settings.dummy_mode;
+                lock_menu->save_momentum = true;
+                break;
             case DesktopLockMenuIndexBrightness:
                 desktop_event = DesktopLockMenuEventScreenSettings;
                 break;
@@ -317,7 +347,9 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             default:
                 break;
             }
-        } else if(idx >= 6 && (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
+        } else if(
+            idx >= DesktopLockMenuIndexBrightness &&
+            (event->type == InputTypeShort || event->type == InputTypeRepeat)) {
             int8_t offset = 0;
             if(event->key == InputKeyUp) {
                 offset = 1;

@@ -489,6 +489,39 @@ static void power_check_security_streak(void) {
     }
 }
 
+static void power_check_device_birthday(void) {
+    DateTime dt;
+    furi_hal_rtc_get_datetime(&dt);
+
+    if(momentum_settings.first_boot_year == 0) {
+        // First time this has ever run - just record today as the
+        // device's "birthday" and check again next year
+        momentum_settings.first_boot_year = dt.year;
+        momentum_settings.first_boot_month = dt.month;
+        momentum_settings.first_boot_day = dt.day;
+        momentum_settings_save();
+        return;
+    }
+
+    if(dt.year == momentum_settings.first_boot_year) {
+        return; // Hasn't been a full year yet
+    }
+    if(dt.month != momentum_settings.first_boot_month ||
+       dt.day != momentum_settings.first_boot_day) {
+        return;
+    }
+    if(momentum_settings.last_birthday_year == dt.year) {
+        return; // Already celebrated this year
+    }
+
+    momentum_settings.last_birthday_year = dt.year;
+    momentum_settings_save();
+
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notification, &sequence_happy_birthday);
+    furi_record_close(RECORD_NOTIFICATION);
+}
+
 static void power_check_low_battery(Power* power) {
     if(!power->info.gauge_is_ok) {
         return;
@@ -770,6 +803,8 @@ static void power_tick_callback(void* context) {
     power_check_gpio_theft_trigger(power);
     // Advance the "days secured" streak once per calendar day
     power_check_security_streak();
+    // Check for the device's yearly "birthday" surprise
+    power_check_device_birthday();
     // Check and notify about battery level change
     power_check_battery_level_change(power);
     // charge supress arm/disarm

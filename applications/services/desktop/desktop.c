@@ -9,6 +9,7 @@
 #include <momentum/settings.h>
 #include <momentum/sound_pack.h>
 #include <momentum/game_stats.h>
+#include <dolphin/dolphin.h>
 #include <notification/notification_messages.h>
 #include <furi_hal.h>
 
@@ -61,7 +62,9 @@ static void desktop_loader_callback(const void* message, void* context) {
                     break;
                 }
             }
-            game_stats_notify_launch(event->name);
+            if(game_stats_notify_launch(event->name)) {
+                dolphin_deed(DolphinDeedPluginFirstGameLaunch);
+            }
         }
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalBeforeAppStarted);
         furi_check(furi_semaphore_acquire(desktop->animation_semaphore, 3000) == FuriStatusOk);
@@ -492,6 +495,9 @@ void desktop_unlock(Desktop* desktop) {
     furi_assert(desktop->locked);
     sound_pack_play_unlock();
     desktop_update_gpio_mirror(false);
+
+    momentum_settings.clean_unlock_streak++;
+    momentum_settings_save();
 
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     Gui* gui = furi_record_open(RECORD_GUI);

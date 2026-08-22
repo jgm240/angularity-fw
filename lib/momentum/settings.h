@@ -118,9 +118,14 @@ typedef struct {
     uint32_t charge_cycles;
     uint32_t security_streak_days;
     uint32_t security_streak_last_day;
+    uint32_t clean_unlock_streak;
     bool theft_alarm_quiet_hours;
     uint32_t theft_alarm_quiet_hours_start;
     uint32_t theft_alarm_quiet_hours_end;
+    uint16_t first_boot_year;
+    uint8_t first_boot_month;
+    uint8_t first_boot_day;
+    uint16_t last_birthday_year;
     BatteryIcon battery_icon;
     bool status_icons;
     bool bar_borders;

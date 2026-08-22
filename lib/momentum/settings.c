@@ -32,9 +32,14 @@ MomentumSettings momentum_settings = {
     .charge_cycles = 0, // None yet
     .security_streak_days = 0, // None yet
     .security_streak_last_day = 0, // Never
+    .clean_unlock_streak = 0, // None yet
     .theft_alarm_quiet_hours = false, // OFF
     .theft_alarm_quiet_hours_start = 22, // 22:00
     .theft_alarm_quiet_hours_end = 7, // 07:00
+    .first_boot_year = 0, // Unset until first boot
+    .first_boot_month = 0,
+    .first_boot_day = 0,
+    .last_birthday_year = 0, // None celebrated yet
     .battery_icon = BatteryIconBarPercent, // Bar %
     .status_icons = true, // ON
     .bar_borders = true, // ON
@@ -124,9 +129,16 @@ static const struct {
     {setting_enum(gpio_mirror_mode, GpioMirrorCount)},
     {setting_uint(gpio_mirror_pin, 0, 31)},
     {setting_uint(charge_cycles, 0, 999999)},
+    {setting_uint(security_streak_days, 0, 999999)},
+    {setting_uint(security_streak_last_day, 0, 0xFFFFFFFF)},
+    {setting_uint(clean_unlock_streak, 0, 999999)},
     {setting_bool(theft_alarm_quiet_hours)},
     {setting_uint(theft_alarm_quiet_hours_start, 0, 23)},
     {setting_uint(theft_alarm_quiet_hours_end, 0, 23)},
+    {setting_uint(first_boot_year, 0, 2099)},
+    {setting_uint(first_boot_month, 0, 12)},
+    {setting_uint(first_boot_day, 0, 31)},
+    {setting_uint(last_birthday_year, 0, 2099)},
     {setting_enum(battery_icon, BatteryIconCount)},
     {setting_bool(status_icons)},
     {setting_bool(bar_borders)},

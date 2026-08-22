@@ -1619,3 +1619,39 @@ const NotificationSequence sequence_lcd_contrast_update = {
 const NotificationSequence sequence_empty = {
     NULL,
 };
+
+// A once-a-year surprise on the device's "birthday" (see power.c's
+// power_check_device_birthday). Deliberately bypasses the sound
+// pack/vibro/volume settings, same as sequence_audiovisual_alert, since
+// this is a rare easter egg rather than a routine UI cue.
+const NotificationSequence sequence_happy_birthday = {
+    &message_force_speaker_volume_setting_1f,
+    &message_force_vibro_setting_on,
+    &message_vibro_on,
+
+    &message_red_255,
+    &message_note_c5,
+    &message_delay_100,
+    &message_red_0,
+
+    &message_green_255,
+    &message_note_e5,
+    &message_delay_100,
+    &message_green_0,
+
+    &message_blue_255,
+    &message_note_g5,
+    &message_delay_100,
+    &message_blue_0,
+
+    &message_red_255,
+    &message_green_255,
+    &message_note_c6,
+    &message_delay_250,
+    &message_red_0,
+    &message_green_0,
+
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};

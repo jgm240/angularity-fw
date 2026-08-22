@@ -218,6 +218,10 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
                 } else {
                     security_log_add("NFC unlock: wrong tag scanned");
                     desktop_play_error_sound();
+                    if(momentum_settings.clean_unlock_streak != 0) {
+                        momentum_settings.clean_unlock_streak = 0;
+                        momentum_settings_save();
+                    }
                 }
             } else {
                 desktop_play_error_sound();

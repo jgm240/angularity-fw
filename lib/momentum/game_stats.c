@@ -74,17 +74,19 @@ static void game_stats_save(void) {
     furi_record_close(RECORD_STORAGE);
 }
 
-void game_stats_notify_launch(const char* app_name) {
-    if(!app_name) return;
+bool game_stats_notify_launch(const char* app_name) {
+    if(!app_name) return false;
     if(!loaded) game_stats_load();
 
     for(size_t i = 0; i < GAME_STATS_COUNT; i++) {
         if(strcmp(app_name, game_stats_entries[i].fap_path) == 0) {
+            bool first_launch = play_counts[i] == 0;
             play_counts[i]++;
             game_stats_save();
-            break;
+            return first_launch;
         }
     }
+    return false;
 }
 
 uint32_t game_stats_get_play_count(size_t index) {

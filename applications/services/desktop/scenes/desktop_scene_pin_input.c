@@ -67,6 +67,10 @@ static void desktop_scene_pin_input_done_callback(const DesktopPinCode* pin_code
             power_reboot(power, PowerBootModeNormal);
         }
         furi_hal_rtc_set_pin_fails(pin_fails);
+        if(momentum_settings.clean_unlock_streak != 0) {
+            momentum_settings.clean_unlock_streak = 0;
+            momentum_settings_save();
+        }
         view_dispatcher_send_custom_event(
             desktop->view_dispatcher, DesktopPinInputEventUnlockFailed);
     }

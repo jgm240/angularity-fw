@@ -2048,7 +2048,7 @@ Function,-,fwrite,size_t,"const void*, size_t, size_t, FILE*"
 Function,-,fwrite_unlocked,size_t,"const void*, size_t, size_t, FILE*"
 Function,+,game_stats_get_distinct_played,size_t,
 Function,+,game_stats_get_play_count,uint32_t,size_t
-Function,+,game_stats_notify_launch,void,const char*
+Function,+,game_stats_notify_launch,_Bool,const char*
 Function,-,gamma,double,double
 Function,-,gamma_r,double,"double, int*"
 Function,-,gammaf,float,float
@@ -4133,6 +4133,7 @@ Variable,+,I_Button_18x18,const Icon,
 Variable,+,I_CC_Angularity_16x16,const Icon,
 Variable,+,I_CC_Bluetooth_16x16,const Icon,
 Variable,+,I_CC_DarkMode_16x16,const Icon,
+Variable,+,I_CC_DummyMode_16x16,const Icon,
 Variable,+,I_CC_LefthandedMode_16x16,const Icon,
 Variable,+,I_CC_Lock_16x16,const Icon,
 Variable,+,I_CC_Settings_16x16,const Icon,
@@ -4657,6 +4658,7 @@ Variable,+,sequence_double_vibro,const NotificationSequence,
 Variable,+,sequence_empty,const NotificationSequence,
 Variable,+,sequence_error,const NotificationSequence,
 Variable,+,sequence_find_my_flipper,const NotificationSequence,
+Variable,+,sequence_happy_birthday,const NotificationSequence,
 Variable,+,sequence_lcd_contrast_update,const NotificationSequence,
 Variable,+,sequence_not_charging,const NotificationSequence,
 Variable,+,sequence_not_charging_beep,const NotificationSequence,
