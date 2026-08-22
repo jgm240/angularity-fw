@@ -8,6 +8,7 @@
 #include <storage/storage.h>
 #include <momentum/settings.h>
 #include <momentum/sound_pack.h>
+#include <momentum/game_stats.h>
 #include <notification/notification_messages.h>
 #include <furi_hal.h>
 
@@ -60,6 +61,7 @@ static void desktop_loader_callback(const void* message, void* context) {
                     break;
                 }
             }
+            game_stats_notify_launch(event->name);
         }
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalBeforeAppStarted);
         furi_check(furi_semaphore_acquire(desktop->animation_semaphore, 3000) == FuriStatusOk);

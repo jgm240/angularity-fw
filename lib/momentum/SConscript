@@ -5,6 +5,7 @@ env.Append(
         File("../../icons/assets_icons.h"),
         File("momentum.h"),
         File("security_log.h"),
+        File("game_stats.h"),
     ],
     LINT_SOURCES=[
         Dir("."),

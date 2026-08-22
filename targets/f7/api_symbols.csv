@@ -133,6 +133,7 @@ Header,+,lib/mlib/m-list.h,,
 Header,+,lib/mlib/m-rbtree.h,,
 Header,+,lib/mlib/m-tuple.h,,
 Header,+,lib/mlib/m-variant.h,,
+Header,+,lib/momentum/game_stats.h,,
 Header,+,lib/momentum/momentum.h,,
 Header,+,lib/momentum/security_log.h,,
 Header,+,lib/music_worker/music_worker.h,,
@@ -2045,6 +2046,9 @@ Function,+,furi_timer_start,FuriStatus,"FuriTimer*, uint32_t"
 Function,+,furi_timer_stop,FuriStatus,FuriTimer*
 Function,-,fwrite,size_t,"const void*, size_t, size_t, FILE*"
 Function,-,fwrite_unlocked,size_t,"const void*, size_t, size_t, FILE*"
+Function,+,game_stats_get_distinct_played,size_t,
+Function,+,game_stats_get_play_count,uint32_t,size_t
+Function,+,game_stats_notify_launch,void,const char*
 Function,-,gamma,double,double
 Function,-,gamma_r,double,"double, int*"
 Function,-,gammaf,float,float
@@ -4411,6 +4415,7 @@ Variable,+,furi_hal_spi_preset_1edge_low_2m,const LL_SPI_InitTypeDef,
 Variable,+,furi_hal_spi_preset_1edge_low_4m,const LL_SPI_InitTypeDef,
 Variable,+,furi_hal_spi_preset_1edge_low_8m,const LL_SPI_InitTypeDef,
 Variable,+,furi_hal_spi_preset_2edge_low_8m,const LL_SPI_InitTypeDef,
+Variable,+,game_stats_entries,const GameStatsEntry[10],
 Variable,+,gpio_button_back,const GpioPin,
 Variable,+,gpio_button_down,const GpioPin,
 Variable,+,gpio_button_left,const GpioPin,

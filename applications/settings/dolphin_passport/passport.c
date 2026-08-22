@@ -8,6 +8,7 @@
 #include <assets_icons.h>
 
 #include <momentum/momentum.h>
+#include <momentum/game_stats.h>
 
 typedef struct {
     FuriSemaphore* semaphore;
@@ -95,6 +96,8 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + (xp_progress > 0), 5);
     canvas_set_color(canvas, ColorBlack);
 
+    canvas_set_font(canvas, FontKeyboard);
+
     if(momentum_settings.security_streak_days > 0) {
         char streak_str[40];
         snprintf(
@@ -103,10 +106,26 @@ static void render_callback(Canvas* canvas, void* _ctx) {
             "Secured: %lu day%s",
             momentum_settings.security_streak_days,
             momentum_settings.security_streak_days == 1 ? "" : "s");
-        canvas_set_font(canvas, FontKeyboard);
-        canvas_draw_str(canvas, 59, 58, streak_str);
-        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 59, 51, streak_str);
     }
+
+    size_t games_played = game_stats_get_distinct_played();
+    if(games_played > 0) {
+        char games_str[40];
+        if(games_played == GAME_STATS_COUNT) {
+            snprintf(games_str, sizeof(games_str), "All Games Played!");
+        } else {
+            snprintf(
+                games_str,
+                sizeof(games_str),
+                "Games: %u/%u",
+                (unsigned)games_played,
+                (unsigned)GAME_STATS_COUNT);
+        }
+        canvas_draw_str(canvas, 59, 58, games_str);
+    }
+
+    canvas_set_font(canvas, FontSecondary);
 }
 
 int32_t passport_app(void* p) {
