@@ -183,6 +183,27 @@ extern const NotificationSequence sequence_sound_pack_retro_app_badusb;
 extern const NotificationSequence sequence_sound_pack_minimal_app_badusb;
 extern const NotificationSequence sequence_sound_pack_arcade_app_badusb;
 
+// Sound packs: GPIO app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_gpio;
+extern const NotificationSequence sequence_sound_pack_chime_app_gpio;
+extern const NotificationSequence sequence_sound_pack_retro_app_gpio;
+extern const NotificationSequence sequence_sound_pack_minimal_app_gpio;
+extern const NotificationSequence sequence_sound_pack_arcade_app_gpio;
+
+// Sound packs: Passport app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_passport;
+extern const NotificationSequence sequence_sound_pack_chime_app_passport;
+extern const NotificationSequence sequence_sound_pack_retro_app_passport;
+extern const NotificationSequence sequence_sound_pack_minimal_app_passport;
+extern const NotificationSequence sequence_sound_pack_arcade_app_passport;
+
+// Sound packs: Clock app open cue
+extern const NotificationSequence sequence_sound_pack_classic_app_clock;
+extern const NotificationSequence sequence_sound_pack_chime_app_clock;
+extern const NotificationSequence sequence_sound_pack_retro_app_clock;
+extern const NotificationSequence sequence_sound_pack_minimal_app_clock;
+extern const NotificationSequence sequence_sound_pack_arcade_app_clock;
+
 // Light up
 extern const NotificationSequence sequence_set_only_red_255;
 extern const NotificationSequence sequence_set_only_green_255;

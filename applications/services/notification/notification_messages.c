@@ -826,7 +826,8 @@ const NotificationSequence sequence_sound_pack_classic_app_subghz = {
     &message_note_a5,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_a5,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_a5,  &message_delay_25, &message_sound_off, &message_delay_25,
-    &message_note_a5,  &message_delay_100, &message_sound_off,
+    &message_vibro_on, &message_note_a5,  &message_delay_100, &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 
@@ -834,7 +835,8 @@ const NotificationSequence sequence_sound_pack_chime_app_subghz = {
     &message_note_a6,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_a6,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_a6,  &message_delay_25, &message_sound_off, &message_delay_25,
-    &message_note_a6,  &message_delay_100, &message_sound_off,
+    &message_vibro_on, &message_note_a6,  &message_delay_100, &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 
@@ -842,7 +844,8 @@ const NotificationSequence sequence_sound_pack_retro_app_subghz = {
     &message_note_a4,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_a4,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_a4,  &message_delay_25, &message_sound_off, &message_delay_25,
-    &message_note_a4,  &message_delay_100, &message_sound_off,
+    &message_vibro_on, &message_note_a4,  &message_delay_100, &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 
@@ -851,8 +854,10 @@ const NotificationSequence sequence_sound_pack_minimal_app_subghz = {
     &message_delay_25,
     &message_sound_off,
     &message_delay_25,
+    &message_vibro_on,
     &message_note_a5,
     &message_delay_50,
+    &message_vibro_off,
     &message_sound_off,
     NULL,
 };
@@ -861,7 +866,8 @@ const NotificationSequence sequence_sound_pack_arcade_app_subghz = {
     &message_note_e5,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_e5,  &message_delay_25, &message_sound_off, &message_delay_25,
     &message_note_e5,  &message_delay_25, &message_sound_off, &message_delay_25,
-    &message_note_a5,  &message_delay_100, &message_sound_off,
+    &message_vibro_on, &message_note_a5,  &message_delay_100, &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 
@@ -1073,7 +1079,8 @@ const NotificationSequence sequence_sound_pack_classic_app_badusb = {
     &message_note_d6,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_c6,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_e6,  &message_delay_25, &message_sound_off, &message_delay_10,
-    &message_note_c6,  &message_delay_25, &message_sound_off,
+    &message_vibro_on, &message_note_c6,  &message_delay_25, &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 
@@ -1082,7 +1089,8 @@ const NotificationSequence sequence_sound_pack_chime_app_badusb = {
     &message_note_d7,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_c7,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_e7,  &message_delay_25, &message_sound_off, &message_delay_10,
-    &message_note_c7,  &message_delay_25, &message_sound_off,
+    &message_vibro_on, &message_note_c7,  &message_delay_25, &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 
@@ -1091,7 +1099,8 @@ const NotificationSequence sequence_sound_pack_retro_app_badusb = {
     &message_note_d4,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_c4,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_e4,  &message_delay_25, &message_sound_off, &message_delay_10,
-    &message_note_c4,  &message_delay_25, &message_sound_off,
+    &message_vibro_on, &message_note_c4,  &message_delay_25, &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 
@@ -1100,8 +1109,10 @@ const NotificationSequence sequence_sound_pack_minimal_app_badusb = {
     &message_delay_25,
     &message_sound_off,
     &message_delay_10,
+    &message_vibro_on,
     &message_note_e6,
     &message_delay_25,
+    &message_vibro_off,
     &message_sound_off,
     NULL,
 };
@@ -1113,7 +1124,197 @@ const NotificationSequence sequence_sound_pack_arcade_app_badusb = {
     &message_note_d6,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_c6,  &message_delay_25, &message_sound_off, &message_delay_10,
     &message_note_e6,  &message_delay_25, &message_sound_off, &message_delay_10,
-    &message_note_g6,  &message_delay_25, &message_sound_off,
+    &message_vibro_on, &message_note_g6,  &message_delay_25, &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+// App-open cue: GPIO (jumper pins snapping into a header)
+const NotificationSequence sequence_sound_pack_classic_app_gpio = {
+    &message_note_c6,
+    &message_delay_10,
+    &message_sound_off,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_gpio = {
+    &message_note_e6,
+    &message_delay_10,
+    &message_sound_off,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_note_e6,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_gpio = {
+    &message_vibro_on,
+    &message_note_a4,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_note_a4,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_gpio = {
+    &message_note_c6,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_gpio = {
+    &message_note_c6,
+    &message_delay_10,
+    &message_sound_off,
+    &message_delay_25,
+    &message_note_e6,
+    &message_delay_10,
+    &message_sound_off,
+    &message_delay_25,
+    &message_vibro_on,
+    &message_note_g6,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+// App-open cue: Passport (pages of a book fluttering)
+const NotificationSequence sequence_sound_pack_classic_app_passport = {
+    &message_note_e7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_e7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_c7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d7,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_passport = {
+    &message_note_e8,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d8,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_e8,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_c8,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d8,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_passport = {
+    &message_note_e6,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d6,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_e6,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_c6,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d6,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_passport = {
+    &message_note_e7,
+    &message_delay_10,
+    &message_sound_off,
+    &message_delay_10,
+    &message_note_c7,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_passport = {
+    &message_note_e7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_g7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_e7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_c7,  &message_delay_10, &message_sound_off, &message_delay_10,
+    &message_note_d7,  &message_delay_25, &message_sound_off,
+    NULL,
+};
+
+// App-open cue: Clock (a steady tick-tock)
+const NotificationSequence sequence_sound_pack_classic_app_clock = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_delay_100,
+    &message_vibro_on,
+    &message_note_a5,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_chime_app_clock = {
+    &message_vibro_on,
+    &message_note_c7,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_delay_100,
+    &message_vibro_on,
+    &message_note_a6,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_retro_app_clock = {
+    &message_vibro_on,
+    &message_note_c4,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_delay_100,
+    &message_vibro_on,
+    &message_note_a3,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_minimal_app_clock = {
+    &message_note_c6,
+    &message_delay_10,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_sound_pack_arcade_app_clock = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_note_e6,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_delay_50,
+    &message_vibro_on,
+    &message_note_a5,
+    &message_delay_10,
+    &message_vibro_off,
+    &message_sound_off,
     NULL,
 };
 

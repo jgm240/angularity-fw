@@ -114,7 +114,7 @@ void sound_pack_play_click(void) {
 
 // Indexed [AppSound][SoundPack]; SoundPackOff entries are left NULL (play()
 // already no-ops on NULL), so only Classic..Arcade need populating.
-static const NotificationSequence* const app_open_sequences[6][SoundPackCount] = {
+static const NotificationSequence* const app_open_sequences[APP_SOUND_COUNT][SoundPackCount] = {
     [AppSoundSettings] =
         {
             [SoundPackClassic] = &sequence_sound_pack_classic_app_open,
@@ -162,6 +162,30 @@ static const NotificationSequence* const app_open_sequences[6][SoundPackCount] =
             [SoundPackRetro] = &sequence_sound_pack_retro_app_badusb,
             [SoundPackMinimal] = &sequence_sound_pack_minimal_app_badusb,
             [SoundPackArcade] = &sequence_sound_pack_arcade_app_badusb,
+        },
+    [AppSoundGpio] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_gpio,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_gpio,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_gpio,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_gpio,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_gpio,
+        },
+    [AppSoundPassport] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_passport,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_passport,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_passport,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_passport,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_passport,
+        },
+    [AppSoundClock] =
+        {
+            [SoundPackClassic] = &sequence_sound_pack_classic_app_clock,
+            [SoundPackChime] = &sequence_sound_pack_chime_app_clock,
+            [SoundPackRetro] = &sequence_sound_pack_retro_app_clock,
+            [SoundPackMinimal] = &sequence_sound_pack_minimal_app_clock,
+            [SoundPackArcade] = &sequence_sound_pack_arcade_app_clock,
         },
 };
 

@@ -39,6 +39,12 @@ static const struct {
     {"u2f", AppSoundU2f},
     {"Bad KB", AppSoundBadUsb},
     {"bad_kb", AppSoundBadUsb},
+    {"GPIO", AppSoundGpio},
+    {"gpio", AppSoundGpio},
+    {"Passport", AppSoundPassport},
+    {"passport", AppSoundPassport},
+    {"Clock & Alarm", AppSoundClock},
+    {"clock_settings", AppSoundClock},
 };
 
 static void desktop_loader_callback(const void* message, void* context) {

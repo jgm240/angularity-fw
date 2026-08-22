@@ -22,7 +22,12 @@ typedef enum {
     AppSoundIButton, // Big-button thunk
     AppSoundU2f, // Lock opening
     AppSoundBadUsb, // Rapid typing blips
+    AppSoundGpio, // Jumper pins snapping into a header
+    AppSoundPassport, // Book pages fluttering
+    AppSoundClock, // Steady tick-tock
 } AppSound;
+
+#define APP_SOUND_COUNT (AppSoundClock + 1)
 
 /** Contextual "opening this app" cue, matched by the main menu's app name. */
 void sound_pack_play_app_open(AppSound app);
