@@ -1,0 +1,12 @@
+# Espressif IoT Development Framework (ESP-IDF) Project Minimal Configuration
+CONFIG_USB_HOST_HUBS_SUPPORTED=y
+
+# UART0 carries our own keyboard/mouse protocol to the Flipper - the
+# default system log target is also UART0, and interleaved log text would
+# corrupt that protocol stream. Silence it here as a first line of
+# defense; computer_mode_main.c also disables logging at runtime as a
+# second one, since sdkconfig alone doesn't suppress everything that
+# happens before app_main() runs.
+CONFIG_LOG_DEFAULT_LEVEL_NONE=y
+CONFIG_LOG_MAXIMUM_LEVEL_NONE=y
+CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
