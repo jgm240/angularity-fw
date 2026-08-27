@@ -1,0 +1,11 @@
+App(
+    appid="dolphin_music",
+    name="DolphinMusic",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="dolphin_music_app",
+    stack_size=4 * 1024,
+    fap_category="Media",
+    fap_version=(1, 0),
+    fap_icon="assets/icon.png",
+    fap_description="Continuously pulls live audio from a companion server on your network (over the WiFi Devboard) and plays it through the onboard speaker, like a lo-fi wireless speaker",
+)

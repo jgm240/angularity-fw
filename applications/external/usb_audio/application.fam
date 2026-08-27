@@ -1,0 +1,11 @@
+App(
+    appid="usb_audio",
+    name="USB Audio",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="usb_audio_app",
+    stack_size=2 * 1024,
+    fap_category="Media",
+    fap_version=(1, 0),
+    fap_icon="assets/icon.png",
+    fap_description="Turns the Flipper into a USB audio device, playing received audio through the onboard speaker (lo-fi: 8-bit, mono)",
+)

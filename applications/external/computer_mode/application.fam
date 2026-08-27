@@ -1,0 +1,11 @@
+App(
+    appid="computer_mode",
+    name="Computer Mode",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="computer_mode_app",
+    stack_size=2 * 1024,
+    fap_category="Tools",
+    fap_version=(1, 0),
+    fap_icon="assets/icon.png",
+    fap_description="EXPERIMENTAL: notepad driven by an external USB keyboard/mouse via a custom ESP32 firmware on the WiFi Devboard (see tools/computer_mode_esp32)",
+)

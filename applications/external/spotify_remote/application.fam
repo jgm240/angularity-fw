@@ -1,0 +1,11 @@
+App(
+    appid="spotify_remote",
+    name="Spotify Remote",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="spotify_remote_app",
+    stack_size=4 * 1024,
+    fap_category="Tools",
+    fap_version=(1, 0),
+    fap_icon="assets/icon.png",
+    fap_description="Remote control (play/pause/skip/volume + now playing) for Spotify Connect over the WiFi Devboard - does not play audio itself",
+)

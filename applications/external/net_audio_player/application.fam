@@ -1,0 +1,11 @@
+App(
+    appid="net_audio_player",
+    name="Net Audio Player",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="net_audio_player_app",
+    stack_size=4 * 1024,
+    fap_category="Media",
+    fap_version=(1, 0),
+    fap_icon="assets/icon.png",
+    fap_description="Downloads a direct audio URL (WAV or MP3) over the WiFi Devboard/FlipperHTTP and plays it through the onboard speaker",
+)

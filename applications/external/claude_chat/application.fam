@@ -1,0 +1,11 @@
+App(
+    appid="claude_chat",
+    name="Claude Chat",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="claude_chat_app",
+    stack_size=4 * 1024,
+    fap_category="Tools",
+    fap_version=(1, 0),
+    fap_icon="assets/icon.png",
+    fap_description="Ask Claude a question over the WiFi Devboard/FlipperHTTP using your own Anthropic API key",
+)
