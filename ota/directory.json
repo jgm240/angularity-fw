@@ -1,0 +1,24 @@
+{
+  "channels": [
+    {
+      "id": "release",
+      "title": "Release",
+      "description": "Stable Angularity FW builds",
+      "versions": [
+        {
+          "version": "AngularityFW-release25",
+          "changelog": "Pseudo-Off mode (screen dark, apps closed, BT/OTG off, still charges; hold OK to wake). Theft alarm: unlocking silences it, GPIO triggers need a healthy-to-broken edge.",
+          "timestamp": 1791638340,
+          "files": [
+            {
+              "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release25/AngularityFW-release25.tgz",
+              "target": "f7",
+              "type": "update_tgz",
+              "sha256": "5c3a95b6fc4f499b173cc685d279c8d308d6044c57885dcc7e6d9f12f90ea33f"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
