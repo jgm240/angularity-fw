@@ -7,6 +7,7 @@
 #include <storage/storage.h>
 #include <saved_struct.h>
 #include <input/input.h>
+#include <power/power_service/power.h>
 
 #define TAG "DesktopKeybinds"
 
@@ -215,6 +216,10 @@ void desktop_run_keybind(Desktop* desktop, InputType _type, InputKey _key) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventLockKeypad);
     } else if(furi_string_equal(keybind, "Lock with PIN")) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventLockWithPin);
+    } else if(furi_string_equal(keybind, "Pseudo-Off")) {
+        Power* power = furi_record_open(RECORD_POWER);
+        power_pseudo_off(power);
+        furi_record_close(RECORD_POWER);
     } else if(furi_string_equal(keybind, "Wipe Device")) {
         loader_start_detached_with_gui_error(desktop->loader, "Storage", "Wipe Device");
     } else {

@@ -54,6 +54,8 @@ struct NotificationApp {
     NotificationLedLayer display;
     NotificationLedLayer led[NOTIFICATION_LED_COUNT];
     uint8_t display_led_lock;
+    // Held dark regardless of input/notifications (Pseudo-Off mode)
+    bool display_forced_off;
 
     NotificationSettings settings;
 

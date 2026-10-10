@@ -3207,6 +3207,7 @@ Function,+,power_get_pubsub,FuriPubSub*,Power*
 Function,+,power_is_battery_healthy,_Bool,Power*
 Function,+,power_is_otg_enabled,_Bool,Power*
 Function,+,power_off,void,Power*
+Function,+,power_pseudo_off,void,Power*
 Function,+,power_reboot,void,"Power*, PowerBootMode"
 Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"

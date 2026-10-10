@@ -46,6 +46,11 @@ struct Power {
     bool app_running;
     bool charge_is_supressed;
     bool theft_alarm_active;
+    // Pseudo-Off: screen/LEDs/radios dark, still charging, OK-hold wakes
+    bool pseudo_off;
+    bool pseudo_off_bt_was_enabled;
+    bool pseudo_off_otg_was_requested;
+    FuriPubSubSubscription* pseudo_off_input_subscription;
     // Set once the alarm's forced lock has actually been observed, so a
     // later unlock can be told apart from "was never locked"
     bool theft_alarm_saw_lock;
@@ -70,6 +75,8 @@ typedef enum {
     PowerMessageTypeIsBatteryHealthy,
     PowerMessageTypeShowBatteryLowWarning,
     PowerMessageTypeSwitchOTG,
+    PowerMessageTypePseudoOff,
+    PowerMessageTypePseudoWake,
 
     PowerMessageTypeGetSettings,
     PowerMessageTypeSetSettings,

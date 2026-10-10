@@ -128,7 +128,9 @@ static void notification_reset_notification_layer(
         notification_sound_off();
     }
     if(reset_mask & reset_display_mask) {
-        if(!float_is_equal(display_brightness_set, app->settings.display_brightness)) {
+        if(app->display_forced_off) {
+            furi_hal_light_set(LightBacklight, 0);
+        } else if(!float_is_equal(display_brightness_set, app->settings.display_brightness)) {
             furi_hal_light_set(LightBacklight, app->settings.display_brightness * 0xFF);
         }
         furi_timer_start(app->display_timer, notification_settings_display_off_delay_ticks(app));
@@ -204,7 +206,8 @@ static void notification_process_notification_message(
     bool reset_notifications = true;
     float speaker_volume_setting = app->settings.speaker_volume;
     bool vibro_setting = app->settings.vibro_on;
-    float display_brightness_setting = app->settings.display_brightness;
+    float display_brightness_setting =
+        app->display_forced_off ? 0.0f : app->settings.display_brightness;
 
     uint8_t reset_mask = 0;
 
@@ -341,8 +344,10 @@ static void notification_process_notification_message(
             force_vibro = true;
             break;
         case NotificationMessageTypeForceDisplayBrightnessSetting:
-            display_brightness_setting =
-                notification_message->data.forced_settings.display_brightness;
+            if(!app->display_forced_off) {
+                display_brightness_setting =
+                    notification_message->data.forced_settings.display_brightness;
+            }
             break;
         case NotificationMessageTypeLedBrightnessSettingApply:
             led_active = true;
@@ -475,6 +480,7 @@ static NotificationApp* notification_app_alloc(void) {
     app->display.value[LayerNotification] = 0x00;
     app->display.index = LayerInternal;
     app->display.light = LightBacklight;
+    app->display_forced_off = false;
 
     app->led[0].value[LayerInternal] = 0x00;
     app->led[0].value[LayerNotification] = 0x00;

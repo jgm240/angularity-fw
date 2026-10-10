@@ -63,6 +63,14 @@ typedef struct {
  */
 void power_off(Power* power);
 
+/** Enter Pseudo-Off: closes the running app, locks the desktop, blanks the
+ * screen and LEDs, and turns Bluetooth/OTG off, while charging carries on.
+ * Hold OK to wake. Not persisted - a reboot returns to normal.
+ *
+ * @param[in] power Power instance
+ */
+void power_pseudo_off(Power* power);
+
 /** Reboot device
  *
  * @param mode      PowerBootMode

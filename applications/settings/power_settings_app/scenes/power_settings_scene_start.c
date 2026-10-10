@@ -6,6 +6,7 @@ enum PowerSettingsSubmenuIndex {
     PowerSettingsSubmenuIndexBatteryInfo,
     PowerSettingsSubmenuIndexReboot,
     PowerSettingsSubmenuIndexOff,
+    PowerSettingsSubmenuIndexPseudoOff,
     PowerSettingsSubmenuIndexAutoPowerOff,
 };
 
@@ -82,6 +83,8 @@ void power_settings_scene_start_on_enter(void* context) {
 
     variable_item_list_add(variable_item_list, "Power OFF", 1, NULL, NULL);
 
+    variable_item_list_add(variable_item_list, "Pseudo-Off", 1, NULL, NULL);
+
     item = variable_item_list_add(
         variable_item_list,
         "Auto PowerOff",
@@ -130,6 +133,9 @@ bool power_settings_scene_start_on_event(void* context, SceneManagerEvent event)
             scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneReboot);
         } else if(event.event == PowerSettingsSubmenuIndexOff) {
             scene_manager_next_scene(app->scene_manager, PowerSettingsAppScenePowerOff);
+        } else if(event.event == PowerSettingsSubmenuIndexPseudoOff) {
+            // Looks off, keeps charging; hold OK to wake
+            power_pseudo_off(app->power);
         }
         scene_manager_set_scene_state(app->scene_manager, PowerSettingsAppSceneStart, event.event);
         consumed = true;

@@ -12,6 +12,8 @@
 #include <desktop/desktop.h>
 
 #include <loader/loader.h>
+#include <notification/notification_app.h>
+#include <bt/bt_service/bt_i.h>
 
 #define TAG "Power"
 
@@ -321,7 +323,7 @@ static const GpioPinRecord* power_theft_alarm_resolve_pin(uint32_t index) {
 // state. Unlike the unplug trigger, these don't depend on charging state
 // at all - they're purely about the physical wiring being intact.
 static void power_check_gpio_theft_trigger(Power* power) {
-    if(!momentum_settings.theft_alarm) {
+    if(!momentum_settings.theft_alarm || power->pseudo_off) {
         power->gpio_theft_seen_ok = false;
         return;
     }
@@ -416,7 +418,8 @@ static void power_check_charging_state(Power* power) {
         if((power->info.charge == 100) || (furi_hal_power_is_charging_done())) {
             if(power->state != PowerStateCharged) {
                 notification_internal_message(notification, &sequence_charged);
-                if(power->state != PowerStateCharging && momentum_settings.charging_sound) {
+                if(power->state != PowerStateCharging && momentum_settings.charging_sound &&
+                   !power->pseudo_off) {
                     notification_message(notification, &sequence_charging_beep);
                 }
                 if(power->state == PowerStateCharging) {
@@ -432,7 +435,7 @@ static void power_check_charging_state(Power* power) {
 
         } else if(power->state != PowerStateCharging) {
             notification_internal_message(notification, &sequence_charging);
-            if(momentum_settings.charging_sound) {
+            if(momentum_settings.charging_sound && !power->pseudo_off) {
                 notification_message(notification, &sequence_charging_beep);
             }
             power->state = PowerStateCharging;
@@ -444,10 +447,10 @@ static void power_check_charging_state(Power* power) {
         bool was_connected = (power->state == PowerStateCharging) ||
                               (power->state == PowerStateCharged);
         notification_internal_message(notification, &sequence_not_charging);
-        if(momentum_settings.charging_sound) {
+        if(momentum_settings.charging_sound && !power->pseudo_off) {
             notification_message(notification, &sequence_not_charging_beep);
         }
-        if(momentum_settings.theft_alarm &&
+        if(momentum_settings.theft_alarm && !power->pseudo_off &&
            momentum_settings.theft_alarm_trigger == TheftAlarmTriggerUnplug && was_connected) {
             power->theft_alarm_active = true;
             just_armed_alarm = true;
@@ -734,6 +737,115 @@ static void power_settings_apply(Power* power) {
 }
 
 // do something depend from power queue message
+// ---- Pseudo-Off ----
+//
+// Behaves like the device being off - screen dark, LEDs/sound/vibro quiet,
+// no app running, Bluetooth and the 5V rail down, no theft alarm - while
+// the charger carries on as normal. It is NOT a real power-off: the
+// firmware's services stay resident (they can't be unloaded at runtime),
+// they just have nothing to do. Wake is a long press of OK; the lock screen
+// is where it lands, PIN included if one is set.
+
+static void power_pseudo_off_input_callback(const void* value, void* context) {
+    furi_assert(value);
+    furi_assert(context);
+    const InputEvent* event = value;
+    Power* power = context;
+    if(event->sequence_source == INPUT_SEQUENCE_SOURCE_HARDWARE && event->key == InputKeyOk &&
+       event->type == InputTypeLong) {
+        PowerMessage msg = {.type = PowerMessageTypePseudoWake};
+        furi_message_queue_put(power->message_queue, &msg, 0);
+    }
+}
+
+static void power_pseudo_off_close_app_and_lock(void) {
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    loader_signal(loader, FuriSignalExit, NULL);
+    furi_record_close(RECORD_LOADER);
+
+    Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+    if(!desktop_api_is_locked(desktop)) {
+        desktop_api_lock(desktop);
+    }
+    furi_record_close(RECORD_DESKTOP);
+}
+
+static void power_handle_pseudo_off(Power* power) {
+    if(power->pseudo_off) {
+        return;
+    }
+    power->pseudo_off = true;
+
+    // Dark first, so nothing flashes while the rest unwinds
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification->display_forced_off = true;
+    notification_message(notification, &sequence_reset_rgb);
+    notification_message(notification, &sequence_reset_sound);
+    notification_message(notification, &sequence_reset_vibro);
+    notification_message(notification, &sequence_display_backlight_off);
+    furi_record_close(RECORD_NOTIFICATION);
+
+    power_pseudo_off_close_app_and_lock();
+
+    // Radios / rails
+    Bt* bt = furi_record_open(RECORD_BT);
+    power->pseudo_off_bt_was_enabled = bt->bt_settings.enabled;
+    bt_disconnect(bt);
+    furi_hal_bt_stop_advertising();
+    furi_record_close(RECORD_BT);
+
+    power->pseudo_off_otg_was_requested = power->is_otg_requested;
+    power->is_otg_requested = false;
+    furi_hal_power_disable_otg();
+
+    // A silenced theft alarm must not resume on wake
+    power->theft_alarm_active = false;
+    power->theft_alarm_saw_lock = false;
+
+    if(power->pseudo_off_input_subscription == NULL) {
+        power->pseudo_off_input_subscription = furi_pubsub_subscribe(
+            power->input_events_pubsub, power_pseudo_off_input_callback, power);
+    }
+    FURI_LOG_I(TAG, "Pseudo-Off entered");
+}
+
+static void power_handle_pseudo_wake(Power* power) {
+    if(!power->pseudo_off) {
+        return;
+    }
+    power->pseudo_off = false;
+
+    if(power->pseudo_off_input_subscription != NULL) {
+        furi_pubsub_unsubscribe(
+            power->input_events_pubsub, power->pseudo_off_input_subscription);
+        power->pseudo_off_input_subscription = NULL;
+    }
+
+    // Tick re-enables OTG once is_otg_requested is set again
+    power->is_otg_requested = power->pseudo_off_otg_was_requested;
+
+    if(power->pseudo_off_bt_was_enabled) {
+        furi_hal_bt_start_advertising();
+    }
+
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification->display_forced_off = false;
+    notification_message(notification, &sequence_display_backlight_on);
+    furi_record_close(RECORD_NOTIFICATION);
+    FURI_LOG_I(TAG, "Pseudo-Off left");
+}
+
+// Runs every tick while pseudo-off: stray button presses (a pocket, a bag)
+// can wander the lock screen or start something, so shut that down again
+// rather than trust the lock alone.
+static void power_pseudo_off_enforce(Power* power) {
+    if(!power->pseudo_off) {
+        return;
+    }
+    power_pseudo_off_close_app_and_lock();
+    furi_hal_power_disable_otg();
+}
+
 static void power_message_callback(FuriEventLoopObject* object, void* context) {
     furi_assert(context);
     Power* power = context;
@@ -783,6 +895,12 @@ static void power_message_callback(FuriEventLoopObject* object, void* context) {
             furi_hal_power_disable_otg();
         }
         break;
+    case PowerMessageTypePseudoOff:
+        power_handle_pseudo_off(power);
+        break;
+    case PowerMessageTypePseudoWake:
+        power_handle_pseudo_wake(power);
+        break;
     case PowerMessageTypeGetSettings:
         furi_assert(msg.lock);
         *msg.settings = power->settings;
@@ -830,6 +948,8 @@ static void power_tick_callback(void* context) {
 
     // Update data from gauge and charger
     const bool need_refresh = power_update_info(power);
+    // Pseudo-Off: keep the device actually dark and idle
+    power_pseudo_off_enforce(power);
     // Check low battery level
     power_check_low_battery(power);
     // Check and notify about charging state
