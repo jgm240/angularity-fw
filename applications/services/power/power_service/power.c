@@ -321,7 +321,11 @@ static const GpioPinRecord* power_theft_alarm_resolve_pin(uint32_t index) {
 // state. Unlike the unplug trigger, these don't depend on charging state
 // at all - they're purely about the physical wiring being intact.
 static void power_check_gpio_theft_trigger(Power* power) {
-    if(!momentum_settings.theft_alarm || power->theft_alarm_active) {
+    if(!momentum_settings.theft_alarm) {
+        power->gpio_theft_seen_ok = false;
+        return;
+    }
+    if(power->theft_alarm_active) {
         return;
     }
 
@@ -350,7 +354,18 @@ static void power_check_gpio_theft_trigger(Power* power) {
         triggered = !furi_hal_gpio_read(pin2->pin);
     }
 
+    // Only a healthy -> broken transition counts. With nothing wired to the
+    // pins they read as "broken" from the start, which used to fire the
+    // alarm immediately and again the instant USB cleared it - a lockout
+    // loop with no way out short of disabling the alarm blind.
+    if(!triggered) {
+        power->gpio_theft_seen_ok = true;
+    } else if(!power->gpio_theft_seen_ok) {
+        triggered = false;
+    }
+
     if(triggered) {
+        power->gpio_theft_seen_ok = false;
         power->theft_alarm_active = true;
         power_theft_alarm_trigger(power);
     }
@@ -395,6 +410,8 @@ static void power_check_charging_state(Power* power) {
         // USB is connected again: silence the theft alarm regardless of
         // which charging sub-state we land in below
         power->theft_alarm_active = false;
+        power->theft_alarm_saw_lock = false;
+        power->gpio_theft_seen_ok = false;
 
         if((power->info.charge == 100) || (furi_hal_power_is_charging_done())) {
             if(power->state != PowerStateCharged) {
@@ -438,6 +455,24 @@ static void power_check_charging_state(Power* power) {
         power->state = PowerStateNotCharging;
         power->event.type = PowerEventTypeStopCharging;
         furi_pubsub_publish(power->event_pubsub, &power->event);
+    }
+
+    if(power->theft_alarm_active) {
+        // Unlocking the device silences the alarm. Without this, the only
+        // way out was plugging in USB - and a PIN-correct unlock still left
+        // the burst/LED going. Only counts once the alarm's own lock has
+        // actually been seen, so an alarm configured for sound/LED only
+        // (no lock) isn't dismissed on the very next tick.
+        Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+        bool desktop_locked = desktop_api_is_locked(desktop);
+        furi_record_close(RECORD_DESKTOP);
+        if(desktop_locked) {
+            power->theft_alarm_saw_lock = true;
+        } else if(power->theft_alarm_saw_lock) {
+            power->theft_alarm_active = false;
+            power->theft_alarm_saw_lock = false;
+            power->gpio_theft_seen_ok = false;
+        }
     }
 
     if(power->theft_alarm_active) {

@@ -46,6 +46,12 @@ struct Power {
     bool app_running;
     bool charge_is_supressed;
     bool theft_alarm_active;
+    // Set once the alarm's forced lock has actually been observed, so a
+    // later unlock can be told apart from "was never locked"
+    bool theft_alarm_saw_lock;
+    // GPIO Pull/Tether triggers only fire on a healthy -> broken transition,
+    // so this must have been seen healthy first
+    bool gpio_theft_seen_ok;
     FuriPubSub* input_events_pubsub;
     FuriPubSub* ascii_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
