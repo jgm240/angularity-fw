@@ -1,9 +1,0 @@
-{
-  "version": "AngularityFW-release26",
-  "changelog": "Configurable Control Center, Profiles, Diagnostics, SD Health, App Permissions (opt-in), WiFi OTA updater. Fixes Computer Mode tile.",
-  "timestamp": 1792165130,
-  "size": 13111269,
-  "sha256": "3d1e0b8e0bc0194a19b6899b6467c8968984ffd069037da0a783948931f64ae3",
-  "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release26/AngularityFW-release26.tgz",
-  "wifi_url": "https://raw.githubusercontent.com/jgm240/angularity-fw/ota-files/AngularityFW-release26.tgz"
-}
