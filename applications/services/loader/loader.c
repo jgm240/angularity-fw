@@ -582,7 +582,8 @@ static int32_t loader_permission_thread(void* context) {
         }
     }
 
-    uint32_t needed = requested & ~allowed;
+    // Kinds the user switched off in the settings are never asked about
+    uint32_t needed = requested & app_permissions_get_watched() & ~allowed;
     if(needed == 0) return 0;
 
     FuriString* app_name = furi_string_alloc();

@@ -5,7 +5,7 @@
 #include <toolbox/saved_struct.h>
 
 #define APP_PERMISSIONS_MAGIC       0x5A
-#define APP_PERMISSIONS_VERSION     1
+#define APP_PERMISSIONS_VERSION     2 /* v2: split Radio into Radio/NFC/RFID/IR, added watched mask */
 #define APP_PERMISSIONS_MAX_ENTRIES 48
 
 // The values in app_permissions.h and the scanner core must agree
@@ -13,6 +13,10 @@ _Static_assert(AppPermissionRadio == APP_PERM_RADIO, "radio bit");
 _Static_assert(AppPermissionGpio == APP_PERM_GPIO, "gpio bit");
 _Static_assert(AppPermissionUsb == APP_PERM_USB, "usb bit");
 _Static_assert(AppPermissionBluetooth == APP_PERM_BLUETOOTH, "bluetooth bit");
+_Static_assert(AppPermissionRfid == APP_PERM_RFID, "rfid bit");
+_Static_assert(AppPermissionNfc == APP_PERM_NFC, "nfc bit");
+_Static_assert(AppPermissionInfrared == APP_PERM_IR, "ir bit");
+_Static_assert(APP_PERMISSIONS_ALL == APP_PERM_ALL, "all bits");
 
 typedef struct {
     uint32_t path_hash;
@@ -26,7 +30,7 @@ typedef struct {
     bool enabled;
     uint8_t count;
     uint8_t next_evict; // simple ring: oldest answers are replaced when full
-    uint8_t reserved;
+    uint8_t watched; // permission kinds the user wants to be asked about
     AppPermissionEntry entries[APP_PERMISSIONS_MAX_ENTRIES];
 } AppPermissionsFile;
 
@@ -41,6 +45,7 @@ static AppPermissionsFile* app_permissions_open(void) {
            APP_PERMISSIONS_MAGIC,
            APP_PERMISSIONS_VERSION)) {
         memset(file, 0, sizeof(AppPermissionsFile));
+        file->watched = APP_PERM_ALL;
     }
     if(file->count > APP_PERMISSIONS_MAX_ENTRIES) file->count = 0;
     if(file->next_evict >= APP_PERMISSIONS_MAX_ENTRIES) file->next_evict = 0;
@@ -81,6 +86,19 @@ bool app_permissions_is_enabled(void) {
 void app_permissions_set_enabled(bool enabled) {
     AppPermissionsFile* file = app_permissions_open();
     file->enabled = enabled;
+    app_permissions_commit(file);
+}
+
+uint32_t app_permissions_get_watched(void) {
+    AppPermissionsFile* file = app_permissions_open();
+    uint32_t watched = file->watched;
+    app_permissions_discard(file);
+    return watched;
+}
+
+void app_permissions_set_watched(uint32_t watched) {
+    AppPermissionsFile* file = app_permissions_open();
+    file->watched = (uint8_t)(watched & APP_PERM_ALL);
     app_permissions_commit(file);
 }
 
@@ -161,6 +179,9 @@ void app_permissions_describe(uint32_t mask, FuriString* out) {
         const char* name;
     } names[] = {
         {AppPermissionRadio, "Radio"},
+        {AppPermissionNfc, "NFC"},
+        {AppPermissionRfid, "RFID"},
+        {AppPermissionInfrared, "IR"},
         {AppPermissionGpio, "GPIO"},
         {AppPermissionUsb, "USB"},
         {AppPermissionBluetooth, "Bluetooth"},

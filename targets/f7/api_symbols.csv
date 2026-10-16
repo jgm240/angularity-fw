@@ -655,9 +655,11 @@ Function,+,app_permissions_classify,uint32_t,const char*
 Function,+,app_permissions_count,uint32_t,
 Function,+,app_permissions_describe,void,"uint32_t, FuriString*"
 Function,+,app_permissions_forget_all,void,
+Function,+,app_permissions_get_watched,uint32_t,
 Function,+,app_permissions_is_enabled,_Bool,
 Function,+,app_permissions_lookup,_Bool,"const char*, uint32_t, uint32_t*, uint32_t*"
 Function,+,app_permissions_set_enabled,void,_Bool
+Function,+,app_permissions_set_watched,void,uint32_t
 Function,+,app_permissions_store,void,"const char*, uint32_t, uint32_t, uint32_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"

@@ -8,22 +8,29 @@
 #include <stdint.h>
 #include <string.h>
 
-#define APP_PERM_RADIO     (1u << 0)
+#define APP_PERM_RADIO     (1u << 0) /* Sub-GHz */
 #define APP_PERM_GPIO      (1u << 1)
 #define APP_PERM_USB       (1u << 2)
 #define APP_PERM_BLUETOOTH (1u << 3)
+#define APP_PERM_RFID      (1u << 4) /* 125 kHz RFID, iButton / 1-Wire */
+#define APP_PERM_NFC       (1u << 5) /* 13.56 MHz NFC */
+#define APP_PERM_IR        (1u << 6) /* Infrared */
+#define APP_PERM_ALL       0x7Fu
 
 static inline bool app_perm_has_prefix(const char* s, const char* prefix) {
     return strncmp(s, prefix, strlen(prefix)) == 0;
 }
 
 static inline uint32_t app_perm_classify_name(const char* name) {
-    static const char* const radio[] = {
-        "furi_hal_subghz", "subghz",        "furi_hal_nfc",  "nfc_",       "felica",
-        "mf_classic",      "mf_ultralight", "mf_desfire",    "mf_plus",    "iso14443",
-        "iso15693",        "slix",          "furi_hal_rfid", "lfrfid",     "furi_hal_infrared",
-        "infrared",        "furi_hal_ibutton", "ibutton",    "onewire",
+    static const char* const radio[] = {"furi_hal_subghz", "subghz"};
+    static const char* const nfc[] = {
+        "furi_hal_nfc", "nfc_",     "felica",     "mf_classic", "mf_ultralight",
+        "mf_desfire",   "mf_plus",  "iso14443",   "iso15693",   "slix",
     };
+    static const char* const rfid[] = {
+        "furi_hal_rfid", "lfrfid", "furi_hal_ibutton", "ibutton", "onewire",
+    };
+    static const char* const ir[] = {"furi_hal_infrared", "infrared"};
     static const char* const gpio[] = {
         "furi_hal_gpio",
         "furi_hal_serial",
@@ -41,6 +48,12 @@ static inline uint32_t app_perm_classify_name(const char* name) {
     uint32_t mask = 0;
     for(unsigned i = 0; i < sizeof(radio) / sizeof(radio[0]); i++)
         if(app_perm_has_prefix(name, radio[i])) mask |= APP_PERM_RADIO;
+    for(unsigned i = 0; i < sizeof(nfc) / sizeof(nfc[0]); i++)
+        if(app_perm_has_prefix(name, nfc[i])) mask |= APP_PERM_NFC;
+    for(unsigned i = 0; i < sizeof(rfid) / sizeof(rfid[0]); i++)
+        if(app_perm_has_prefix(name, rfid[i])) mask |= APP_PERM_RFID;
+    for(unsigned i = 0; i < sizeof(ir) / sizeof(ir[0]); i++)
+        if(app_perm_has_prefix(name, ir[i])) mask |= APP_PERM_IR;
     for(unsigned i = 0; i < sizeof(gpio) / sizeof(gpio[0]); i++)
         if(app_perm_has_prefix(name, gpio[i])) mask |= APP_PERM_GPIO;
     for(unsigned i = 0; i < sizeof(usb) / sizeof(usb[0]); i++)

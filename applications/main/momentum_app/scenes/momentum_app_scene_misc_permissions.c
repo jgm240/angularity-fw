@@ -1,9 +1,26 @@
 #include "../momentum_app.h"
 #include <momentum/app_permissions.h>
 
+typedef struct {
+    const char* label;
+    uint32_t bit;
+} PermissionKind;
+
+static const PermissionKind kinds[] = {
+    {"Ask: Radio (Sub-GHz)", AppPermissionRadio},
+    {"Ask: NFC", AppPermissionNfc},
+    {"Ask: RFID / iButton", AppPermissionRfid},
+    {"Ask: IR", AppPermissionInfrared},
+    {"Ask: GPIO", AppPermissionGpio},
+    {"Ask: USB", AppPermissionUsb},
+    {"Ask: Bluetooth", AppPermissionBluetooth},
+};
+#define KIND_COUNT COUNT_OF(kinds)
+
 enum VarItemListIndex {
     VarItemListIndexEnabled,
-    VarItemListIndexRemembered,
+    // kinds[] follow: indices 1..KIND_COUNT
+    VarItemListIndexRemembered = 1 + KIND_COUNT,
     VarItemListIndexForget,
 };
 
@@ -19,6 +36,19 @@ static void momentum_app_scene_misc_permissions_enabled_changed(VariableItem* it
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     app_permissions_set_enabled(value);
+}
+
+static void momentum_app_scene_misc_permissions_kind_changed(VariableItem* item) {
+    const PermissionKind* kind = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    uint32_t watched = app_permissions_get_watched();
+    if(value) {
+        watched |= kind->bit;
+    } else {
+        watched &= ~kind->bit;
+    }
+    app_permissions_set_watched(watched);
 }
 
 static void momentum_app_scene_misc_permissions_enter_callback(void* context, uint32_t index) {
@@ -40,6 +70,19 @@ void momentum_app_scene_misc_permissions_on_enter(void* context) {
     bool enabled = app_permissions_is_enabled();
     variable_item_set_current_value_index(item, enabled);
     variable_item_set_current_value_text(item, enabled ? "ON" : "OFF");
+
+    uint32_t watched = app_permissions_get_watched();
+    for(size_t i = 0; i < KIND_COUNT; i++) {
+        item = variable_item_list_add(
+            var_item_list,
+            kinds[i].label,
+            2,
+            momentum_app_scene_misc_permissions_kind_changed,
+            (void*)&kinds[i]);
+        bool on = (watched & kinds[i].bit) != 0;
+        variable_item_set_current_value_index(item, on);
+        variable_item_set_current_value_text(item, on ? "ON" : "OFF");
+    }
 
     remembered_item = variable_item_list_add(var_item_list, "Remembered apps", 0, NULL, app);
     remembered_item_update();
