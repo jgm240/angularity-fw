@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <loader/loader.h>
 #include <momentum/momentum.h>
+#include <momentum/cc_layout.h>
+#include <momentum/profiles.h>
 
 #include "../desktop_i.h"
 #include <desktop/desktop_settings.h>
@@ -34,7 +36,17 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop_pin_code_is_set());
     desktop_lock_menu_set_stealth_mode_state(
         desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
-    desktop_lock_menu_set_idx(desktop->lock_menu, 3);
+    // Re-read the layout: it may have been edited in the Angularity app since last time
+    cc_layout_reload();
+    desktop_lock_menu_set_profile_active(desktop->lock_menu, profiles_get_active());
+    uint8_t start_idx = 3;
+    for(uint8_t i = 0; i < CC_LAYOUT_SLOTS; i++) {
+        if(cc_layout_get(i) == CcActionLock) {
+            start_idx = i;
+            break;
+        }
+    }
+    desktop_lock_menu_set_idx(desktop->lock_menu, start_idx);
 
     gui_set_hide_statusbar(desktop->gui, true);
 
@@ -128,9 +140,38 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventComputerMode:
             desktop_scene_lock_menu_save_settings(desktop);
-            loader_start_detached_with_gui_error(desktop->loader, "computer_mode", NULL);
+            // External apps outside the main menu are only found by file path
+            loader_start_detached_with_gui_error(
+                desktop->loader, EXT_PATH("apps/Tools/computer_mode.fap"), NULL);
             consumed = true;
             break;
+        case DesktopLockMenuEventPseudoOff:
+            desktop_scene_lock_menu_save_settings(desktop);
+            power_pseudo_off(furi_record_open(RECORD_POWER));
+            furi_record_close(RECORD_POWER);
+            consumed = true;
+            break;
+        case DesktopLockMenuEventDiagnostics:
+            desktop_scene_lock_menu_save_settings(desktop);
+            loader_start_detached_with_gui_error(
+                desktop->loader, EXT_PATH("apps/Tools/diagnostics.fap"), NULL);
+            consumed = true;
+            break;
+        case DesktopLockMenuEventSdHealth:
+            desktop_scene_lock_menu_save_settings(desktop);
+            loader_start_detached_with_gui_error(
+                desktop->loader, EXT_PATH("apps/Tools/sd_health.fap"), NULL);
+            consumed = true;
+            break;
+        case DesktopLockMenuEventProfileNext: {
+            uint8_t slot = profiles_cycle();
+            desktop_lock_menu_set_profile_active(desktop->lock_menu, slot);
+            notification_message(
+                desktop->lock_menu->notification,
+                slot == PROFILE_NONE ? &sequence_error : &sequence_success);
+            consumed = true;
+            break;
+        }
         case DesktopLockMenuEventStealthModeOn:
             desktop_set_stealth_mode_state(desktop, true);
             break;

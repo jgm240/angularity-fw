@@ -21,6 +21,7 @@ struct DesktopLockMenuView {
     bool save_notification;
     bool save_momentum;
     bool save_bt;
+    uint8_t profile_active; // cached profiles_get_active(), avoids flash reads while drawing
 };
 
 typedef enum {
@@ -50,5 +51,6 @@ View* desktop_lock_menu_get_view(DesktopLockMenuView* lock_menu);
 void desktop_lock_menu_set_pin_state(DesktopLockMenuView* lock_menu, bool pin_is_set);
 void desktop_lock_menu_set_stealth_mode_state(DesktopLockMenuView* lock_menu, bool stealth_mode);
 void desktop_lock_menu_set_idx(DesktopLockMenuView* lock_menu, uint8_t idx);
+void desktop_lock_menu_set_profile_active(DesktopLockMenuView* lock_menu, uint8_t profile);
 DesktopLockMenuView* desktop_lock_menu_alloc(void);
 void desktop_lock_menu_free(DesktopLockMenuView* lock_menu);

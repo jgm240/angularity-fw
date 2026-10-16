@@ -2,6 +2,8 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <momentum/momentum.h>
+#include <momentum/cc_layout.h>
+#include <momentum/profiles.h>
 #include <furi_hal_rtc.h>
 
 #include "../desktop_i.h"
@@ -67,6 +69,11 @@ void desktop_lock_menu_set_idx(DesktopLockMenuView* lock_menu, uint8_t idx) {
         lock_menu->view, DesktopLockMenuViewModel * model, { model->idx = idx; }, true);
 }
 
+void desktop_lock_menu_set_profile_active(DesktopLockMenuView* lock_menu, uint8_t profile) {
+    lock_menu->profile_active = profile;
+    with_view_model(lock_menu->view, DesktopLockMenuViewModel * model, { UNUSED(model); }, true);
+}
+
 void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
     DesktopLockMenuViewModel* m = model;
 
@@ -98,45 +105,63 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             value = 0;
         }
 
-        switch(i) {
-        case DesktopLockMenuIndexLefthandedMode:
-            icon = &I_CC_LefthandedMode_16x16;
-            enabled = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
-            break;
-        case DesktopLockMenuIndexSettings:
-            icon = &I_CC_Settings_16x16;
-            break;
-        case DesktopLockMenuIndexDarkMode:
-            icon = &I_CC_DarkMode_16x16;
-            enabled = momentum_settings.dark_mode;
-            break;
-        case DesktopLockMenuIndexLock:
-            icon = &I_CC_Lock_16x16;
-            break;
-        case DesktopLockMenuIndexBluetooth:
-            icon = &I_CC_Bluetooth_16x16;
-            enabled = m->lock_menu->bt->bt_settings.enabled;
-            break;
-        case DesktopLockMenuIndexMomentum:
-            icon = &I_CC_Angularity_16x16;
-            break;
-        case DesktopLockMenuIndexDummyMode:
-            icon = &I_CC_DummyMode_16x16;
-            enabled = momentum_settings.dummy_mode;
-            break;
-        case DesktopLockMenuIndexComputerMode:
-            icon = &I_CC_ComputerMode_16x16;
-            break;
-        case DesktopLockMenuIndexBrightness:
+        if(toggle) {
+            switch(cc_layout_get(i)) {
+            case CcActionLefthanded:
+                icon = &I_CC_LefthandedMode_16x16;
+                enabled = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
+                break;
+            case CcActionSettings:
+                icon = &I_CC_Settings_16x16;
+                break;
+            case CcActionDarkMode:
+                icon = &I_CC_DarkMode_16x16;
+                enabled = momentum_settings.dark_mode;
+                break;
+            case CcActionLock:
+                icon = &I_CC_Lock_16x16;
+                break;
+            case CcActionBluetooth:
+                icon = &I_CC_Bluetooth_16x16;
+                enabled = m->lock_menu->bt->bt_settings.enabled;
+                break;
+            case CcActionAngularity:
+                icon = &I_CC_Angularity_16x16;
+                break;
+            case CcActionDummyMode:
+                icon = &I_CC_DummyMode_16x16;
+                enabled = momentum_settings.dummy_mode;
+                break;
+            case CcActionComputerMode:
+                icon = &I_CC_ComputerMode_16x16;
+                break;
+            case CcActionPseudoOff:
+                icon = &I_CC_PseudoOff_16x16;
+                break;
+            case CcActionStealth:
+                icon = &I_CC_Stealth_16x16;
+                enabled = m->stealth_mode;
+                break;
+            case CcActionDiagnostics:
+                icon = &I_CC_Diagnostics_16x16;
+                break;
+            case CcActionSdHealth:
+                icon = &I_CC_SdHealth_16x16;
+                break;
+            case CcActionProfile:
+                icon = &I_CC_Profile_16x16;
+                enabled = m->lock_menu->profile_active != PROFILE_NONE;
+                break;
+            default:
+                icon = &I_CC_Settings_16x16;
+                break;
+            }
+        } else if(i == DesktopLockMenuIndexBrightness) {
             icon = &I_Pin_star_7x7;
             value = total - m->lock_menu->notification->settings.display_brightness * total;
-            break;
-        case DesktopLockMenuIndexVolume:
+        } else {
             icon = m->stealth_mode ? &I_Muted_8x8 : &I_Volup_8x6;
             value = total - m->lock_menu->notification->settings.speaker_volume * total;
-            break;
-        default:
-            break;
         }
 
         if(selected) {
@@ -233,7 +258,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                         model->show_lock_popup = false;
                     }
                 } else {
-                    if(model->idx == DesktopLockMenuIndexLock && event->key == InputKeyOk) {
+                    if(model->idx < DESKTOP_LOCK_MENU_TOGGLE_COUNT &&
+                       cc_layout_get(model->idx) == CcActionLock && event->key == InputKeyOk) {
                         model->show_lock_popup = true;
                     } else if(model->idx < DESKTOP_LOCK_MENU_TOGGLE_COUNT) {
                         // 4 full columns x 2 rows (idx 0-7)
@@ -300,49 +326,67 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
         if(event->key == InputKeyBack) {
             consumed = false;
         } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-            switch(idx) {
-            case DesktopLockMenuIndexLefthandedMode:
-                if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
-                    furi_hal_rtc_reset_flag(FuriHalRtcFlagHandOrient);
+            if(idx >= DesktopLockMenuIndexBrightness) {
+                if(idx == DesktopLockMenuIndexBrightness) {
+                    desktop_event = DesktopLockMenuEventScreenSettings;
                 } else {
-                    furi_hal_rtc_set_flag(FuriHalRtcFlagHandOrient);
+                    desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :
+                                                   DesktopLockMenuEventStealthModeOn;
                 }
-                break;
-            case DesktopLockMenuIndexSettings:
-                desktop_event = DesktopLockMenuEventSettings;
-                break;
-            case DesktopLockMenuIndexDarkMode:
-                momentum_settings.dark_mode = !momentum_settings.dark_mode;
-                lock_menu->save_momentum = true;
-                break;
-            case DesktopLockMenuIndexBluetooth:
-                lock_menu->bt->bt_settings.enabled = !lock_menu->bt->bt_settings.enabled;
-                if(lock_menu->bt->bt_settings.enabled) {
-                    furi_hal_bt_start_advertising();
-                } else {
-                    furi_hal_bt_stop_advertising();
+            } else {
+                switch(cc_layout_get(idx)) {
+                case CcActionLefthanded:
+                    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+                        furi_hal_rtc_reset_flag(FuriHalRtcFlagHandOrient);
+                    } else {
+                        furi_hal_rtc_set_flag(FuriHalRtcFlagHandOrient);
+                    }
+                    break;
+                case CcActionSettings:
+                    desktop_event = DesktopLockMenuEventSettings;
+                    break;
+                case CcActionDarkMode:
+                    momentum_settings.dark_mode = !momentum_settings.dark_mode;
+                    lock_menu->save_momentum = true;
+                    break;
+                case CcActionBluetooth:
+                    lock_menu->bt->bt_settings.enabled = !lock_menu->bt->bt_settings.enabled;
+                    if(lock_menu->bt->bt_settings.enabled) {
+                        furi_hal_bt_start_advertising();
+                    } else {
+                        furi_hal_bt_stop_advertising();
+                    }
+                    lock_menu->save_bt = true;
+                    break;
+                case CcActionAngularity:
+                    desktop_event = DesktopLockMenuEventMomentum;
+                    break;
+                case CcActionDummyMode:
+                    momentum_settings.dummy_mode = !momentum_settings.dummy_mode;
+                    lock_menu->save_momentum = true;
+                    break;
+                case CcActionComputerMode:
+                    desktop_event = DesktopLockMenuEventComputerMode;
+                    break;
+                case CcActionPseudoOff:
+                    desktop_event = DesktopLockMenuEventPseudoOff;
+                    break;
+                case CcActionStealth:
+                    desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :
+                                                   DesktopLockMenuEventStealthModeOn;
+                    break;
+                case CcActionDiagnostics:
+                    desktop_event = DesktopLockMenuEventDiagnostics;
+                    break;
+                case CcActionSdHealth:
+                    desktop_event = DesktopLockMenuEventSdHealth;
+                    break;
+                case CcActionProfile:
+                    desktop_event = DesktopLockMenuEventProfileNext;
+                    break;
+                default:
+                    break;
                 }
-                lock_menu->save_bt = true;
-                break;
-            case DesktopLockMenuIndexMomentum:
-                desktop_event = DesktopLockMenuEventMomentum;
-                break;
-            case DesktopLockMenuIndexDummyMode:
-                momentum_settings.dummy_mode = !momentum_settings.dummy_mode;
-                lock_menu->save_momentum = true;
-                break;
-            case DesktopLockMenuIndexComputerMode:
-                desktop_event = DesktopLockMenuEventComputerMode;
-                break;
-            case DesktopLockMenuIndexBrightness:
-                desktop_event = DesktopLockMenuEventScreenSettings;
-                break;
-            case DesktopLockMenuIndexVolume:
-                desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :
-                                               DesktopLockMenuEventStealthModeOn;
-                break;
-            default:
-                break;
             }
         } else if(
             idx >= DesktopLockMenuIndexBrightness &&
@@ -387,6 +431,7 @@ DesktopLockMenuView* desktop_lock_menu_alloc(void) {
     DesktopLockMenuView* lock_menu = malloc(sizeof(DesktopLockMenuView));
     lock_menu->bt = furi_record_open(RECORD_BT);
     lock_menu->notification = furi_record_open(RECORD_NOTIFICATION);
+    lock_menu->profile_active = PROFILE_NONE;
     lock_menu->view = view_alloc();
     view_allocate_model(lock_menu->view, ViewModelTypeLocking, sizeof(DesktopLockMenuViewModel));
     with_view_model(

@@ -7,6 +7,7 @@ enum VarItemListIndex {
     VarItemListIndexDolphin,
     VarItemListIndexSpoof,
     VarItemListIndexVgm,
+    VarItemListIndexProfiles,
     VarItemListIndexShowMomentumIntro,
 };
 
@@ -36,6 +37,9 @@ void momentum_app_scene_misc_on_enter(void* context) {
     variable_item_set_current_value_text(item, ">");
 
     item = variable_item_list_add(var_item_list, "VGM Options", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(var_item_list, "Profiles", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
 
     variable_item_list_add(var_item_list, "Show Angularity Intro", 0, NULL, app);
@@ -80,6 +84,10 @@ bool momentum_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
         case VarItemListIndexVgm:
             scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscVgm, 0);
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscVgm);
+            break;
+        case VarItemListIndexProfiles:
+            scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscProfiles, 0);
+            scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscProfiles);
             break;
         case VarItemListIndexShowMomentumIntro: {
             for(int i = 0; i < 10; i++) {

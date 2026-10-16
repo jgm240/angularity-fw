@@ -133,8 +133,10 @@ Header,+,lib/mlib/m-list.h,,
 Header,+,lib/mlib/m-rbtree.h,,
 Header,+,lib/mlib/m-tuple.h,,
 Header,+,lib/mlib/m-variant.h,,
+Header,+,lib/momentum/cc_layout.h,,
 Header,+,lib/momentum/game_stats.h,,
 Header,+,lib/momentum/momentum.h,,
+Header,+,lib/momentum/profiles.h,,
 Header,+,lib/momentum/security_log.h,,
 Header,+,lib/music_worker/music_worker.h,,
 Header,+,lib/nanopb/pb.h,,
@@ -896,6 +898,12 @@ Function,+,canvas_width,size_t,const Canvas*
 Function,-,cbrt,double,double
 Function,-,cbrtf,float,float
 Function,-,cbrtl,long double,long double
+Function,+,cc_action_name,const char*,CcAction
+Function,+,cc_layout_get,CcAction,uint8_t
+Function,+,cc_layout_reload,void,
+Function,+,cc_layout_reset,void,
+Function,+,cc_layout_save,void,
+Function,+,cc_layout_set,void,"uint8_t, CcAction"
 Function,-,ceil,double,double
 Function,-,ceilf,float,float
 Function,-,ceill,long double,long double
@@ -3214,6 +3222,12 @@ Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
 Function,+,process_favorite_launch,_Bool,char**
+Function,+,profiles_apply,_Bool,uint8_t
+Function,+,profiles_cycle,uint8_t,
+Function,+,profiles_get_active,uint8_t,
+Function,+,profiles_is_saved,_Bool,uint8_t
+Function,+,profiles_name,const char*,uint8_t
+Function,+,profiles_save_current,void,uint8_t
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."
 Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase* const*, size_t"
 Function,+,protocol_dict_decoders_feed,ProtocolId,"ProtocolDict*, _Bool, uint32_t"
@@ -4135,10 +4149,15 @@ Variable,+,I_CC_Angularity_16x16,const Icon,
 Variable,+,I_CC_Bluetooth_16x16,const Icon,
 Variable,+,I_CC_ComputerMode_16x16,const Icon,
 Variable,+,I_CC_DarkMode_16x16,const Icon,
+Variable,+,I_CC_Diagnostics_16x16,const Icon,
 Variable,+,I_CC_DummyMode_16x16,const Icon,
 Variable,+,I_CC_LefthandedMode_16x16,const Icon,
 Variable,+,I_CC_Lock_16x16,const Icon,
+Variable,+,I_CC_Profile_16x16,const Icon,
+Variable,+,I_CC_PseudoOff_16x16,const Icon,
+Variable,+,I_CC_SdHealth_16x16,const Icon,
 Variable,+,I_CC_Settings_16x16,const Icon,
+Variable,+,I_CC_Stealth_16x16,const Icon,
 Variable,-,I_Certification1_103x56,const Icon,
 Variable,-,I_Certification2_46x33,const Icon,
 Variable,-,I_CertificationChina0_121x41,const Icon,
