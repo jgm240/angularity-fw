@@ -1,0 +1,13 @@
+App(
+    appid="ota_update",
+    name="Angularity Update",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ota_update_app",
+    requires=["gui", "storage", "dialogs", "loader", "expansion"],
+    stack_size=4 * 1024,
+    fap_icon="icon.png",
+    fap_category="Tools",
+    fap_author="Angularity FW",
+    fap_version="1.0",
+    fap_description="Download and install Angularity FW updates over the WiFi Devboard (FlipperHTTP), no phone needed",
+)
