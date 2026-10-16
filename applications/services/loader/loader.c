@@ -533,6 +533,23 @@ typedef struct {
     bool allow;
 } LoaderPermissionJob;
 
+static bool loader_app_is_firmware_bundled(const char* path) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTERNAL_APPS[i].path, path) == 0) return true;
+    }
+    for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_SETTINGS_APPS[i].path, path) == 0) return true;
+    }
+    static const char* const bundled_dirs[] = {
+        EXT_PATH("apps/assets/"),
+        EXT_PATH("apps/Settings/"),
+    };
+    for(size_t i = 0; i < COUNT_OF(bundled_dirs); i++) {
+        if(strncmp(path, bundled_dirs[i], strlen(bundled_dirs[i])) == 0) return true;
+    }
+    return false;
+}
+
 static int32_t loader_permission_thread(void* context) {
     LoaderPermissionJob* job = context;
     const char* path = job->path;
@@ -543,6 +560,10 @@ static int32_t loader_permission_thread(void* context) {
     // Never gate the settings app that turns this feature off, or a "Deny" could lock the
     // user out of switching it back off
     if(strstr(path, "/momentum_app.fap")) return 0;
+
+    // Apps that ship with the firmware (main menu, settings and assets apps such as
+    // Sub-GHz, Infrared, Passport) are trusted; only other apps are asked about
+    if(loader_app_is_firmware_bundled(path)) return 0;
 
     FileInfo info;
     uint32_t size = 0;
