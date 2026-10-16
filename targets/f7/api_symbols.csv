@@ -133,6 +133,7 @@ Header,+,lib/mlib/m-list.h,,
 Header,+,lib/mlib/m-rbtree.h,,
 Header,+,lib/mlib/m-tuple.h,,
 Header,+,lib/mlib/m-variant.h,,
+Header,+,lib/momentum/app_permissions.h,,
 Header,+,lib/momentum/cc_layout.h,,
 Header,+,lib/momentum/game_stats.h,,
 Header,+,lib/momentum/momentum.h,,
@@ -650,6 +651,14 @@ Function,-,acosl,long double,long double
 Function,-,aligned_alloc,void*,"size_t, size_t"
 Function,+,aligned_free,void,void*
 Function,+,aligned_malloc,void*,"size_t, size_t"
+Function,+,app_permissions_classify,uint32_t,const char*
+Function,+,app_permissions_count,uint32_t,
+Function,+,app_permissions_describe,void,"uint32_t, FuriString*"
+Function,+,app_permissions_forget_all,void,
+Function,+,app_permissions_is_enabled,_Bool,
+Function,+,app_permissions_lookup,_Bool,"const char*, uint32_t, uint32_t*, uint32_t*"
+Function,+,app_permissions_set_enabled,void,_Bool
+Function,+,app_permissions_store,void,"const char*, uint32_t, uint32_t, uint32_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
@@ -1216,6 +1225,7 @@ Function,-,fiprintf,int,"FILE*, const char*, ..."
 Function,-,fiscanf,int,"FILE*, const char*, ..."
 Function,+,flipper_application_alloc,FlipperApplication*,"Storage*, const ElfApiInterface*"
 Function,+,flipper_application_alloc_thread,FuriThread*,"FlipperApplication*, const char*"
+Function,+,flipper_application_enumerate_imports,void,"FlipperApplication*, FlipperApplicationImportCallback, void*"
 Function,+,flipper_application_free,void,FlipperApplication*
 Function,+,flipper_application_get_manifest,const FlipperApplicationManifest*,FlipperApplication*
 Function,+,flipper_application_is_plugin,_Bool,FlipperApplication*

@@ -8,6 +8,7 @@ env.Append(
         File("game_stats.h"),
         File("profiles.h"),
         File("cc_layout.h"),
+        File("app_permissions.h"),
     ],
     LINT_SOURCES=[
         Dir("."),

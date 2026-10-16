@@ -123,6 +123,18 @@ void elf_file_call_fini(ELFFile* elf);
 const ElfApiInterface* elf_file_get_api_interface(ELFFile* elf_file);
 
 /**
+ * @brief Callback for elf_file_enumerate_imports
+ * @return true to continue, false to stop enumeration
+ */
+typedef bool (*ElfImportCallback)(const char* name, void* context);
+
+/**
+ * @brief Call back for every undefined (imported) symbol name in the ELF
+ * symbol table. Needs the section table to be loaded.
+ */
+void elf_file_enumerate_imports(ELFFile* elf_file, ElfImportCallback callback, void* context);
+
+/**
  * @brief Get ELF file debug info
  * @param elf_file 
  * @param debug_info 

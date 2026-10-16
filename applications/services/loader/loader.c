@@ -11,6 +11,8 @@
 #include <loader/firmware_api/firmware_api.h>
 
 #include <momentum/asset_packs.h>
+#include <momentum/app_permissions.h>
+#include <momentum/security_log.h>
 
 #define TAG "Loader"
 
@@ -519,6 +521,75 @@ static LoaderStatusError
     }
 }
 
+// App permissions (opt-in, Angularity > Misc > App Permissions)
+
+static bool loader_import_scan_callback(const char* name, void* context) {
+    uint32_t* mask = context;
+    *mask |= app_permissions_classify(name);
+    return true;
+}
+
+/* Ask the user before an app that imports radio / GPIO / USB / Bluetooth
+ * functions starts. Answers are remembered per app (keyed by path + file size,
+ * so an updated app is asked again). This is a prompt based on what the app
+ * links against, not a sandbox. Returns true if the app may start. */
+static bool loader_check_app_permissions(Storage* storage, const char* path, FlipperApplication* fap) {
+    if(!app_permissions_is_enabled()) return true;
+
+    FileInfo info;
+    uint32_t size = 0;
+    if(storage_common_stat(storage, path, &info) == FSE_OK) size = (uint32_t)info.size;
+
+    uint32_t requested = 0, allowed = 0;
+    if(!app_permissions_lookup(path, size, &requested, &allowed)) {
+        flipper_application_enumerate_imports(fap, loader_import_scan_callback, &requested);
+        allowed = 0;
+        if(requested == 0) {
+            app_permissions_store(path, size, 0, 0);
+            return true;
+        }
+    }
+
+    uint32_t needed = requested & ~allowed;
+    if(needed == 0) return true;
+
+    FuriString* app_name = furi_string_alloc();
+    path_extract_filename_no_ext(path, app_name);
+    FuriString* wanted = furi_string_alloc();
+    app_permissions_describe(needed, wanted);
+    FuriString* text = furi_string_alloc_printf(
+        "%s\nwants to use:\n%s", furi_string_get_cstr(app_name), furi_string_get_cstr(wanted));
+
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+    DialogMessage* message = dialog_message_alloc();
+    dialog_message_set_header(message, "Allow app?", 64, 0, AlignCenter, AlignTop);
+    dialog_message_set_text(message, furi_string_get_cstr(text), 64, 30, AlignCenter, AlignCenter);
+    dialog_message_set_buttons(message, "Deny", "Once", "Always");
+    DialogMessageButton res = dialog_message_show(dialogs, message);
+    dialog_message_free(message);
+    furi_record_close(RECORD_DIALOGS);
+
+    bool allow = (res == DialogMessageButtonCenter) || (res == DialogMessageButtonRight);
+    // Remember "Always" as granted; remember a deny/once as still-not-granted so
+    // the import scan is not repeated but the app is asked again next time
+    app_permissions_store(path, size, requested, res == DialogMessageButtonRight ? requested : allowed);
+
+    FuriString* log = furi_string_alloc_printf(
+        "App %s: %s %s",
+        furi_string_get_cstr(app_name),
+        res == DialogMessageButtonRight ? "always allowed" :
+        res == DialogMessageButtonCenter ? "allowed once" :
+                                           "denied",
+        furi_string_get_cstr(wanted));
+    security_log_add(furi_string_get_cstr(log));
+
+    furi_string_free(log);
+    furi_string_free(text);
+    furi_string_free(wanted);
+    furi_string_free(app_name);
+    return allow;
+}
+
 static LoaderMessageLoaderStatusResult loader_start_external_app(
     Loader* loader,
     Storage* storage,
@@ -610,6 +681,15 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
                 result.error = loader_status_error_from_preload_status(preload_res);
                 break;
             }
+        }
+
+        if(!loader_check_app_permissions(storage, path, loader->app.fap)) {
+            result.value = loader_make_status_error(
+                LoaderStatusErrorApiMismatchCanceled, // reused: skips the generic error popup
+                error_message,
+                "Permission denied: %s",
+                path);
+            break;
         }
 
         FURI_LOG_I(TAG, "Starting app");
