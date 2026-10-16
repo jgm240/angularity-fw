@@ -12,6 +12,7 @@
 
 #include <momentum/asset_packs.h>
 #include <momentum/app_permissions.h>
+#include <momentum/app_permissions_scan.h>
 #include <momentum/security_log.h>
 
 #define TAG "Loader"
@@ -522,36 +523,46 @@ static LoaderStatusError
 }
 
 // App permissions (opt-in, Angularity > Misc > App Permissions)
+//
+// The loader service thread only has a 2 KB stack, so the whole check (settings
+// file reads, ELF scan, dialog, log write) runs in a short-lived thread of its own.
 
-static bool loader_import_scan_callback(const char* name, void* context) {
-    uint32_t* mask = context;
-    *mask |= app_permissions_classify(name);
-    return true;
-}
+typedef struct {
+    Storage* storage;
+    const char* path;
+    bool allow;
+} LoaderPermissionJob;
 
-/* Ask the user before an app that imports radio / GPIO / USB / Bluetooth
- * functions starts. Answers are remembered per app (keyed by path + file size,
- * so an updated app is asked again). This is a prompt based on what the app
- * links against, not a sandbox. Returns true if the app may start. */
-static bool loader_check_app_permissions(Storage* storage, const char* path, FlipperApplication* fap) {
-    if(!app_permissions_is_enabled()) return true;
+static int32_t loader_permission_thread(void* context) {
+    LoaderPermissionJob* job = context;
+    const char* path = job->path;
+    job->allow = true;
+
+    if(!app_permissions_is_enabled()) return 0;
+
+    // Never gate the settings app that turns this feature off, or a "Deny" could lock the
+    // user out of switching it back off
+    if(strstr(path, "/momentum_app.fap")) return 0;
 
     FileInfo info;
     uint32_t size = 0;
-    if(storage_common_stat(storage, path, &info) == FSE_OK) size = (uint32_t)info.size;
+    if(storage_common_stat(job->storage, path, &info) == FSE_OK) size = (uint32_t)info.size;
 
     uint32_t requested = 0, allowed = 0;
     if(!app_permissions_lookup(path, size, &requested, &allowed)) {
-        flipper_application_enumerate_imports(fap, loader_import_scan_callback, &requested);
         allowed = 0;
+        if(!app_permissions_scan_file(job->storage, path, &requested)) {
+            // Not parseable: do not block the app, and do not remember anything
+            return 0;
+        }
         if(requested == 0) {
             app_permissions_store(path, size, 0, 0);
-            return true;
+            return 0;
         }
     }
 
     uint32_t needed = requested & ~allowed;
-    if(needed == 0) return true;
+    if(needed == 0) return 0;
 
     FuriString* app_name = furi_string_alloc();
     path_extract_filename_no_ext(path, app_name);
@@ -569,15 +580,16 @@ static bool loader_check_app_permissions(Storage* storage, const char* path, Fli
     dialog_message_free(message);
     furi_record_close(RECORD_DIALOGS);
 
-    bool allow = (res == DialogMessageButtonCenter) || (res == DialogMessageButtonRight);
-    // Remember "Always" as granted; remember a deny/once as still-not-granted so
-    // the import scan is not repeated but the app is asked again next time
-    app_permissions_store(path, size, requested, res == DialogMessageButtonRight ? requested : allowed);
+    job->allow = (res == DialogMessageButtonCenter) || (res == DialogMessageButtonRight);
+    // "Always" is remembered as granted. Deny/Once are remembered as not granted so the
+    // import scan is not repeated, but the app is asked again next time.
+    app_permissions_store(
+        path, size, requested, res == DialogMessageButtonRight ? requested : allowed);
 
     FuriString* log = furi_string_alloc_printf(
         "App %s: %s %s",
         furi_string_get_cstr(app_name),
-        res == DialogMessageButtonRight ? "always allowed" :
+        res == DialogMessageButtonRight  ? "always allowed" :
         res == DialogMessageButtonCenter ? "allowed once" :
                                            "denied",
         furi_string_get_cstr(wanted));
@@ -587,7 +599,20 @@ static bool loader_check_app_permissions(Storage* storage, const char* path, Fli
     furi_string_free(text);
     furi_string_free(wanted);
     furi_string_free(app_name);
-    return allow;
+    return 0;
+}
+
+/* Ask the user before an app that links against radio / GPIO / USB / Bluetooth
+ * functions starts. This is a prompt based on what the app links against, not a
+ * sandbox. Returns true if the app may start. */
+static bool loader_check_app_permissions(Storage* storage, const char* path) {
+    LoaderPermissionJob job = {.storage = storage, .path = path, .allow = true};
+    FuriThread* thread =
+        furi_thread_alloc_ex("LoaderPermissions", 4 * 1024, loader_permission_thread, &job);
+    furi_thread_start(thread);
+    furi_thread_join(thread);
+    furi_thread_free(thread);
+    return job.allow;
 }
 
 static LoaderMessageLoaderStatusResult loader_start_external_app(
@@ -683,7 +708,7 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
             }
         }
 
-        if(!loader_check_app_permissions(storage, path, loader->app.fap)) {
+        if(!loader_check_app_permissions(storage, path)) {
             result.value = loader_make_status_error(
                 LoaderStatusErrorApiMismatchCanceled, // reused: skips the generic error popup
                 error_message,

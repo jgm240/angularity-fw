@@ -230,14 +230,6 @@ const FlipperApplicationManifest* flipper_application_get_manifest(FlipperApplic
     return &app->manifest;
 }
 
-void flipper_application_enumerate_imports(
-    FlipperApplication* app,
-    FlipperApplicationImportCallback callback,
-    void* context) {
-    furi_check(app);
-    elf_file_enumerate_imports(app->elf, callback, context);
-}
-
 FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplication* app) {
     furi_check(app);
 

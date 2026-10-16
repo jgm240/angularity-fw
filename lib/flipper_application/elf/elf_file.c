@@ -665,21 +665,6 @@ static Elf32_Addr elf_address_of_by_hash(ELFFile* elf, uint32_t hash) {
     return ELF_INVALID_ADDRESS;
 }
 
-void elf_file_enumerate_imports(ELFFile* elf, ElfImportCallback callback, void* context) {
-    furi_check(elf);
-    furi_check(callback);
-
-    FuriString* name = furi_string_alloc();
-    Elf32_Sym sym;
-    for(size_t i = 0; i < elf->symbol_count; i++) {
-        furi_string_reset(name);
-        if(elf_read_symbol(elf, i, &sym, name) && sym.st_shndx == SHN_UNDEF && sym.st_name != 0) {
-            if(!callback(furi_string_get_cstr(name), context)) break;
-        }
-    }
-    furi_string_free(name);
-}
-
 static bool elf_file_find_string_by_hash(ELFFile* elf, uint32_t hash, FuriString* out) {
     bool result = false;
 

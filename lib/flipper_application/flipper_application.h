@@ -66,21 +66,6 @@ typedef struct {
 FlipperApplication*
     flipper_application_alloc(Storage* storage, const ElfApiInterface* api_interface);
 
-/** Callback for flipper_application_enumerate_imports
- * @return true to keep going, false to stop
- */
-typedef bool (*FlipperApplicationImportCallback)(const char* name, void* context);
-
-/** List the symbols a loaded application imports from the firmware
- * @param app Application pointer
- * @param callback Called with each imported symbol name
- * @param context Passed to the callback
- */
-void flipper_application_enumerate_imports(
-    FlipperApplication* app,
-    FlipperApplicationImportCallback callback,
-    void* context);
-
 /** Destroy FlipperApplication object
  * @param app Application pointer
  */
