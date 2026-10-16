@@ -3,7 +3,7 @@ App(
     name="Angularity Update",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ota_update_app",
-    requires=["gui", "storage", "dialogs", "loader", "expansion"],
+    requires=["gui", "storage", "dialogs", "loader"],
     stack_size=4 * 1024,
     fap_icon="icon.png",
     fap_category="Tools",
