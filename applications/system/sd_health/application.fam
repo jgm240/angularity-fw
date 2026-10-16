@@ -1,0 +1,13 @@
+App(
+    appid="sd_health",
+    name="SD Health",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="sd_health_app",
+    requires=["gui", "storage"],
+    stack_size=4 * 1024,
+    fap_icon="icon.png",
+    fap_category="Tools",
+    fap_author="Angularity FW",
+    fap_version="1.0",
+    fap_description="SD card info, speed benchmark, write/verify surface test and folder integrity scan",
+)
