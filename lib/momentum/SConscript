@@ -9,6 +9,7 @@ env.Append(
         File("profiles.h"),
         File("cc_layout.h"),
         File("app_permissions.h"),
+        File("screenshot.h"),
     ],
     LINT_SOURCES=[
         Dir("."),

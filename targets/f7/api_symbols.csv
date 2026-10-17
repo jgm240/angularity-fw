@@ -138,6 +138,7 @@ Header,+,lib/momentum/cc_layout.h,,
 Header,+,lib/momentum/game_stats.h,,
 Header,+,lib/momentum/momentum.h,,
 Header,+,lib/momentum/profiles.h,,
+Header,+,lib/momentum/screenshot.h,,
 Header,+,lib/momentum/security_log.h,,
 Header,+,lib/music_worker/music_worker.h,,
 Header,+,lib/nanopb/pb.h,,
@@ -3372,6 +3373,13 @@ Function,+,scene_manager_search_and_switch_to_previous_scene,_Bool,"SceneManager
 Function,+,scene_manager_search_and_switch_to_previous_scene_one_of,_Bool,"SceneManager*, const uint32_t*, size_t"
 Function,+,scene_manager_set_scene_state,void,"SceneManager*, uint32_t, uint32_t"
 Function,+,scene_manager_stop,void,SceneManager*
+Function,+,screenshot_combo_name,const char*,uint8_t
+Function,+,screenshot_get_combo,uint8_t,
+Function,+,screenshot_is_enabled,_Bool,
+Function,+,screenshot_set_combo,void,uint8_t
+Function,+,screenshot_set_enabled,void,_Bool
+Function,+,screenshot_start,void,
+Function,+,screenshot_take,_Bool,
 Function,+,sd_api_get_fs_type_text,const char*,SDFsType
 Function,-,secure_getenv,char*,const char*
 Function,+,security_log_add,void,const char*
@@ -4168,6 +4176,7 @@ Variable,+,I_CC_Profile_16x16,const Icon,
 Variable,+,I_CC_PseudoOff_16x16,const Icon,
 Variable,+,I_CC_SdHealth_16x16,const Icon,
 Variable,+,I_CC_Settings_16x16,const Icon,
+Variable,+,I_CC_Standby_16x16,const Icon,
 Variable,+,I_CC_Stealth_16x16,const Icon,
 Variable,-,I_Certification1_103x56,const Icon,
 Variable,-,I_Certification2_46x33,const Icon,

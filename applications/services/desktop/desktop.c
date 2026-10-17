@@ -9,6 +9,7 @@
 #include <momentum/settings.h>
 #include <momentum/sound_pack.h>
 #include <momentum/game_stats.h>
+#include <momentum/screenshot.h>
 #include <dolphin/dolphin.h>
 #include <notification/notification_messages.h>
 #include <furi_hal.h>
@@ -639,6 +640,9 @@ int32_t desktop_srv(void* p) {
     Desktop* desktop = desktop_alloc();
 
     desktop_init_settings(desktop);
+
+    // Hold-keys screenshot shortcut (off until enabled in Angularity > Misc > Screenshot)
+    screenshot_start();
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
