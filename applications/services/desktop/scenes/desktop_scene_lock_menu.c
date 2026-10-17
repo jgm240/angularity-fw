@@ -163,6 +163,12 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 desktop->loader, EXT_PATH("apps/Tools/sd_health.fap"), NULL);
             consumed = true;
             break;
+        case DesktopLockMenuEventStandby:
+            desktop_scene_lock_menu_save_settings(desktop);
+            loader_start_detached_with_gui_error(
+                desktop->loader, EXT_PATH("apps/Tools/standby.fap"), NULL);
+            consumed = true;
+            break;
         case DesktopLockMenuEventProfileNext: {
             uint8_t slot = profiles_cycle();
             desktop_lock_menu_set_profile_active(desktop->lock_menu, slot);

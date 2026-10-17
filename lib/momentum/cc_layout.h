@@ -24,6 +24,7 @@ typedef enum {
     CcActionDiagnostics,
     CcActionSdHealth,
     CcActionProfile,
+    CcActionStandby,
     CcActionCount,
 } CcAction;
 

@@ -74,4 +74,5 @@ typedef enum {
     DesktopLockMenuEventDiagnostics,
     DesktopLockMenuEventSdHealth,
     DesktopLockMenuEventProfileNext,
+    DesktopLockMenuEventStandby,
 } DesktopEvent;

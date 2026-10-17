@@ -152,6 +152,9 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
                 icon = &I_CC_Profile_16x16;
                 enabled = m->lock_menu->profile_active != PROFILE_NONE;
                 break;
+            case CcActionStandby:
+                icon = &I_CC_Standby_16x16;
+                break;
             default:
                 icon = &I_CC_Settings_16x16;
                 break;
@@ -383,6 +386,9 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                     break;
                 case CcActionProfile:
                     desktop_event = DesktopLockMenuEventProfileNext;
+                    break;
+                case CcActionStandby:
+                    desktop_event = DesktopLockMenuEventStandby;
                     break;
                 default:
                     break;

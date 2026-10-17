@@ -31,6 +31,7 @@ static const char* const cc_action_names[CcActionCount] = {
     [CcActionDiagnostics] = "Diagnostics",
     [CcActionSdHealth] = "SD Health",
     [CcActionProfile] = "Next profile",
+    [CcActionStandby] = "Standby",
 };
 
 static uint8_t cc_layout[CC_LAYOUT_SLOTS];
