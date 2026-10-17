@@ -2,8 +2,11 @@
 
 Updates Angularity FW from the Flipper itself, no phone needed.
 
-1. Seat the **WiFi Devboard** running **FlipperHTTP** firmware and set its WiFi once (any FlipperHTTP app can do it).
-2. Open **Apps > Tools > Angularity Update > Check and install update**.
+1. Seat the **WiFi Devboard** running **FlipperHTTP** firmware (flash it with Apps > GPIO > ESP > ESP Flasher).
+2. Open **Apps > Tools > Angularity Update > WiFi setup**: it scans for networks (or lets you type a name),
+   asks for the password, saves it on the devboard, connects, shows the IP address and checks that the
+   update server is reachable. 2.4 GHz networks with a normal password only. Needed once.
+3. Open **Check and install update**.
 3. The app reads `ota/latest.json` from the project repo, shows the version, downloads the
    package in resumable 128 KB chunks (about 20 minutes for 13 MB at 115200 baud), checks its
    SHA-256, unpacks it to `/ext/update`, and hands over to the system updater.

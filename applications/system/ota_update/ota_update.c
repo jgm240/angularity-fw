@@ -5,6 +5,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_box.h>
+#include <gui/modules/text_input.h>
 #include <gui/elements.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
@@ -41,13 +42,23 @@ typedef enum {
     OtaViewMenu,
     OtaViewStatus,
     OtaViewResult,
+    OtaViewWifiList,
+    OtaViewWifiSsid, // shared by the name and password steps
 } OtaView;
 
 typedef enum {
     JobUpdate,
     JobCheck,
+    JobWifiScan,
     JobTest,
+    JobWifiSave, // not in the menu: started after the user enters a password
 } Job;
+
+#define WIFI_MAX_NETWORKS 24
+#define WIFI_SSID_LEN     33 // 32 characters + NUL
+#define WIFI_PASS_LEN     65 // 64 characters + NUL
+#define WIFI_SCAN_LINE    3072
+#define WIFI_MANUAL_INDEX 0 // first list entry: type the name by hand
 
 typedef enum {
     OtaEventJobDone = 1,
@@ -93,6 +104,15 @@ typedef struct {
     FuriStreamBuffer* rx;
     volatile uint32_t rx_overflow;
     uint8_t* io;
+
+    // WiFi setup
+    Submenu* wifi_list;
+    TextInput* text_input;
+    char networks[WIFI_MAX_NETWORKS][WIFI_SSID_LEN];
+    size_t network_count;
+    char ssid[WIFI_SSID_LEN];
+    char password[WIFI_PASS_LEN];
+    bool wifi_board_ok; // devboard answered during the scan, so the list (or manual entry) makes sense
 } OtaApp;
 
 // ------------------------------------------------------------ status UI
@@ -623,7 +643,7 @@ static bool connect_devboard(OtaApp* app) {
     if(!link_ping(app)) {
         furi_string_cat_str(
             app->text,
-            "No answer from the WiFi Devboard.\n\n- Seat it firmly on the GPIO header\n- It must run FlipperHTTP firmware (not Computer Mode)\n- WiFi must be set up once with the FlipperHTTP / WiFi apps\n");
+            "No answer from the WiFi Devboard.\n\n- Seat it firmly on the GPIO header\n- It must run FlipperHTTP firmware (not Computer Mode)\n- Set up its WiFi from this app's \"WiFi setup\" menu\n");
         return false;
     }
     return true;
@@ -671,6 +691,138 @@ static bool fetch_release(OtaApp* app, Release* rel) {
 static bool is_installed_version(const Release* rel) {
     const char* current = version_get_version(version_get());
     return current && (strstr(current, rel->version) || strstr(rel->version, current));
+}
+
+// Read lines from the devboard until `done` says stop, the timeout passes, or Back is pressed.
+// Everything received is appended to `all` (one line per row).
+typedef bool (*LineDoneFn)(const char* all, const char* line);
+
+static void collect_lines(
+    OtaApp* app,
+    uint32_t timeout_ms,
+    char* line,
+    size_t line_cap,
+    FuriString* all,
+    LineDoneFn done) {
+    uint32_t start = furi_get_tick();
+    while(furi_get_tick() - start < timeout_ms && !app->cancel) {
+        if(!link_read_line(app, line, line_cap, 1000)) continue;
+        furi_string_cat_str(all, line);
+        furi_string_cat_str(all, "\n");
+        if(done(furi_string_get_cstr(all), line)) break;
+    }
+}
+
+static bool scan_done(const char* all, const char* line) {
+    UNUSED(line);
+    return ota_json_array_complete(all, "networks");
+}
+
+static bool save_done(const char* all, const char* line) {
+    UNUSED(all);
+    return strstr(line, "[SUCCESS]") || strstr(line, "[ERROR]") || strstr(line, "Failed");
+}
+
+static bool connect_done(const char* all, const char* line) {
+    UNUSED(all);
+    return strstr(line, "[CONNECTED]") || strstr(line, "[SUCCESS]") || strstr(line, "[ERROR]") ||
+           strstr(line, "Failed") || strstr(line, "onnected to");
+}
+
+static bool ip_done(const char* all, const char* line) {
+    UNUSED(line);
+    char ip[24];
+    return ota_find_ipv4(all, ip, sizeof(ip));
+}
+
+static void job_wifi_scan(OtaApp* app) {
+    app->network_count = 0;
+    app->wifi_board_ok = false;
+    if(!connect_devboard(app)) return;
+    app->wifi_board_ok = true;
+
+    status_set(app, "WiFi scan", "Looking for networks...", "up to 25 seconds", -1);
+    link_flush(app);
+    link_send(app, "[WIFI/SCAN]");
+
+    char* line = malloc(WIFI_SCAN_LINE);
+    FuriString* all = furi_string_alloc();
+    collect_lines(app, 25000, line, WIFI_SCAN_LINE, all, scan_done);
+    free(line);
+
+    app->network_count = ota_json_string_array(
+        furi_string_get_cstr(all),
+        "networks",
+        &app->networks[0][0],
+        WIFI_SSID_LEN,
+        WIFI_MAX_NETWORKS);
+
+    furi_string_free(all);
+}
+
+static void job_wifi_save(OtaApp* app) {
+    if(!connect_devboard(app)) return;
+
+    char ssid_esc[WIFI_SSID_LEN * 2 + 2], pass_esc[WIFI_PASS_LEN * 2 + 2], cmd[320];
+    if(!ota_json_escape(app->ssid, ssid_esc, sizeof(ssid_esc)) ||
+       !ota_json_escape(app->password, pass_esc, sizeof(pass_esc)) ||
+       snprintf(cmd, sizeof(cmd), "[WIFI/SAVE]{\"ssid\":\"%s\",\"password\":\"%s\"}", ssid_esc, pass_esc) >=
+           (int)sizeof(cmd)) {
+        furi_string_cat_str(app->text, "The network name or password is too long.\n");
+        return;
+    }
+
+    char* line = malloc(256);
+    FuriString* said = furi_string_alloc();
+
+    status_set(app, "Saving WiFi", app->ssid, "", -1);
+    link_flush(app);
+    link_send(app, cmd);
+    collect_lines(app, 6000, line, 256, said, save_done);
+    bool save_failed = strstr(furi_string_get_cstr(said), "[ERROR]") != NULL;
+
+    furi_string_reset(said);
+    status_set(app, "Connecting", app->ssid, "up to 30 seconds", -1);
+    link_send(app, "[WIFI/CONNECT]");
+    collect_lines(app, 30000, line, 256, said, connect_done);
+    const char* reply = furi_string_get_cstr(said);
+    bool connected = !save_failed && !strstr(reply, "[ERROR]") && !strstr(reply, "Failed") &&
+                     (strstr(reply, "[CONNECTED]") || strstr(reply, "onnected to") ||
+                      strstr(reply, "[SUCCESS]"));
+
+    if(app->cancel) {
+        furi_string_cat_str(app->text, "Cancelled.\n");
+    } else if(connected) {
+        char ip[24] = "";
+        furi_string_reset(said);
+        link_send(app, "[WIFI/IP]");
+        collect_lines(app, 3000, line, 256, said, ip_done);
+        ota_find_ipv4(furi_string_get_cstr(said), ip, sizeof(ip));
+
+        furi_string_cat_printf(app->text, "Saved and connected to \"%s\".\n", app->ssid);
+        if(ip[0]) furi_string_cat_printf(app->text, "IP address: %s\n", ip);
+
+        // End-to-end proof that the internet is reachable
+        status_set(app, "Checking internet", "Reading update info...", "", -1);
+        Release rel;
+        FuriString* keep = furi_string_alloc_set(app->text);
+        furi_string_reset(app->text);
+        if(fetch_release(app, &rel)) {
+            furi_string_set(app->text, keep);
+            furi_string_cat_printf(
+                app->text, "\nInternet works. Latest firmware: %s\n\nYou can now run \"Check and install update\".\n", rel.version);
+        } else {
+            furi_string_cat_str(keep, "\nConnected to WiFi, but the update server could not be reached:\n");
+            furi_string_cat_str(keep, furi_string_get_cstr(app->text));
+            furi_string_set(app->text, keep);
+        }
+        furi_string_free(keep);
+    } else {
+        furi_string_cat_printf(app->text, "Could not connect to \"%s\".\n\nCheck the password and that the network is 2.4 GHz (the devboard cannot use 5 GHz).\n\nThe devboard said:\n%s\n", app->ssid, furi_string_empty(said) ? "(nothing)" : furi_string_get_cstr(said));
+    }
+    furi_string_free(said);
+    free(line);
+    memset(app->password, 0, sizeof(app->password));
 }
 
 static void job_test(OtaApp* app) {
@@ -813,6 +965,12 @@ static int32_t worker_thread(void* context) {
     case JobTest:
         job_test(app);
         break;
+    case JobWifiScan:
+        job_wifi_scan(app);
+        break;
+    case JobWifiSave:
+        job_wifi_save(app);
+        break;
     }
     link_close(app);
     view_dispatcher_send_custom_event(app->dispatcher, OtaEventJobDone);
@@ -832,12 +990,70 @@ static void menu_callback(void* context, uint32_t index) {
     start_job(context, (Job)index);
 }
 
+// ---- WiFi setup screens (run on the GUI thread)
+
+static void wifi_password_entered(void* context) {
+    OtaApp* app = context;
+    start_job(app, JobWifiSave);
+}
+
+static void wifi_ssid_entered(void* context) {
+    OtaApp* app = context;
+    text_input_reset(app->text_input);
+    text_input_set_header_text(app->text_input, "Password (blank = open)");
+    text_input_set_minimum_length(app->text_input, 0);
+    app->password[0] = '\0';
+    text_input_set_result_callback(
+        app->text_input, wifi_password_entered, app, app->password, sizeof(app->password), true);
+    view_dispatcher_switch_to_view(app->dispatcher, OtaViewWifiSsid);
+}
+
+static void wifi_list_callback(void* context, uint32_t index) {
+    OtaApp* app = context;
+    text_input_reset(app->text_input);
+    if(index == WIFI_MANUAL_INDEX) {
+        app->ssid[0] = '\0';
+        text_input_set_header_text(app->text_input, "Network name");
+        text_input_set_minimum_length(app->text_input, 1);
+        text_input_set_result_callback(
+            app->text_input, wifi_ssid_entered, app, app->ssid, sizeof(app->ssid), true);
+        view_dispatcher_switch_to_view(app->dispatcher, OtaViewWifiSsid);
+    } else if(index - 1 < app->network_count) {
+        snprintf(app->ssid, sizeof(app->ssid), "%s", app->networks[index - 1]);
+        wifi_ssid_entered(app);
+    }
+}
+
+static void wifi_list_populate(OtaApp* app) {
+    submenu_reset(app->wifi_list);
+    submenu_set_header(app->wifi_list, app->network_count ? "Choose network" : "No networks found");
+    submenu_add_item(app->wifi_list, "Type name...", WIFI_MANUAL_INDEX, wifi_list_callback, app);
+    for(size_t i = 0; i < app->network_count; i++) {
+        submenu_add_item(app->wifi_list, app->networks[i], i + 1, wifi_list_callback, app);
+    }
+}
+
+static uint32_t wifi_back_to_list(void* context) {
+    UNUSED(context);
+    return OtaViewWifiList;
+}
+
+static uint32_t wifi_back_to_menu(void* context) {
+    UNUSED(context);
+    return OtaViewMenu;
+}
+
 static bool custom_event_callback(void* context, uint32_t event) {
     OtaApp* app = context;
     if(event == OtaEventJobDone) {
         furi_thread_join(app->worker);
         furi_thread_free(app->worker);
         app->worker = NULL;
+        if(app->job == JobWifiScan && !app->cancel && app->wifi_board_ok) {
+            wifi_list_populate(app);
+            view_dispatcher_switch_to_view(app->dispatcher, OtaViewWifiList);
+            return true;
+        }
         text_box_set_text(app->result, furi_string_get_cstr(app->text));
         text_box_set_focus(app->result, TextBoxFocusStart);
         view_dispatcher_switch_to_view(app->dispatcher, OtaViewResult);
@@ -878,6 +1094,7 @@ int32_t ota_update_app(void* p) {
     app->menu = submenu_alloc();
     submenu_add_item(app->menu, "Check and install update", JobUpdate, menu_callback, app);
     submenu_add_item(app->menu, "Check for update only", JobCheck, menu_callback, app);
+    submenu_add_item(app->menu, "WiFi setup", JobWifiScan, menu_callback, app);
     submenu_add_item(app->menu, "Test WiFi Devboard", JobTest, menu_callback, app);
     view_dispatcher_add_view(app->dispatcher, OtaViewMenu, submenu_get_view(app->menu));
 
@@ -887,6 +1104,15 @@ int32_t ota_update_app(void* p) {
     view_set_draw_callback(app->status, status_draw);
     view_set_input_callback(app->status, status_input);
     view_dispatcher_add_view(app->dispatcher, OtaViewStatus, app->status);
+
+    app->wifi_list = submenu_alloc();
+    view_set_previous_callback(submenu_get_view(app->wifi_list), wifi_back_to_menu);
+    view_dispatcher_add_view(app->dispatcher, OtaViewWifiList, submenu_get_view(app->wifi_list));
+
+    app->text_input = text_input_alloc();
+    // One TextInput view serves both the name and the password step
+    view_set_previous_callback(text_input_get_view(app->text_input), wifi_back_to_list);
+    view_dispatcher_add_view(app->dispatcher, OtaViewWifiSsid, text_input_get_view(app->text_input));
 
     app->result = text_box_alloc();
     text_box_set_font(app->result, TextBoxFontText);
@@ -907,6 +1133,10 @@ int32_t ota_update_app(void* p) {
     view_dispatcher_remove_view(app->dispatcher, OtaViewMenu);
     view_dispatcher_remove_view(app->dispatcher, OtaViewStatus);
     view_dispatcher_remove_view(app->dispatcher, OtaViewResult);
+    view_dispatcher_remove_view(app->dispatcher, OtaViewWifiList);
+    view_dispatcher_remove_view(app->dispatcher, OtaViewWifiSsid);
+    submenu_free(app->wifi_list);
+    text_input_free(app->text_input);
     submenu_free(app->menu);
     view_free(app->status);
     text_box_free(app->result);
