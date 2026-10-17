@@ -11,6 +11,7 @@
 #include <notification/notification_app.h>
 #include <storage/storage.h>
 #include <datetime/datetime.h>
+#include <toolbox/version.h>
 
 #include "standby_draw.h"
 #include "devboard.h"
@@ -20,6 +21,12 @@
 #define SETTINGS_PATH EXT_PATH("apps_data/standby/settings.bin")
 #define WEATHER_PATH  EXT_PATH("apps_data/standby/weather.json")
 #define JWLINK_PATH   EXT_PATH("apps_data/standby/jwlink.json")
+// shared with the Angularity Update app
+#define UPDATE_STATUS_PATH EXT_PATH("apps_data/ota_update/status.json")
+#define UPDATE_URL_OVERRIDE EXT_PATH("apps_data/ota_update/url.txt")
+#define UPDATE_DEFAULT_URL \
+    "https://raw.githubusercontent.com/jgm240/angularity-fw/main/ota/latest.json"
+#define UPDATE_CHECK_SECONDS (7u * 86400u)
 
 #define SETTINGS_MAGIC 0x53425931u // "SBY1"
 #define JSON_BUFFER    4096
@@ -82,6 +89,7 @@ typedef struct {
     StandbyWeather weather;
     StandbyJwlink jw;
     char city_buf[32];
+    char update_ver[36]; // set while a newer release is waiting
 
     uint8_t page;
     float original_brightness;
@@ -189,6 +197,54 @@ static uint32_t local_timestamp(void) {
     return datetime_datetime_to_timestamp(&dt);
 }
 
+// ------------------------------------------------------------ update badge
+
+static bool installed_matches(const char* version) {
+    const char* current = version_get_version(version_get());
+    return current && current[0] && (strstr(current, version) || strstr(version, current));
+}
+
+/* Reads the shared status; fills app->update_ver when a newer release is waiting. Returns the
+ * timestamp of the last check, or 0 if there is none. */
+static uint32_t update_status_load(StandbyApp* app) {
+    app->update_ver[0] = '\0';
+    uint32_t checked = 0;
+    char* text = read_text_file(app->storage, UPDATE_STATUS_PATH, 300);
+    if(text) {
+        uint32_t newer = 0;
+        char latest[40];
+        if(mj_u32(text, "checked", &checked) && mj_string(text, "latest", latest, sizeof(latest))) {
+            mj_u32(text, "newer", &newer);
+            if(newer) {
+                const char* shown = strstr(latest, "release");
+                snprintf(app->update_ver, sizeof(app->update_ver), "%.30s", shown ? shown : latest);
+            }
+        }
+        free(text);
+    }
+    return checked;
+}
+
+static void update_status_store(StandbyApp* app, const char* latest, bool newer) {
+    storage_common_mkdir(app->storage, EXT_PATH("apps_data"));
+    storage_common_mkdir(app->storage, EXT_PATH("apps_data/ota_update"));
+    char text[160];
+    int n = snprintf(
+        text,
+        sizeof(text),
+        "{\"checked\":%lu,\"latest\":\"%.60s\",\"newer\":%d}\n",
+        (unsigned long)local_timestamp(),
+        latest,
+        newer ? 1 : 0);
+    if(n <= 0 || (size_t)n >= sizeof(text)) return;
+    File* f = storage_file_alloc(app->storage);
+    if(storage_file_open(f, UPDATE_STATUS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_write(f, text, (size_t)n);
+    }
+    storage_file_close(f);
+    storage_file_free(f);
+}
+
 // ------------------------------------------------------------ display model
 
 static void model_push(StandbyApp* app, const char* notice) {
@@ -212,6 +268,7 @@ static void model_push(StandbyApp* app, const char* notice) {
             m->monday_first = app->settings.monday_first;
             m->weather = app->weather;
             m->jw = app->jw;
+            snprintf(m->update_ver, sizeof(m->update_ver), "%.34s", app->update_ver);
             if(notice) snprintf(m->notice, sizeof(m->notice), "%s", notice);
         },
         true);
@@ -326,6 +383,30 @@ static bool do_sync_time(StandbyApp* app, DevBoard* d, char* buf) {
     return true;
 }
 
+/* At most once a week, ask the update feed whether a newer firmware exists and record it in the
+ * shared status file (the Angularity Update app shows it too). Failures are silent. */
+static void maybe_check_update(StandbyApp* app, DevBoard* d, char* buf) {
+    uint32_t now = local_timestamp();
+    uint32_t checked = update_status_load(app);
+    if(checked != 0 && now >= checked && now - checked < UPDATE_CHECK_SECONDS) return;
+
+    char url[200];
+    snprintf(url, sizeof(url), "%s", UPDATE_DEFAULT_URL);
+    char* override = read_text_file(app->storage, UPDATE_URL_OVERRIDE, 190);
+    if(override) {
+        size_t n = 0;
+        while(override[n] && override[n] != '\r' && override[n] != '\n' && override[n] != ' ') n++;
+        override[n] = '\0';
+        if(strncmp(override, "https://", 8) == 0) snprintf(url, sizeof(url), "%s", override);
+        free(override);
+    }
+    if(!fetch_json(d, url, buf, JSON_BUFFER)) return;
+    char version[48];
+    if(!mj_string(buf, "version", version, sizeof(version))) return;
+    update_status_store(app, version, !installed_matches(version));
+    update_status_load(app);
+}
+
 static int32_t worker_thread(void* context) {
     StandbyApp* app = context;
     char* buf = malloc(JSON_BUFFER);
@@ -337,6 +418,7 @@ static int32_t worker_thread(void* context) {
     if(devboard_open(&d, &app->cancel)) {
         if(devboard_ping(&d)) {
             ok = (app->job == JobSyncTime) ? do_sync_time(app, &d, buf) : do_refresh(app, &d, buf);
+            if(ok && app->job == JobRefresh) maybe_check_update(app, &d, buf);
         }
         devboard_close(&d);
     }
@@ -550,6 +632,7 @@ static void tick(StandbyApp* app) {
     if(now_tick - app->last_jwlink_load > 20000 || app->last_jwlink_load == 0) {
         app->last_jwlink_load = now_tick ? now_tick : 1;
         jwlink_load(app);
+        update_status_load(app);
     }
 
     // automatic refresh: once at start, then on the chosen interval; failures back off for 10 minutes

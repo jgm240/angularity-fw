@@ -149,3 +149,31 @@ static bool ota_find_ipv4(const char* text, char* out, size_t cap) {
     }
     return false;
 }
+
+/* The feed of the release before the newest one: latest.json -> previous.json */
+static inline bool previous_feed_url(const char* latest_url, char* out, size_t cap) {
+    static const char tail[] = "latest.json";
+    size_t n = strlen(latest_url), t = sizeof(tail) - 1;
+    if(n < t || strcmp(latest_url + n - t, tail) != 0 || n - t + sizeof("previous.json") > cap) {
+        return false;
+    }
+    memcpy(out, latest_url, n - t);
+    strcpy(out + n - t, "previous.json");
+    return true;
+}
+
+
+// "/ext/update/<dir>/update.fuf" -> "<dir>"
+static inline void manifest_dir_name(const char* manifest, char* out, size_t cap) {
+    out[0] = '\0';
+    const char* end = strrchr(manifest, '/');
+    if(!end || end == manifest) return;
+    const char* start = end;
+    while(start > manifest && start[-1] != '/')
+        start--;
+    size_t len = (size_t)(end - start);
+    if(len >= cap) return;
+    memcpy(out, start, len);
+    out[len] = '\0';
+}
+

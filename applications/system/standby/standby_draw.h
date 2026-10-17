@@ -24,6 +24,7 @@ typedef struct {
     bool h24;
     bool monday_first;
     char notice[44];
+    char update_ver[36]; // newest release when it is newer than the installed one
     StandbyWeather weather;
     StandbyJwlink jw;
 } DisplayModel;
@@ -172,7 +173,12 @@ static void draw_clock(Canvas* canvas, const DisplayModel* m) {
     canvas_draw_str_aligned(canvas, 2, 1, AlignLeft, AlignTop, buf);
     draw_battery_text(canvas, m);
 
-    if(m->weather.valid && !m->notice[0]) {
+    // bottom line: weather, alternating with "update available" when there is one
+    bool show_update = m->update_ver[0] && (!m->weather.valid || ((m->now.second / 6) % 2) == 1);
+    if(!m->notice[0] && show_update) {
+        snprintf(buf, sizeof(buf), "Update: %.28s", m->update_ver);
+        canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignBottom, buf);
+    } else if(m->weather.valid && !m->notice[0]) {
         char t[8];
         format_temp(t, sizeof(t), m->weather.temp10, m->fahrenheit);
         snprintf(buf, sizeof(buf), "%s   %s", t, standby_wmo_text(m->weather.code));

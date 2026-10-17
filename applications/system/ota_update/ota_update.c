@@ -13,6 +13,7 @@
 #include <expansion/expansion.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/version.h>
+#include <datetime/datetime.h>
 #include <momentum/settings.h>
 
 #include "sha256.h"
@@ -29,6 +30,16 @@
 #define OTA_PART_ID  EXT_PATH("update/.ota_download.id")
 #define OTA_TGZ      EXT_PATH("update/.ota_package.tgz")
 
+#define OTA_STATE_DIR    EXT_PATH("apps_data/ota_update")
+#define OTA_KEPT_FILE    EXT_PATH("apps_data/ota_update/kept.txt")
+#define OTA_STATUS_FILE  EXT_PATH("apps_data/ota_update/status.json")
+#define OTA_AUTOOFF_FILE EXT_PATH("apps_data/ota_update/autocheck_off")
+#define OTA_KEEP_COUNT   3 // unpacked packages kept on the SD card for rollback
+#define AUTOCHECK_HOURS  20
+#define MENU_ROLLBACK    50
+#define MENU_AUTO_TOGGLE 51
+#define ROLLBACK_DOWNLOAD 99
+
 #define UART_BAUD         115200
 #define RX_STREAM_SIZE    8192
 #define IO_BUFFER_SIZE    4096
@@ -44,6 +55,7 @@ typedef enum {
     OtaViewResult,
     OtaViewWifiList,
     OtaViewWifiSsid, // shared by the name and password steps
+    OtaViewRollback,
 } OtaView;
 
 typedef enum {
@@ -52,6 +64,9 @@ typedef enum {
     JobWifiScan,
     JobTest,
     JobWifiSave, // not in the menu: started after the user enters a password
+    JobAutoCheck, // quiet background check (own thread)
+    JobRollbackDownload,
+    JobRollbackLocal,
 } Job;
 
 #define WIFI_MAX_NETWORKS 24
@@ -63,6 +78,7 @@ typedef enum {
 typedef enum {
     OtaEventJobDone = 1,
     OtaEventExit,
+    OtaEventAutoCheckDone,
 } OtaEvent;
 
 typedef struct {
@@ -113,6 +129,14 @@ typedef struct {
     char ssid[WIFI_SSID_LEN];
     char password[WIFI_PASS_LEN];
     bool wifi_board_ok; // devboard answered during the scan, so the list (or manual entry) makes sense
+
+    // auto-check and rollback
+    FuriThread* auto_worker;
+    Submenu* rollback_list;
+    char kept[OTA_KEEP_COUNT][96]; // update folders this app unpacked, newest first
+    size_t kept_count;
+    char rollback_pick[96];
+    bool auto_check_on;
 } OtaApp;
 
 // ------------------------------------------------------------ status UI
@@ -649,17 +673,25 @@ static bool connect_devboard(OtaApp* app) {
     return true;
 }
 
-static bool fetch_release(OtaApp* app, Release* rel) {
-    char url[200];
-    load_update_url(url, sizeof(url));
-    status_set(app, "Checking", "Reading update info...", "", -1);
+static bool is_installed_version(const Release* rel);
+static void status_write(OtaApp* app, const char* latest, bool newer);
+
+/* Reads and validates an update feed JSON. Errors go to `err`; the status screen is only
+ * touched when `show_status` is set (the quiet auto-check must not draw on it). */
+static bool fetch_release_ex(
+    OtaApp* app,
+    Release* rel,
+    const char* url,
+    FuriString* err,
+    bool show_status) {
+    if(show_status) status_set(app, "Checking", "Reading update info...", "", -1);
 
     char* json = malloc(JSON_BUFFER_SIZE);
     HttpHead head;
     bool ok = http_get_text(app, url, json, JSON_BUFFER_SIZE, &head);
     if(!ok) {
         furi_string_cat_printf(
-            app->text,
+            err,
             "Could not read the update info.\n%s\n\nIs the Devboard connected to WiFi?\n",
             head.error[0] ? head.error : "No data");
         free(json);
@@ -681,16 +713,174 @@ static bool fetch_release(OtaApp* app, Release* rel) {
 
     if(!good || rel->url[0] == '\0' || strlen(rel->sha256) != 64 || rel->size < 100000) {
         furi_string_cat_str(
-            app->text,
+            err,
             "The update info is incomplete (needs version, size, sha256 and a download link).\n");
         return false;
     }
     return true;
 }
 
+static bool fetch_release(OtaApp* app, Release* rel) {
+    char url[200];
+    load_update_url(url, sizeof(url));
+    bool ok = fetch_release_ex(app, rel, url, app->text, true);
+    if(ok) status_write(app, rel->version, !is_installed_version(rel));
+    return ok;
+}
+
 static bool is_installed_version(const Release* rel) {
     const char* current = version_get_version(version_get());
     return current && (strstr(current, rel->version) || strstr(rel->version, current));
+}
+
+// ---- kept packages (rollback) and the update status shown in the menu
+
+static void ota_ensure_state_dir(OtaApp* app) {
+    storage_common_mkdir(app->storage, EXT_PATH("apps_data"));
+    storage_common_mkdir(app->storage, OTA_STATE_DIR);
+}
+
+static void kept_load(OtaApp* app) {
+    app->kept_count = 0;
+    File* f = storage_file_alloc(app->storage);
+    if(storage_file_open(f, OTA_KEPT_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        char buf[OTA_KEEP_COUNT * 100 + 8] = {0};
+        size_t n = storage_file_read(f, buf, sizeof(buf) - 1);
+        buf[n] = '\0';
+        char* line = buf;
+        while(*line && app->kept_count < OTA_KEEP_COUNT) {
+            char* nl = line;
+            while(*nl && *nl != '\n')
+                nl++;
+            size_t len = (size_t)(nl - line);
+            while(len > 0 && line[len - 1] == '\r')
+                len--;
+            if(len > 0 && len < sizeof(app->kept[0])) {
+                memcpy(app->kept[app->kept_count], line, len);
+                app->kept[app->kept_count][len] = '\0';
+                app->kept_count++;
+            }
+            line = *nl ? nl + 1 : nl;
+        }
+    }
+    storage_file_close(f);
+    storage_file_free(f);
+}
+
+static void kept_save(OtaApp* app) {
+    ota_ensure_state_dir(app);
+    File* f = storage_file_alloc(app->storage);
+    if(storage_file_open(f, OTA_KEPT_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        for(size_t i = 0; i < app->kept_count; i++) {
+            storage_file_write(f, app->kept[i], strlen(app->kept[i]));
+            storage_file_write(f, "\n", 1);
+        }
+    }
+    storage_file_close(f);
+    storage_file_free(f);
+}
+
+/* Remember a freshly unpacked update folder; folders pushed out of the list are deleted so the
+ * SD card does not fill up. Only folders this app created are ever removed. */
+static void kept_add(OtaApp* app, const char* dir_name) {
+    kept_load(app);
+    char old[OTA_KEEP_COUNT][96];
+    size_t old_count = app->kept_count;
+    memcpy(old, app->kept, sizeof(old));
+
+    snprintf(app->kept[0], sizeof(app->kept[0]), "%s", dir_name);
+    app->kept_count = 1;
+    for(size_t i = 0; i < old_count && app->kept_count < OTA_KEEP_COUNT; i++) {
+        if(strcmp(old[i], dir_name) != 0) {
+            memcpy(app->kept[app->kept_count++], old[i], sizeof(app->kept[0]));
+        }
+    }
+    // delete whatever fell off the end
+    for(size_t i = 0; i < old_count; i++) {
+        bool still = false;
+        for(size_t j = 0; j < app->kept_count; j++) {
+            if(strcmp(old[i], app->kept[j]) == 0) still = true;
+        }
+        if(!still && old[i][0] && !strchr(old[i], '/')) {
+            FuriString* path = furi_string_alloc_printf("%s/%s", OTA_DIR, old[i]);
+            storage_simply_remove_recursive(app->storage, furi_string_get_cstr(path));
+            furi_string_free(path);
+        }
+    }
+    kept_save(app);
+}
+
+static uint32_t local_now(void) {
+    DateTime dt;
+    furi_hal_rtc_get_datetime(&dt);
+    return datetime_datetime_to_timestamp(&dt);
+}
+
+static void status_write(OtaApp* app, const char* latest, bool newer) {
+    ota_ensure_state_dir(app);
+    char text[160];
+    int n = snprintf(
+        text,
+        sizeof(text),
+        "{\"checked\":%lu,\"latest\":\"%s\",\"newer\":%d}\n",
+        (unsigned long)local_now(),
+        latest,
+        newer ? 1 : 0);
+    if(n <= 0 || (size_t)n >= sizeof(text)) return;
+    File* f = storage_file_alloc(app->storage);
+    if(storage_file_open(f, OTA_STATUS_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_write(f, text, (size_t)n);
+    }
+    storage_file_close(f);
+    storage_file_free(f);
+}
+
+/* Returns false if no status exists. */
+static bool status_read(OtaApp* app, uint32_t* checked, char* latest, size_t cap, bool* newer) {
+    bool ok = false;
+    File* f = storage_file_alloc(app->storage);
+    if(storage_file_open(f, OTA_STATUS_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        char buf[200] = {0};
+        size_t n = storage_file_read(f, buf, sizeof(buf) - 1);
+        buf[n] = '\0';
+        uint32_t newer_v = 0;
+        if(ota_json_u32(buf, "checked", checked) && ota_json_string(buf, "latest", latest, cap)) {
+            ota_json_u32(buf, "newer", &newer_v);
+            *newer = newer_v != 0;
+            ok = true;
+        }
+    }
+    storage_file_close(f);
+    storage_file_free(f);
+    return ok;
+}
+
+static void menu_header_update(OtaApp* app) {
+    uint32_t checked;
+    char latest[64];
+    bool newer;
+    char header[48];
+    if(!status_read(app, &checked, latest, sizeof(latest), &newer)) {
+        snprintf(header, sizeof(header), "Angularity Update");
+    } else if(newer) {
+        // "AngularityFW-release28" -> show the tail so it fits the header
+        const char* shown = strstr(latest, "release");
+        snprintf(header, sizeof(header), "Update available: %.28s", shown ? shown : latest);
+    } else {
+        uint32_t now = local_now();
+        uint32_t age = now > checked ? now - checked : 0;
+        if(age < 3600 * 36) {
+            snprintf(header, sizeof(header), "Up to date (today)");
+        } else {
+            snprintf(header, sizeof(header), "Up to date (%lu d ago)", (unsigned long)(age / 86400));
+        }
+    }
+    submenu_set_header(app->menu, header);
+}
+
+static void auto_toggle_label(OtaApp* app) {
+    submenu_change_item_label(
+        app->menu, MENU_AUTO_TOGGLE, app->auto_check_on ? "Auto-check: ON" : "Auto-check: OFF");
 }
 
 // Read lines from the devboard until `done` says stop, the timeout passes, or Back is pressed.
@@ -853,10 +1043,23 @@ static void job_check(OtaApp* app) {
         is_installed_version(&rel) ? "You are up to date." : "A newer version is available.");
 }
 
-static void job_update(OtaApp* app) {
+static void job_install(OtaApp* app, bool previous) {
     if(!connect_devboard(app)) return;
     Release rel;
-    if(!fetch_release(app, &rel)) return;
+    if(previous) {
+        char latest_url[200], prev_url[200];
+        load_update_url(latest_url, sizeof(latest_url));
+        if(!previous_feed_url(latest_url, prev_url, sizeof(prev_url))) {
+            furi_string_cat_str(app->text, "No previous-release feed is available for this update source.\n");
+            return;
+        }
+        if(!fetch_release_ex(app, &rel, prev_url, app->text, true)) {
+            furi_string_cat_str(app->text, "There may be no previous release published yet.\n");
+            return;
+        }
+    } else if(!fetch_release(app, &rel)) {
+        return;
+    }
 
     bool same = is_installed_version(&rel);
     FuriString* ask = furi_string_alloc_printf(
@@ -864,8 +1067,12 @@ static void job_update(OtaApp* app) {
         rel.version,
         (unsigned long)(rel.size / (1024 * 1024)),
         (unsigned long)(rel.size / 11000 / 60 + 1),
-        same ? "Already installed" : "New version");
-    bool go = confirm(app, same ? "Reinstall?" : "Download update?", furi_string_get_cstr(ask), same ? "Reinstall" : "Download");
+        same ? "Already installed" : (previous ? "Older release" : "New version"));
+    bool go = confirm(
+        app,
+        same ? "Reinstall?" : (previous ? "Roll back?" : "Download update?"),
+        furi_string_get_cstr(ask),
+        same ? "Reinstall" : (previous ? "Download" : "Download"));
     furi_string_free(ask);
     if(!go) {
         furi_string_cat_str(app->text, "Nothing was changed.\n");
@@ -935,8 +1142,15 @@ static void job_update(OtaApp* app) {
         return;
     }
 
+    {
+        // remember this package so it can be rolled back to later; old ones get cleaned up
+        char dir_name[96];
+        manifest_dir_name(furi_string_get_cstr(manifest), dir_name, sizeof(dir_name));
+        if(dir_name[0]) kept_add(app, dir_name);
+    }
+
     furi_string_cat_printf(
-        app->text, "Update %s is ready in /ext/update.\n", rel.version);
+        app->text, "%s %s is ready in /ext/update.\n", previous ? "Rollback to" : "Update", rel.version);
     if(confirm(app, "Install now?", "The Flipper will restart\nand update itself.", "Install")) {
         Loader* loader = furi_record_open(RECORD_LOADER);
         loader_start_detached_with_gui_error(loader, "UpdaterApp", furi_string_get_cstr(manifest));
@@ -948,6 +1162,66 @@ static void job_update(OtaApp* app) {
     furi_string_cat_str(
         app->text, "You can install it later from Archive: /ext/update > update.fuf > Run.\n");
     furi_string_free(manifest);
+}
+
+static void job_update(OtaApp* app) {
+    job_install(app, false);
+}
+
+/* Install a package that is already unpacked on the SD card (kept from an earlier update). */
+static void job_rollback_local(OtaApp* app) {
+    FuriString* manifest = furi_string_alloc_printf("%s/%s/update.fuf", OTA_DIR, app->rollback_pick);
+    if(!storage_file_exists(app->storage, furi_string_get_cstr(manifest))) {
+        furi_string_cat_printf(
+            app->text, "%s is no longer on the SD card.\n", app->rollback_pick);
+        furi_string_free(manifest);
+        return;
+    }
+    if(!furi_hal_power_is_charging() && furi_hal_power_get_pct() < MIN_BATTERY_PCT) {
+        furi_string_cat_printf(
+            app->text,
+            "Battery is %u%%. Charge to at least %d%% (or plug in USB) first.\n",
+            furi_hal_power_get_pct(),
+            MIN_BATTERY_PCT);
+        furi_string_free(manifest);
+        return;
+    }
+    const char* shown = strstr(app->rollback_pick, "AngularityFW");
+    FuriString* ask = furi_string_alloc_printf(
+        "%s\nReplaces the current\nfirmware", shown ? shown : app->rollback_pick);
+    bool go = confirm(app, "Roll back?", furi_string_get_cstr(ask), "Install");
+    furi_string_free(ask);
+    if(!go) {
+        furi_string_cat_str(app->text, "Nothing was changed.\n");
+        furi_string_free(manifest);
+        return;
+    }
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    loader_start_detached_with_gui_error(loader, "UpdaterApp", furi_string_get_cstr(manifest));
+    furi_record_close(RECORD_LOADER);
+    furi_string_free(manifest);
+    view_dispatcher_send_custom_event(app->dispatcher, OtaEventExit);
+}
+
+/* Quiet check on launch: no screens, no messages, failures are ignored. Own thread so the
+ * menu is usable at once; starting any other job cancels it first. */
+static int32_t auto_worker_thread(void* context) {
+    OtaApp* app = context;
+    if(link_open(app)) {
+        if(link_ping(app)) {
+            Release rel;
+            char url[200];
+            load_update_url(url, sizeof(url));
+            FuriString* err = furi_string_alloc();
+            if(fetch_release_ex(app, &rel, url, err, false)) {
+                status_write(app, rel.version, !is_installed_version(&rel));
+            }
+            furi_string_free(err);
+        }
+        link_close(app);
+    }
+    view_dispatcher_send_custom_event(app->dispatcher, OtaEventAutoCheckDone);
+    return 0;
 }
 
 // ------------------------------------------------------------ plumbing
@@ -971,13 +1245,31 @@ static int32_t worker_thread(void* context) {
     case JobWifiSave:
         job_wifi_save(app);
         break;
+    case JobRollbackDownload:
+        job_install(app, true);
+        break;
+    case JobRollbackLocal:
+        job_rollback_local(app);
+        break;
+    case JobAutoCheck:
+        break; // runs on its own thread, never through worker_thread
     }
     link_close(app);
     view_dispatcher_send_custom_event(app->dispatcher, OtaEventJobDone);
     return 0;
 }
 
+static void auto_worker_stop(OtaApp* app) {
+    if(app->auto_worker) {
+        app->cancel = true;
+        furi_thread_join(app->auto_worker);
+        furi_thread_free(app->auto_worker);
+        app->auto_worker = NULL;
+    }
+}
+
 static void start_job(OtaApp* app, Job job) {
+    auto_worker_stop(app); // frees the serial port if the background check still holds it
     app->job = job;
     app->cancel = false;
     status_set(app, "Working...", "", "", -1);
@@ -986,8 +1278,57 @@ static void start_job(OtaApp* app, Job job) {
     furi_thread_start(app->worker);
 }
 
+static void rollback_callback(void* context, uint32_t index) {
+    OtaApp* app = context;
+    if(index == ROLLBACK_DOWNLOAD) {
+        start_job(app, JobRollbackDownload);
+    } else if(index >= 100 && index - 100 < app->kept_count) {
+        snprintf(app->rollback_pick, sizeof(app->rollback_pick), "%s", app->kept[index - 100]);
+        start_job(app, JobRollbackLocal);
+    }
+}
+
+static void rollback_populate(OtaApp* app) {
+    submenu_reset(app->rollback_list);
+    submenu_set_header(app->rollback_list, "Roll back to");
+    kept_load(app);
+    const char* current = version_get_version(version_get());
+    for(size_t i = 0; i < app->kept_count; i++) {
+        const char* name = app->kept[i];
+        if(current && current[0] && strstr(name, current)) continue; // that is the installed one
+        FuriString* manifest = furi_string_alloc_printf("%s/%s/update.fuf", OTA_DIR, name);
+        bool present = storage_file_exists(app->storage, furi_string_get_cstr(manifest));
+        furi_string_free(manifest);
+        if(!present) continue;
+        const char* label = strstr(name, "AngularityFW");
+        submenu_add_item(app->rollback_list, label ? label : name, 100 + i, rollback_callback, app);
+    }
+    submenu_add_item(
+        app->rollback_list, "Download previous release", ROLLBACK_DOWNLOAD, rollback_callback, app);
+}
+
 static void menu_callback(void* context, uint32_t index) {
-    start_job(context, (Job)index);
+    OtaApp* app = context;
+    if(index == MENU_ROLLBACK) {
+        rollback_populate(app);
+        view_dispatcher_switch_to_view(app->dispatcher, OtaViewRollback);
+    } else if(index == MENU_AUTO_TOGGLE) {
+        app->auto_check_on = !app->auto_check_on;
+        if(app->auto_check_on) {
+            storage_common_remove(app->storage, OTA_AUTOOFF_FILE);
+        } else {
+            ota_ensure_state_dir(app);
+            File* f = storage_file_alloc(app->storage);
+            if(storage_file_open(f, OTA_AUTOOFF_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                storage_file_write(f, "off\n", 4);
+            }
+            storage_file_close(f);
+            storage_file_free(f);
+        }
+        auto_toggle_label(app);
+    } else {
+        start_job(app, (Job)index);
+    }
 }
 
 // ---- WiFi setup screens (run on the GUI thread)
@@ -1063,6 +1404,16 @@ static bool custom_event_callback(void* context, uint32_t event) {
         view_dispatcher_stop(app->dispatcher);
         return true;
     }
+    if(event == OtaEventAutoCheckDone) {
+        // ignore it if a manual job already took over and joined the background thread
+        if(app->auto_worker) {
+            furi_thread_join(app->auto_worker);
+            furi_thread_free(app->auto_worker);
+            app->auto_worker = NULL;
+        }
+        menu_header_update(app);
+        return true;
+    }
     return false;
 }
 
@@ -1094,8 +1445,10 @@ int32_t ota_update_app(void* p) {
     app->menu = submenu_alloc();
     submenu_add_item(app->menu, "Check and install update", JobUpdate, menu_callback, app);
     submenu_add_item(app->menu, "Check for update only", JobCheck, menu_callback, app);
+    submenu_add_item(app->menu, "Roll back to previous version", MENU_ROLLBACK, menu_callback, app);
     submenu_add_item(app->menu, "WiFi setup", JobWifiScan, menu_callback, app);
     submenu_add_item(app->menu, "Test WiFi Devboard", JobTest, menu_callback, app);
+    submenu_add_item(app->menu, "Auto-check", MENU_AUTO_TOGGLE, menu_callback, app);
     view_dispatcher_add_view(app->dispatcher, OtaViewMenu, submenu_get_view(app->menu));
 
     app->status = view_alloc();
@@ -1104,6 +1457,11 @@ int32_t ota_update_app(void* p) {
     view_set_draw_callback(app->status, status_draw);
     view_set_input_callback(app->status, status_input);
     view_dispatcher_add_view(app->dispatcher, OtaViewStatus, app->status);
+
+    app->rollback_list = submenu_alloc();
+    view_set_previous_callback(submenu_get_view(app->rollback_list), wifi_back_to_menu);
+    view_dispatcher_add_view(
+        app->dispatcher, OtaViewRollback, submenu_get_view(app->rollback_list));
 
     app->wifi_list = submenu_alloc();
     view_set_previous_callback(submenu_get_view(app->wifi_list), wifi_back_to_menu);
@@ -1119,9 +1477,30 @@ int32_t ota_update_app(void* p) {
     view_set_previous_callback(text_box_get_view(app->result), result_previous);
     view_dispatcher_add_view(app->dispatcher, OtaViewResult, text_box_get_view(app->result));
 
+    app->auto_check_on = !storage_file_exists(app->storage, OTA_AUTOOFF_FILE);
+    auto_toggle_label(app);
+    menu_header_update(app);
+
+    // quiet background check, at most once per AUTOCHECK_HOURS
+    if(app->auto_check_on) {
+        uint32_t checked = 0;
+        char latest[64];
+        bool newer;
+        bool have = status_read(app, &checked, latest, sizeof(latest), &newer);
+        uint32_t now = local_now();
+        if(!have || now < checked || now - checked > AUTOCHECK_HOURS * 3600u) {
+            app->cancel = false;
+            app->auto_worker =
+                furi_thread_alloc_ex("OtaAutoCheck", 4 * 1024, auto_worker_thread, app);
+            furi_thread_start(app->auto_worker);
+        }
+    }
+
     view_dispatcher_attach_to_gui(app->dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_switch_to_view(app->dispatcher, OtaViewMenu);
     view_dispatcher_run(app->dispatcher);
+
+    auto_worker_stop(app);
 
     if(app->worker) {
         app->cancel = true;
@@ -1135,6 +1514,8 @@ int32_t ota_update_app(void* p) {
     view_dispatcher_remove_view(app->dispatcher, OtaViewResult);
     view_dispatcher_remove_view(app->dispatcher, OtaViewWifiList);
     view_dispatcher_remove_view(app->dispatcher, OtaViewWifiSsid);
+    view_dispatcher_remove_view(app->dispatcher, OtaViewRollback);
+    submenu_free(app->rollback_list);
     submenu_free(app->wifi_list);
     text_input_free(app->text_input);
     submenu_free(app->menu);
