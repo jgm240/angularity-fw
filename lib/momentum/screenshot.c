@@ -78,6 +78,9 @@ void screenshot_set_enabled(bool enabled) {
     if(!shot.started) settings_load();
     shot.settings.enabled = enabled;
     settings_save();
+    // hooks are only installed once the feature is on; the settings were saved first because
+    // screenshot_start() reloads them
+    if(enabled) screenshot_start();
 }
 
 uint8_t screenshot_get_combo(void) {

@@ -641,8 +641,9 @@ int32_t desktop_srv(void* p) {
 
     desktop_init_settings(desktop);
 
-    // Hold-keys screenshot shortcut (off until enabled in Angularity > Misc > Screenshot)
-    screenshot_start();
+    // Hold-keys screenshot shortcut: nothing is hooked at boot unless it was enabled in
+    // Angularity > Misc > Screenshot (enabling it there starts it immediately)
+    if(screenshot_is_enabled()) screenshot_start();
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
