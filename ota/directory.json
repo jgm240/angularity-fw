@@ -6,6 +6,34 @@
       "description": "Stable Angularity FW builds",
       "versions": [
         {
+          "version": "AngularityFW-release27",
+          "changelog": "App Permissions: separate Radio, NFC, RFID and IR kinds with per-kind switches; firmware apps are no longer prompted.",
+          "timestamp": 1792220835,
+          "files": [
+            {
+              "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release27/AngularityFW-release27.tgz",
+              "target": "f7",
+              "type": "update_tgz",
+              "sha256": "667901c16c4fde0c7a1a53dcfe6c8219971cc757176457c893ded10baf589808",
+              "size": 13111734
+            }
+          ]
+        },
+        {
+          "version": "AngularityFW-release26",
+          "changelog": "Configurable Control Center, Profiles, Diagnostics, SD Health, App Permissions (opt-in), WiFi OTA updater. Fixes Computer Mode tile.",
+          "timestamp": 1792220833,
+          "files": [
+            {
+              "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release26/AngularityFW-release26.tgz",
+              "target": "f7",
+              "type": "update_tgz",
+              "sha256": "3d1e0b8e0bc0194a19b6899b6467c8968984ffd069037da0a783948931f64ae3",
+              "size": 13111269
+            }
+          ]
+        },
+        {
           "version": "AngularityFW-release25",
           "changelog": "Pseudo-Off mode (screen dark, apps closed, BT/OTG off, still charges; hold OK to wake). Theft alarm: unlocking silences it, GPIO triggers need a healthy-to-broken edge.",
           "timestamp": 1791638340,

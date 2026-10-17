@@ -1,9 +1,9 @@
 {
-  "version": "AngularityFW-release25",
-  "changelog": "Pseudo-Off mode; theft alarm lockout fixes",
-  "timestamp": 1792165356,
-  "size": 13082615,
-  "sha256": "5c3a95b6fc4f499b173cc685d279c8d308d6044c57885dcc7e6d9f12f90ea33f",
-  "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release25/AngularityFW-release25.tgz",
-  "wifi_url": "https://raw.githubusercontent.com/jgm240/angularity-fw/ota-files/AngularityFW-release25.tgz"
+  "version": "AngularityFW-release27",
+  "changelog": "App Permissions: separate Radio, NFC, RFID and IR kinds with per-kind switches; firmware apps are no longer prompted.",
+  "timestamp": 1792220835,
+  "size": 13111734,
+  "sha256": "667901c16c4fde0c7a1a53dcfe6c8219971cc757176457c893ded10baf589808",
+  "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release27/AngularityFW-release27.tgz",
+  "wifi_url": "https://raw.githubusercontent.com/jgm240/angularity-fw/ota-files/AngularityFW-release27.tgz"
 }
