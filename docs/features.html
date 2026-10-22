@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Features — Angularity FW</title>
+<meta name="description" content="Everything Angularity FW adds to the Flipper Zero: configurable Control Center, Pseudo-Off, theft alarm, profiles, Standby display, WiFi updates, app permissions, diagnostics and screenshots.">
+<meta name="theme-color" content="#0b1020">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Features — Angularity FW">
+<meta property="og:description" content="Everything Angularity FW adds to the Flipper Zero: configurable Control Center, Pseudo-Off, theft alarm, profiles, Standby display, WiFi updates, app permissions, diagnostics and screenshots.">
+<meta property="og:image" content="https://jgm240.github.io/angularity-fw/img/og.png">
+<meta property="og:url" content="https://jgm240.github.io/angularity-fw/features.html">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html"><img src="img/icon.svg" alt="" width="30" height="30">Angularity FW</a>
+<nav class="main" aria-label="Main"><a href="index.html">Home</a><a href="features.html" aria-current="page">Features</a><a href="install.html">Install</a><a href="downloads.html">Downloads</a><a href="about.html">About</a><a class="gh" href="https://github.com/jgm240/angularity-fw">GitHub</a></nav>
+</div></header>
+<main id="main">
+
+<div class="wrap" style="padding-top:40px;padding-bottom:8px">
+<h1 style="font-size:2.2rem;margin:0 0 8px">Features</h1>
+<p class="sub">Everything Angularity adds on top of Momentum, and how to use it. Menus are under <strong>Angularity</strong> (the app in the main menu) unless noted.</p>
+<div class="toc">
+<a href="#control-center">Control Center</a><a href="#pseudo-off">Pseudo-Off</a><a href="#theft-alarm">Theft alarm</a>
+<a href="#profiles">Profiles</a><a href="#standby">Standby</a><a href="#update">Update app</a>
+<a href="#app-permissions">App Permissions</a><a href="#diagnostics">Diagnostics &amp; SD Health</a>
+<a href="#screenshot">Screenshots</a><a href="#devboard">WiFi Devboard apps</a><a href="#more">And more</a>
+</div>
+<article class="feature" id="control-center"><h2>Configurable Control Center </h2>
+<p>The Control Center is the tile menu on the Desktop. Angularity lets you decide what each of the 8 tiles does.</p>
+<ul class="clean">
+<li><strong>Where:</strong> Angularity &rarr; Interface &rarr; Control Center. Pick an action for each slot, or reset to the default layout.</li>
+<li><strong>Actions:</strong> Left-handed, Settings, Dark mode, Lock, Bluetooth, Angularity, Dummy mode, Computer Mode, Pseudo-Off, Stealth, Diagnostics, SD Health, Next profile, Standby.</li>
+</ul></article><article class="feature" id="pseudo-off"><h2>Pseudo-Off </h2>
+<p>Like turning the Flipper off, but it keeps charging. The screen goes dark, the running app is asked to close, the Flipper locks, Bluetooth stops advertising and OTG power is cut. <strong>Hold OK</strong> to wake it.</p>
+<ul class="clean">
+<li><strong>Start it:</strong> Settings &rarr; Power &rarr; Pseudo-Off, a Control Center tile, or a Desktop keybind named &ldquo;Pseudo-Off&rdquo;.</li>
+<li><strong>Good to know:</strong> it is not saved across a reboot, services stay resident, and waking lands on the lock screen (PIN if set).</li>
+</ul></article><article class="feature" id="theft-alarm"><h2>Theft alarm </h2>
+<p>Sounds an alarm, flashes the LED and/or locks the Flipper when the trigger fires.</p>
+<ul class="clean">
+<li><strong>Triggers:</strong> unplugging the charger, a GPIO &ldquo;pull&rdquo; wire, or a GPIO &ldquo;tether&rdquo; wire.</li>
+<li><strong>Safe by design:</strong> unlocking the Flipper silences the alarm, and GPIO triggers only fire when a healthy connection breaks &mdash; so a wire already in the wrong state can&rsquo;t lock you out.</li>
+<li><strong>Where:</strong> Angularity &rarr; Misc &rarr; Power. Includes quiet hours, a security log and battery health.</li>
+</ul></article><article class="feature" id="profiles"><h2>Profiles </h2>
+<p>Three slots &mdash; Home, Work, Travel &mdash; that remember screen brightness, volume, LED, vibration, Bluetooth, dark mode and the theft alarm.</p>
+<ul class="clean"><li><strong>Where:</strong> Angularity &rarr; Misc &rarr; Profiles to save or apply; add the &ldquo;Next profile&rdquo; Control Center tile to cycle through saved ones.</li></ul></article><article class="feature" id="standby"><h2>Standby </h2>
+<p>A dimmed bedside/desk display. Open it from <em>Apps &rarr; Tools &rarr; Standby</em> or add its Control Center tile. Left/Right change pages, Up/Down set the idle brightness, <kbd>OK</kbd> opens the menu.</p>
+<ul class="clean">
+<li><strong>Pages:</strong> clock, weather (3-day outlook), calendar, and JWLink watch data.</li>
+<li><strong>With the WiFi Devboard:</strong> weather from Open-Meteo (no account), clock sync from the internet, and a weekly check for a newer firmware. Without it, the clock and calendar still work and the last weather is remembered.</li>
+<li><strong>JWLink:</strong> shows battery, steps, heart rate and upcoming events from your PineTime watch app, delivered by the qAngularity phone app.</li>
+</ul></article><article class="feature" id="update"><h2>Angularity Update (over WiFi) </h2>
+<p>Update the firmware from the Flipper itself &mdash; no phone or computer. Needs a WiFi Devboard running FlipperHTTP firmware.</p>
+<ul class="clean">
+<li><strong>WiFi setup:</strong> scan, pick or type a network, enter the password; it connects and checks that the internet works.</li>
+<li><strong>Check and install:</strong> downloads in resumable chunks, verifies the SHA-256, unpacks to the SD card and hands over to the system updater.</li>
+<li><strong>Auto-check:</strong> a quiet check when you open the app shows &ldquo;Update available&rdquo; in its menu.</li>
+<li><strong>Rollback:</strong> keeps the last few unpacked packages on the SD card and can download the previous release.</li>
+</ul>
+<div class="note info"><p>A 13&nbsp;MB package takes about 20 minutes over the devboard&rsquo;s serial link. Needs roughly 2.2&times; the package size free on the SD card and at least 30% battery.</p></div></article><article class="feature" id="app-permissions"><h2>App Permissions <span class="pill">opt-in</span></h2>
+<p>When switched on, launching a third-party app that uses sensitive hardware asks first: <strong>Deny</strong>, <strong>Once</strong> or <strong>Always</strong>. Answers are remembered per app.</p>
+<ul class="clean">
+<li><strong>Kinds:</strong> Radio (Sub-GHz), NFC, RFID/iButton, IR, GPIO, USB, Bluetooth &mdash; each has its own &ldquo;ask&rdquo; switch.</li>
+<li><strong>Trusted:</strong> apps that ship with the firmware (Sub-GHz, NFC, Infrared, Settings, Passport&hellip;) are never prompted.</li>
+<li><strong>Where:</strong> Angularity &rarr; Misc &rarr; App Permissions.</li>
+</ul>
+<div class="note"><p>This is a prompt based on what an app links against, <strong>not a sandbox</strong>. It tells you what an app can reach; it does not stop a determined malicious app.</p></div></article><article class="feature" id="diagnostics"><h2>Diagnostics &amp; SD Health </h2>
+<p><strong>Diagnostics</strong> (Apps &rarr; Tools): live battery voltage/current/health, a button test, speaker/vibration/LED test, system info and the last crash message.</p>
+<p><strong>SD Health</strong> (Apps &rarr; Tools): card info, a speed test, a 16 or 64&nbsp;MB write-and-verify surface test, and a folder integrity scan.</p>
+<div class="note info"><p>SD Health tests free space and reads folder structure. It cannot repair a damaged card &mdash; if it reports problems, back up and reformat on a computer.</p></div></article><article class="feature" id="screenshot"><h2>Screenshots <span class="pill">off by default</span></h2>
+<p>Hold two keys for about a second and the current screen is saved as a BMP in <code>/screenshots</code> on the SD card (4&times; scaled, Flipper orange).</p>
+<ul class="clean"><li><strong>Turn it on:</strong> Angularity &rarr; Misc &rarr; Screenshot, then choose the key pair (Left+Right, Up+Down, Left+OK or Right+OK). Nothing hooks in until you enable it.</li></ul></article><article class="feature" id="devboard"><h2>WiFi Devboard apps </h2>
+<p>Apps that use the WiFi Devboard (FlipperHTTP firmware): <strong>Flip Browser</strong> (text-mode web browser), <strong>Net Audio Player</strong> (plays a WAV/MP3 URL through the speaker), <strong>Claude Chat</strong> (talks to the Anthropic API with your own key), <strong>Spotify Remote</strong> and <strong>DolphinMusic</strong>.</p>
+<p><strong>Computer Mode</strong> <span class="pill warn">experimental</span> turns a custom ESP32 firmware into a USB keyboard/mouse host for a simple notepad &mdash; it replaces FlipperHTTP on the board and depends on the devboard&rsquo;s USB port supporting host mode, which is unverified.</p></article><article class="feature" id="more"><h2>And more </h2>
+<ul class="clean">
+<li><strong>Looks &amp; sound:</strong> the &ldquo;Angularity&rdquo; Triforce-style and Wheel menus, sound packs, icon packs, per-app open sounds.</li>
+<li><strong>Dummy mode</strong> with real minigames, a Dolphin XP and streak system shown on the Passport.</li>
+<li><strong>Security extras:</strong> Find My Flipper, lock-screen status icons, GPIO mirror, opt-in NFC tag unlock, Shortcuts (trigger/action automation).</li>
+<li><strong>USB Audio</strong> peripheral mode.</li>
+</ul>
+<p>Inherited from Momentum: the full app catalog, asset packs, and everything else the base firmware offers.</p></article></div>
+</main>
+<footer class="site"><div class="wrap">
+<div class="cols">
+<div><h4>Angularity FW</h4><p>A heavily modded firmware for the Flipper Zero, based on Momentum. Free software under the GPL-3.0.</p></div>
+<div><h4>Project</h4><ul>
+<li><a href="https://github.com/jgm240/angularity-fw">Firmware source</a></li>
+<li><a href="https://github.com/jgm240/qangularity">qAngularity phone apps</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/releases">All releases</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/issues">Report a problem</a></li></ul></div>
+<div><h4>Pages</h4><ul>
+<li><a href="features.html">Features</a></li>
+<li><a href="install.html">Install guide</a></li>
+<li><a href="downloads.html">Downloads</a></li>
+<li><a href="about.html">About, credits, licenses</a></li></ul></div>
+</div>
+<p class="legal">Angularity FW is an unofficial community project. It is not made, endorsed or supported by Flipper Devices Inc. or by the Momentum Firmware team. &ldquo;Flipper&rdquo; and &ldquo;Flipper Zero&rdquo; are trademarks of their owners and are used here only to name the hardware this firmware runs on. Flashing custom firmware is done at your own risk.</p>
+</div></footer>
+
+</body>
+</html>

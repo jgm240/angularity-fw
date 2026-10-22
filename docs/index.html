@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Angularity FW — a heavily modded Flipper Zero firmware</title>
+<meta name="description" content="Angularity FW is an unofficial, open-source Flipper Zero firmware based on Momentum: configurable Control Center, Pseudo-Off, theft alarm, Standby display, OTA updates and more.">
+<meta name="theme-color" content="#0b1020">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Angularity FW — a heavily modded Flipper Zero firmware">
+<meta property="og:description" content="Angularity FW is an unofficial, open-source Flipper Zero firmware based on Momentum: configurable Control Center, Pseudo-Off, theft alarm, Standby display, OTA updates and more.">
+<meta property="og:image" content="https://jgm240.github.io/angularity-fw/img/og.png">
+<meta property="og:url" content="https://jgm240.github.io/angularity-fw/">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html"><img src="img/icon.svg" alt="" width="30" height="30">Angularity FW</a>
+<nav class="main" aria-label="Main"><a href="index.html" aria-current="page">Home</a><a href="features.html">Features</a><a href="install.html">Install</a><a href="downloads.html">Downloads</a><a href="about.html">About</a><a class="gh" href="https://github.com/jgm240/angularity-fw">GitHub</a></nav>
+</div></header>
+<main id="main">
+
+<div class="hero"><div class="wrap">
+<span class="pill">Unofficial community firmware</span>
+<h1 style="margin-top:14px"><span>Angularity FW</span></h1>
+<p class="lead">A heavily modded firmware for the Flipper Zero, built on Momentum. More control over your Control Center, smarter power and security, a Standby display, and updates from the Flipper itself.</p>
+<div class="btns">
+<a class="btn primary" href="downloads.html">Download</a>
+<a class="btn" href="install.html">Install guide</a>
+<a class="btn" id="latest-release" href="https://github.com/jgm240/angularity-fw/releases">Latest release</a>
+</div>
+<p class="fine">Open source (GPL-3.0). Not affiliated with Flipper Devices Inc.</p>
+</div></div>
+
+<section><div class="wrap">
+<h2>What&rsquo;s inside</h2>
+<p class="sub">Everything from Momentum, plus the Angularity additions below. Most are opt-in or only run when you open them.</p>
+<div class="grid"><a class="card" href="features.html#control-center" style="text-decoration:none;color:inherit"><h3>Control Center, your way</h3><p>Eight tiles you assign yourself: Settings, Lock, Bluetooth, Pseudo-Off, Stealth, Standby, Diagnostics, profiles and more.</p></a><a class="card" href="features.html#pseudo-off" style="text-decoration:none;color:inherit"><h3>Pseudo-Off</h3><p>Acts like powered off &mdash; screen dark, app closed, Bluetooth off &mdash; while the Flipper keeps charging. Hold OK to wake.</p></a><a class="card" href="features.html#theft-alarm" style="text-decoration:none;color:inherit"><h3>Theft alarm</h3><p>Triggered by unplugging or by a GPIO wire. Unlocking silences it, so you can never lock yourself out.</p></a><a class="card" href="features.html#standby" style="text-decoration:none;color:inherit"><h3>Standby</h3><p>A dimmed bedside display: clock, weather, calendar, and data from your JWLink watch app.</p></a><a class="card" href="features.html#update" style="text-decoration:none;color:inherit"><h3>Update from the Flipper</h3><p>Download and install new firmware over the WiFi Devboard &mdash; with WiFi setup, auto-check and rollback.</p></a><a class="card" href="features.html#app-permissions" style="text-decoration:none;color:inherit"><h3>App Permissions</h3><p>Opt-in prompts before third-party apps use the radio, NFC, RFID, IR, GPIO, USB or Bluetooth.</p></a><a class="card" href="features.html#diagnostics" style="text-decoration:none;color:inherit"><h3>Diagnostics &amp; SD Health</h3><p>Battery, buttons, speaker, LED, crash info &mdash; and an SD card speed, surface and folder check.</p></a><a class="card" href="features.html#profiles" style="text-decoration:none;color:inherit"><h3>Profiles &amp; screenshots</h3><p>Home / Work / Travel setting profiles, and a hold-keys shortcut that saves a screenshot to the SD card.</p></a></div>
+<p style="margin-top:22px"><a href="features.html">See every feature and how to use it &rarr;</a></p>
+</div></section>
+
+<section class="alt"><div class="wrap">
+<h2>Standby, at a glance</h2>
+<p class="sub">Four pages for a bedside or desk display. Swap pages with Left/Right, dim automatically when idle. Weather and clock sync use the WiFi Devboard; everything else works offline.</p>
+<div class="shots"><figure><img src="img/standby-clock.png" alt="Standby Clock page rendered at Flipper screen size" width="512" height="256" loading="lazy"><figcaption><strong>Clock.</strong> Time, date, battery and a weather line</figcaption></figure><figure><img src="img/standby-weather.png" alt="Standby Weather page rendered at Flipper screen size" width="512" height="256" loading="lazy"><figcaption><strong>Weather.</strong> Current conditions and a 3-day outlook</figcaption></figure><figure><img src="img/standby-calendar.png" alt="Standby Calendar page rendered at Flipper screen size" width="512" height="256" loading="lazy"><figcaption><strong>Calendar.</strong> Month grid with today highlighted</figcaption></figure><figure><img src="img/standby-jwlink.png" alt="Standby JWLink page rendered at Flipper screen size" width="512" height="256" loading="lazy"><figcaption><strong>JWLink.</strong> Watch battery, steps, heart rate, next events</figcaption></figure></div>
+<p style="color:var(--muted);font-size:0.88rem;margin-top:14px">Pages shown are rendered at the Flipper&rsquo;s 128&times;64 resolution with the firmware&rsquo;s own fonts and sample data.</p>
+</div></section>
+
+<section><div class="wrap">
+<h2>Phone &amp; desktop companions: qAngularity</h2>
+<p class="sub">A fork of the open-source Flipper mobile apps that updates Angularity FW over Bluetooth. Android 6.0+, iPhone, iPad and Mac (Catalyst).</p>
+<div class="grid">
+<div class="card"><h3>OTA updates</h3><p>Reads this project&rsquo;s release feed, checks the SHA-256, and sends the update to your Flipper.</p></div>
+<div class="card"><h3>JWLink bridge</h3><p>Sends your PineTime watch data and upcoming calendar events to the Flipper&rsquo;s Standby app.</p></div>
+<div class="card"><h3>No tracking</h3><p>Analytics and crash reporting that went to Flipper&rsquo;s servers are removed.</p></div>
+</div>
+<p style="margin-top:18px">The apps are built from source for now &mdash; see <a href="https://github.com/jgm240/qangularity">the qAngularity repository</a>.</p>
+</div></section>
+
+<section class="alt"><div class="wrap">
+<h2>Honest status</h2>
+<div class="note"><p><strong>Compiled and checked, with limited testing on hardware.</strong> Features are built and tested on a computer where possible (parsers against real data, screens rendered pixel-for-pixel), but not every feature has been exercised on every Flipper. Features marked <span class="pill warn">experimental</span> are exactly that. Back up your SD card before updating, and keep qFlipper handy for recovery.</p></div>
+<p>Found a bug? <a href="https://github.com/jgm240/angularity-fw/issues">Open an issue</a> with what the screen says and what you were doing.</p>
+</div></section>
+
+</main>
+<footer class="site"><div class="wrap">
+<div class="cols">
+<div><h4>Angularity FW</h4><p>A heavily modded firmware for the Flipper Zero, based on Momentum. Free software under the GPL-3.0.</p></div>
+<div><h4>Project</h4><ul>
+<li><a href="https://github.com/jgm240/angularity-fw">Firmware source</a></li>
+<li><a href="https://github.com/jgm240/qangularity">qAngularity phone apps</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/releases">All releases</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/issues">Report a problem</a></li></ul></div>
+<div><h4>Pages</h4><ul>
+<li><a href="features.html">Features</a></li>
+<li><a href="install.html">Install guide</a></li>
+<li><a href="downloads.html">Downloads</a></li>
+<li><a href="about.html">About, credits, licenses</a></li></ul></div>
+</div>
+<p class="legal">Angularity FW is an unofficial community project. It is not made, endorsed or supported by Flipper Devices Inc. or by the Momentum Firmware team. &ldquo;Flipper&rdquo; and &ldquo;Flipper Zero&rdquo; are trademarks of their owners and are used here only to name the hardware this firmware runs on. Flashing custom firmware is done at your own risk.</p>
+</div></footer>
+<script src="js/releases.js" defer></script>
+</body>
+</html>

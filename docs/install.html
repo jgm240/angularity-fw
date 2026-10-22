@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install — Angularity FW</title>
+<meta name="description" content="How to install Angularity FW on a Flipper Zero with qFlipper, from the SD card, over WiFi with the Angularity Update app, or from your phone.">
+<meta name="theme-color" content="#0b1020">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Install — Angularity FW">
+<meta property="og:description" content="How to install Angularity FW on a Flipper Zero with qFlipper, from the SD card, over WiFi with the Angularity Update app, or from your phone.">
+<meta property="og:image" content="https://jgm240.github.io/angularity-fw/img/og.png">
+<meta property="og:url" content="https://jgm240.github.io/angularity-fw/install.html">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html"><img src="img/icon.svg" alt="" width="30" height="30">Angularity FW</a>
+<nav class="main" aria-label="Main"><a href="index.html">Home</a><a href="features.html">Features</a><a href="install.html" aria-current="page">Install</a><a href="downloads.html">Downloads</a><a href="about.html">About</a><a class="gh" href="https://github.com/jgm240/angularity-fw">GitHub</a></nav>
+</div></header>
+<main id="main">
+
+<div class="wrap" style="padding-top:40px;padding-bottom:40px">
+<h1 style="font-size:2.2rem;margin:0 0 8px">Install</h1>
+<p class="sub">Angularity FW installs like any Flipper firmware update: a single <code>.tgz</code> package. Always use the <strong>full package</strong> &mdash; the extra apps live on the SD card and are only copied by a full update.</p>
+
+<div class="note"><p><strong>Before you start:</strong> back up your SD card (or at least <code>/ext/apps_data</code> and your saved files), charge the Flipper to at least 30%, and keep a computer with qFlipper available in case you need to recover.</p></div>
+
+<h2 style="margin-top:34px">Method 1: qFlipper (recommended)</h2>
+<ol class="steps">
+<li>Download the latest <code>.tgz</code> from the <a href="downloads.html">Downloads</a> page. Do not unpack it.</li>
+<li>Connect the Flipper to your computer with USB and open qFlipper.</li>
+<li>Use qFlipper&rsquo;s option to install firmware from a file and pick the <code>.tgz</code>.</li>
+<li>Wait for the Flipper to restart and finish updating. Don&rsquo;t unplug it.</li>
+</ol>
+
+<h2>Method 2: from the SD card</h2>
+<ol class="steps">
+<li>Extract the <code>.tgz</code> on your computer. You get a folder named like <code>f7-update-AngularityFW-releaseNN</code>.</li>
+<li>Copy that folder to <code>/ext/update</code> on the Flipper&rsquo;s SD card.</li>
+<li>On the Flipper open <em>Archive</em> (or the file browser), go to <code>/ext/update/&hellip;/</code>, select <code>update.fuf</code> and choose <em>Run</em>.</li>
+</ol>
+
+<h2>Method 3: from the Flipper over WiFi</h2>
+<p>If you already run a recent Angularity FW and have a WiFi Devboard:</p>
+<ol class="steps">
+<li>Put FlipperHTTP firmware on the devboard (Apps &rarr; GPIO &rarr; ESP &rarr; ESP Flasher; firmware at <a href="https://github.com/jblanked/FlipperHTTP">jblanked/FlipperHTTP</a>).</li>
+<li>Open <em>Apps &rarr; Tools &rarr; Angularity Update &rarr; WiFi setup</em> and connect to a 2.4&nbsp;GHz network.</li>
+<li>Choose <em>Check and install update</em>. It downloads, verifies, unpacks and then offers to install.</li>
+</ol>
+
+<h2>From your phone</h2>
+<p>The qAngularity apps update the firmware over Bluetooth, the same way the official mobile app does. They are built from source for now &mdash; see the <a href="https://github.com/jgm240/qangularity">qAngularity repository</a> for instructions.</p>
+
+<h2>After installing</h2>
+<ul class="clean">
+<li>The new apps appear under <em>Apps &rarr; Tools</em> (Standby, Diagnostics, SD Health, Angularity Update) and the Angularity settings under the <em>Angularity</em> app.</li>
+<li>If apps are missing, the SD card wasn&rsquo;t updated &mdash; this happens when only the firmware file is flashed. Install the full <code>.tgz</code> again.</li>
+<li>To confirm a download wasn&rsquo;t corrupted, compare its SHA-256 (shown on the Downloads page) with <code>shasum -a 256 file.tgz</code>.</li>
+</ul>
+
+<h2>If something goes wrong</h2>
+<ul class="clean">
+<li><strong>The Flipper won&rsquo;t start or an app crashes the system:</strong> reinstall a known-good release with qFlipper. If it can&rsquo;t connect, put the Flipper in DFU mode and use qFlipper&rsquo;s recovery &mdash; the official <a href="https://docs.flipper.net">Flipper documentation</a> explains how.</li>
+<li><strong>&ldquo;App Not Found&rdquo; on a tile or menu entry:</strong> the app file isn&rsquo;t on the SD card. Install the full package.</li>
+<li><strong>Still stuck:</strong> <a href="https://github.com/jgm240/angularity-fw/issues">open an issue</a> with the release number and what the screen says.</li>
+</ul>
+</div>
+
+</main>
+<footer class="site"><div class="wrap">
+<div class="cols">
+<div><h4>Angularity FW</h4><p>A heavily modded firmware for the Flipper Zero, based on Momentum. Free software under the GPL-3.0.</p></div>
+<div><h4>Project</h4><ul>
+<li><a href="https://github.com/jgm240/angularity-fw">Firmware source</a></li>
+<li><a href="https://github.com/jgm240/qangularity">qAngularity phone apps</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/releases">All releases</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/issues">Report a problem</a></li></ul></div>
+<div><h4>Pages</h4><ul>
+<li><a href="features.html">Features</a></li>
+<li><a href="install.html">Install guide</a></li>
+<li><a href="downloads.html">Downloads</a></li>
+<li><a href="about.html">About, credits, licenses</a></li></ul></div>
+</div>
+<p class="legal">Angularity FW is an unofficial community project. It is not made, endorsed or supported by Flipper Devices Inc. or by the Momentum Firmware team. &ldquo;Flipper&rdquo; and &ldquo;Flipper Zero&rdquo; are trademarks of their owners and are used here only to name the hardware this firmware runs on. Flashing custom firmware is done at your own risk.</p>
+</div></footer>
+
+</body>
+</html>

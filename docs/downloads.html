@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Downloads — Angularity FW</title>
+<meta name="description" content="Download the latest Angularity FW release for the Flipper Zero, with SHA-256 checksums.">
+<meta name="theme-color" content="#0b1020">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Downloads — Angularity FW">
+<meta property="og:description" content="Download the latest Angularity FW release for the Flipper Zero, with SHA-256 checksums.">
+<meta property="og:image" content="https://jgm240.github.io/angularity-fw/img/og.png">
+<meta property="og:url" content="https://jgm240.github.io/angularity-fw/downloads.html">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html"><img src="img/icon.svg" alt="" width="30" height="30">Angularity FW</a>
+<nav class="main" aria-label="Main"><a href="index.html">Home</a><a href="features.html">Features</a><a href="install.html">Install</a><a href="downloads.html" aria-current="page">Downloads</a><a href="about.html">About</a><a class="gh" href="https://github.com/jgm240/angularity-fw">GitHub</a></nav>
+</div></header>
+<main id="main">
+
+<div class="wrap" style="padding-top:40px;padding-bottom:40px">
+<h1 style="font-size:2.2rem;margin:0 0 8px">Downloads</h1>
+<p class="sub">Each release is one updater package (<code>.tgz</code>). The list below is loaded live from GitHub, newest first. See the <a href="install.html">install guide</a> for how to flash it.</p>
+<div id="release-list"><p class="loading">Loading releases&hellip;</p></div>
+<noscript><p class="err">This list needs JavaScript. <a href="https://github.com/jgm240/angularity-fw/releases">Open the releases page on GitHub</a> instead.</p></noscript>
+
+<div class="note info"><p><strong>Verify your download.</strong> Each release shows its SHA-256. On macOS/Linux run <code>shasum -a 256 AngularityFW-releaseNN.tgz</code>; on Windows run <code>certutil -hashfile AngularityFW-releaseNN.tgz SHA256</code>. The values should match.</p></div>
+
+<h2 style="margin-top:34px">Phone &amp; desktop apps (qAngularity)</h2>
+<p>No ready-made binaries are published yet. The source builds for Android 6.0+, iPhone, iPad and Mac (Catalyst) &mdash; see <a href="https://github.com/jgm240/qangularity">the repository</a> and its <code>docs/BUILDING.md</code>.</p>
+<h2>Source code</h2>
+<p>Firmware: <a href="https://github.com/jgm240/angularity-fw">jgm240/angularity-fw</a> &middot; Apps: <a href="https://github.com/jgm240/qangularity">jgm240/qangularity</a>.</p>
+</div>
+
+</main>
+<footer class="site"><div class="wrap">
+<div class="cols">
+<div><h4>Angularity FW</h4><p>A heavily modded firmware for the Flipper Zero, based on Momentum. Free software under the GPL-3.0.</p></div>
+<div><h4>Project</h4><ul>
+<li><a href="https://github.com/jgm240/angularity-fw">Firmware source</a></li>
+<li><a href="https://github.com/jgm240/qangularity">qAngularity phone apps</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/releases">All releases</a></li>
+<li><a href="https://github.com/jgm240/angularity-fw/issues">Report a problem</a></li></ul></div>
+<div><h4>Pages</h4><ul>
+<li><a href="features.html">Features</a></li>
+<li><a href="install.html">Install guide</a></li>
+<li><a href="downloads.html">Downloads</a></li>
+<li><a href="about.html">About, credits, licenses</a></li></ul></div>
+</div>
+<p class="legal">Angularity FW is an unofficial community project. It is not made, endorsed or supported by Flipper Devices Inc. or by the Momentum Firmware team. &ldquo;Flipper&rdquo; and &ldquo;Flipper Zero&rdquo; are trademarks of their owners and are used here only to name the hardware this firmware runs on. Flashing custom firmware is done at your own risk.</p>
+</div></footer>
+<script src="js/releases.js" defer></script>
+</body>
+</html>
