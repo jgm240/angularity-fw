@@ -56,13 +56,14 @@ COPRO_CUBE_VERSION = "1.20.0"
 
 COPRO_CUBE_DIR = "lib/stm32wb_copro"
 
-# Default radio stack
-COPRO_STACK_BIN = "stm32wb5x_BLE_Stack_light_fw.bin"
-# Firmware also supports "ble_full", but it might not fit into debug builds.
-# Angularity's BLE Host mode (scanner, GATT client) needs the full stack (central role);
-# on the light stack the firmware still builds and Host mode reports it is unavailable.
-# The full stack sits at 0x080CE000, so the firmware image must be <= 843776 bytes for it.
-COPRO_STACK_TYPE = "ble_light"
+# Default radio stack: the full one. Angularity's BLE Host mode (scanner, GATT client) needs its
+# central role; the light stack is peripheral only. The full stack sits at 0x080CE000 (the light
+# one at 0x080D7000), so the firmware image must be <= 843776 bytes - which is why the JS runtime
+# (lib/mjs, 41 KB) is not built in Angularity (see lib/SConscript). It will not fit debug builds.
+# For the stock stack: COPRO_STACK_BIN=stm32wb5x_BLE_Stack_light_fw.bin COPRO_STACK_TYPE=ble_light
+# (Host mode then reports that it is unavailable).
+COPRO_STACK_BIN = "stm32wb5x_BLE_Stack_full_fw.bin"
+COPRO_STACK_TYPE = "ble_full"
 
 # Leave 0 to let scripts automatically calculate it
 COPRO_STACK_ADDR = "0x0"

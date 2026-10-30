@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "updater_app",
-        "js_app",
+        # "js_app",  # needs the JS runtime (lib/mjs), see lib/SConscript
         "findmy_startup",
         # "archive",
     ],

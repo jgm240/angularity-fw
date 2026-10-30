@@ -38,7 +38,7 @@ libs = env.BuildModules(
         "flipper_application",
         "music_worker",
         "uzlib",
-        "mjs",
+        # "mjs",  # JS runtime, 41 KB: dropped to make room for the full BLE radio stack
         "nanopb",
         "update_util",
         "momentum",
