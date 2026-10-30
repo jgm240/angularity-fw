@@ -181,6 +181,8 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
         case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE: {
             hci_le_connection_complete_event_rp0* event =
                 (hci_le_connection_complete_event_rp0*)meta_evt->data;
+            // Role 0 is a connection we initiated (BLE Host mode); the host profile owns those
+            if(event->Role == 0) break;
             gap->connection_params.conn_interval = event->Conn_Interval;
             gap->connection_params.slave_latency = event->Conn_Latency;
             gap->connection_params.supervisor_timeout = event->Supervision_Timeout;
@@ -356,8 +358,12 @@ static void gap_init_svc(Gap* gap, const GapRootSecurityKeys* root_keys) {
     // Initialize GAP interface
     // Skip fist symbol AD_TYPE_COMPLETE_LOCAL_NAME
     char* name = gap->service.adv_name + 1;
+    uint8_t gap_role = GAP_PERIPHERAL_ROLE;
+    if(gap->config->role_central && furi_hal_bt_get_radio_stack() == FuriHalBtStackFull) {
+        gap_role |= GAP_CENTRAL_ROLE;
+    }
     aci_gap_init(
-        GAP_PERIPHERAL_ROLE,
+        gap_role,
         0,
         strlen(name),
         &gap->service.gap_svc_handle,
@@ -503,7 +509,7 @@ static void gap_advertise_stop(void) {
 
 void gap_start_advertising(void) {
     furi_check(furi_mutex_acquire(gap->state_mutex, FuriWaitForever) == FuriStatusOk);
-    if(gap->state == GapStateIdle) {
+    if(gap->state == GapStateIdle && !gap->config->no_advertising) {
         gap->state = GapStateStartingAdv;
         FURI_LOG_I(TAG, "Start advertising");
         gap->enable_adv = true;
@@ -553,7 +559,7 @@ bool gap_init(
     gap->state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     gap->state = GapStateIdle;
     gap->service.connection_handle = 0xFFFF;
-    gap->enable_adv = true;
+    gap->enable_adv = !config->no_advertising;
 
     // Command queue allocation
     gap->command_queue = furi_message_queue_alloc(8, sizeof(GapCommand));

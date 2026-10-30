@@ -287,7 +287,10 @@ Header,+,lib/toolbox/varint.h,,
 Header,+,lib/toolbox/version.h,,
 Header,+,targets/f7/ble_glue/furi_ble/event_dispatcher.h,,
 Header,+,targets/f7/ble_glue/furi_ble/gatt.h,,
+Header,+,targets/f7/ble_glue/furi_ble/host_adv.h,,
+Header,+,targets/f7/ble_glue/furi_ble/host_gatt.h,,
 Header,+,targets/f7/ble_glue/furi_ble/profile_interface.h,,
+Header,+,targets/f7/ble_glue/profiles/host_profile.h,,
 Header,+,targets/f7/ble_glue/profiles/serial_profile.h,,
 Header,+,targets/f7/ble_glue/services/battery_service.h,,
 Header,+,targets/f7/ble_glue/services/dev_info_service.h,,
@@ -803,6 +806,22 @@ Function,-,ble_profile_hid_mouse_press,_Bool,"FuriHalBleProfileBase*, uint8_t"
 Function,-,ble_profile_hid_mouse_release,_Bool,"FuriHalBleProfileBase*, uint8_t"
 Function,-,ble_profile_hid_mouse_release_all,_Bool,FuriHalBleProfileBase*
 Function,-,ble_profile_hid_mouse_scroll,_Bool,"FuriHalBleProfileBase*, int8_t"
+Function,+,ble_profile_host_connect,_Bool,"FuriHalBleProfileBase*, const uint8_t[6], uint8_t"
+Function,+,ble_profile_host_connect_cancel,void,FuriHalBleProfileBase*
+Function,+,ble_profile_host_disconnect,void,FuriHalBleProfileBase*
+Function,+,ble_profile_host_discover,_Bool,FuriHalBleProfileBase*
+Function,+,ble_profile_host_get_mtu,uint16_t,FuriHalBleProfileBase*
+Function,+,ble_profile_host_is_connected,_Bool,FuriHalBleProfileBase*
+Function,+,ble_profile_host_is_scanning,_Bool,FuriHalBleProfileBase*
+Function,+,ble_profile_host_is_supported,_Bool,
+Function,+,ble_profile_host_pair,_Bool,FuriHalBleProfileBase*
+Function,+,ble_profile_host_pairing_confirm,void,"FuriHalBleProfileBase*, _Bool"
+Function,+,ble_profile_host_read,_Bool,"FuriHalBleProfileBase*, uint16_t"
+Function,+,ble_profile_host_scan_start,_Bool,"FuriHalBleProfileBase*, _Bool, _Bool"
+Function,+,ble_profile_host_scan_stop,void,FuriHalBleProfileBase*
+Function,+,ble_profile_host_set_event_callback,void,"FuriHalBleProfileBase*, BleHostEventCallback, void*"
+Function,+,ble_profile_host_subscribe,_Bool,"FuriHalBleProfileBase*, uint16_t, BleHostSubscribeMode"
+Function,+,ble_profile_host_write,_Bool,"FuriHalBleProfileBase*, uint16_t, const uint8_t*, uint8_t, _Bool"
 Function,+,ble_profile_serial_notify_buffer_is_empty,void,FuriHalBleProfileBase*
 Function,+,ble_profile_serial_set_event_callback,void,"FuriHalBleProfileBase*, uint16_t, FuriHalBtSerialCallback, void*"
 Function,+,ble_profile_serial_set_rpc_active,void,"FuriHalBleProfileBase*, _Bool"
@@ -828,6 +847,9 @@ Function,+,ble_svc_serial_update_tx,_Bool,"BleServiceSerial*, uint8_t*, uint16_t
 Function,-,bsearch,void*,"const void*, const void*, size_t, size_t, __compar_fn_t"
 Function,+,bt_disconnect,void,Bt*
 Function,+,bt_forget_bonded_devices,void,Bt*
+Function,+,bt_get_mode,BtMode,Bt*
+Function,+,bt_host_start,FuriHalBleProfileBase*,Bt*
+Function,+,bt_host_stop,void,Bt*
 Function,+,bt_keys_storage_alloc,BtKeysStorage*,const char*
 Function,+,bt_keys_storage_delete,_Bool,BtKeysStorage*
 Function,+,bt_keys_storage_free,void,BtKeysStorage*
@@ -841,6 +863,7 @@ Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
 Function,+,bt_keys_storage_update,_Bool,"BtKeysStorage*, uint8_t*, uint32_t"
 Function,+,bt_profile_restore_default,_Bool,Bt*
 Function,+,bt_profile_start,FuriHalBleProfileBase*,"Bt*, const FuriHalBleProfileTemplate*, FuriHalBleProfileParams"
+Function,+,bt_set_mode,_Bool,"Bt*, BtMode"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
@@ -4436,6 +4459,7 @@ Variable,+,_impure_ptr,_reent*,
 Variable,-,_sys_errlist,const char* const[],
 Variable,-,_sys_nerr,int,
 Variable,-,ble_profile_hid,const FuriHalBleProfileTemplate*,
+Variable,+,ble_profile_host,const FuriHalBleProfileTemplate* const,
 Variable,+,ble_profile_serial,const FuriHalBleProfileTemplate* const,
 Variable,+,compress_config_heatshrink_default,const CompressConfigHeatshrink,
 Variable,+,firmware_api_interface,const ElfApiInterface* const,

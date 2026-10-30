@@ -1,5 +1,6 @@
 #include "../bt_settings_app.h"
 #include <furi_hal_bt.h>
+#include <profiles/host_profile.h>
 
 enum BtSetting {
     BtSettingOff,
@@ -11,6 +12,30 @@ enum BtSettingIndex {
     BtSettingIndexSwitchBt,
     BtSettingIndexForgetDev,
 };
+
+enum BtModeItem {
+    BtModeItemPeripheral,
+    BtModeItemHost,
+    BtModeItemNum,
+};
+
+const char* const bt_mode_text[BtModeItemNum] = {
+    "Peripheral",
+    "Host",
+};
+
+static VariableItem* bt_mode_item = NULL;
+
+static void bt_settings_scene_start_mode_change_callback(VariableItem* item) {
+    BtSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, bt_mode_text[index]);
+    view_dispatcher_send_custom_event(
+        app->view_dispatcher,
+        index == BtModeItemHost ? BtSettingsCustomEventModeHost :
+                                  BtSettingsCustomEventModePeripheral);
+}
 
 const char* const bt_settings_text[BtSettingNum] = {
     "OFF",
@@ -53,6 +78,24 @@ void bt_settings_scene_start_on_enter(void* context) {
             variable_item_set_current_value_index(item, BtSettingOff);
             variable_item_set_current_value_text(item, bt_settings_text[BtSettingOff]);
         }
+        // Peripheral: phones and computers connect to the Flipper (default).
+        // Host: the Flipper connects to other devices (BLE Scanner and apps). Needs the full
+        // radio stack; phone apps cannot connect while in Host mode.
+        if(ble_profile_host_is_supported()) {
+            bt_mode_item = variable_item_list_add(
+                var_item_list,
+                "Mode",
+                BtModeItemNum,
+                bt_settings_scene_start_mode_change_callback,
+                app);
+            uint8_t mode_index = app->settings.mode == BT_SETTINGS_MODE_HOST ? BtModeItemHost :
+                                                                              BtModeItemPeripheral;
+            variable_item_set_current_value_index(bt_mode_item, mode_index);
+            variable_item_set_current_value_text(bt_mode_item, bt_mode_text[mode_index]);
+        } else {
+            bt_mode_item = variable_item_list_add(var_item_list, "Mode", 1, NULL, NULL);
+            variable_item_set_current_value_text(bt_mode_item, "Peripheral only");
+        }
         variable_item_list_add(var_item_list, "Unpair All Devices", 1, NULL, NULL);
         variable_item_list_set_enter_callback(
             var_item_list, bt_settings_scene_start_var_list_enter_callback, app);
@@ -75,6 +118,22 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == BtSettingOff) {
             app->settings.enabled = false;
             consumed = true;
+        } else if(
+            event.event == BtSettingsCustomEventModeHost ||
+            event.event == BtSettingsCustomEventModePeripheral) {
+            BtMode mode = event.event == BtSettingsCustomEventModeHost ? BtModeHost :
+                                                                         BtModePeripheral;
+            // restarts the radio, takes a moment
+            if(bt_set_mode(app->bt, mode)) {
+                app->settings.mode = mode == BtModeHost ? BT_SETTINGS_MODE_HOST :
+                                                          BT_SETTINGS_MODE_PERIPHERAL;
+            } else if(bt_mode_item) {
+                // could not switch: show what is really active
+                variable_item_set_current_value_index(bt_mode_item, BtModeItemPeripheral);
+                variable_item_set_current_value_text(
+                    bt_mode_item, bt_mode_text[BtModeItemPeripheral]);
+            }
+            consumed = true;
         } else if(event.event == BtSettingsCustomEventForgetDevices) {
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevConfirm);
             consumed = true;
@@ -86,5 +145,6 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
 
 void bt_settings_scene_start_on_exit(void* context) {
     BtSettingsApp* app = context;
+    bt_mode_item = NULL;
     variable_item_list_reset(app->var_item_list);
 }

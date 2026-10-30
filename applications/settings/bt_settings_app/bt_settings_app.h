@@ -24,6 +24,8 @@ enum BtSettingsCustomEvent {
 
     BtSettingsCustomEventForgetDevices,
     BtSettingsCustomEventExitView,
+    BtSettingsCustomEventModePeripheral,
+    BtSettingsCustomEventModeHost,
 };
 
 typedef struct {

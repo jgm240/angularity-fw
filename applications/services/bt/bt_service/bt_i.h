@@ -33,6 +33,7 @@ typedef enum {
     BtMessageTypeGetSettings,
     BtMessageTypeSetSettings,
     BtMessageTypeReloadKeysSettings,
+    BtMessageTypeSetMode,
 } BtMessageType;
 
 typedef struct {
@@ -52,6 +53,7 @@ typedef union {
     BtKeyStorageUpdateData key_storage_data;
     BtSettings* settings;
     const BtSettings* csettings;
+    BtMode mode;
 } BtMessageData;
 
 typedef struct {
@@ -89,6 +91,13 @@ struct Bt {
 
     bool suppress_pin_screen;
 };
+
+/** The profile used when no application asked for another one: serial in Peripheral mode,
+ * host in Host mode
+ *
+ * @param bt                    Bt instance
+ */
+const FuriHalBleProfileTemplate* bt_default_profile(Bt* bt);
 
 /** Open a new RPC connection
  *

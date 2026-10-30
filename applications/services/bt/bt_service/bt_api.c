@@ -1,5 +1,6 @@
 #include "bt_i.h"
 #include <profiles/serial_profile.h>
+#include <profiles/host_profile.h>
 
 FuriHalBleProfileBase* bt_profile_start(
     Bt* bt,
@@ -27,8 +28,53 @@ FuriHalBleProfileBase* bt_profile_start(
 }
 
 bool bt_profile_restore_default(Bt* bt) {
-    bt->current_profile = bt_profile_start(bt, ble_profile_serial, NULL);
+    bt->current_profile = bt_profile_start(bt, bt_default_profile(bt), NULL);
     return bt->current_profile != NULL;
+}
+
+BtMode bt_get_mode(Bt* bt) {
+    furi_check(bt);
+    return bt->bt_settings.mode == BT_SETTINGS_MODE_HOST ? BtModeHost : BtModePeripheral;
+}
+
+bool bt_set_mode(Bt* bt, BtMode mode) {
+    furi_check(bt);
+    if(mode == BtModeHost && !ble_profile_host_is_supported()) return false;
+
+    bool result = false;
+    BtMessage message = {
+        .lock = api_lock_alloc_locked(),
+        .type = BtMessageTypeSetMode,
+        .result = &result,
+        .data.mode = mode,
+    };
+    furi_check(
+        furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+    api_lock_wait_unlock_and_free(message.lock);
+    return result;
+}
+
+FuriHalBleProfileBase* bt_host_start(Bt* bt) {
+    furi_check(bt);
+    if(!ble_profile_host_is_supported()) return NULL;
+    if(furi_hal_bt_check_profile_type(bt->current_profile, ble_profile_host)) {
+        return bt->current_profile;
+    }
+    return bt_profile_start(bt, ble_profile_host, NULL);
+}
+
+void bt_host_stop(Bt* bt) {
+    furi_check(bt);
+    if(bt_get_mode(bt) == BtModeHost &&
+       furi_hal_bt_check_profile_type(bt->current_profile, ble_profile_host)) {
+        // Host mode is the default: no need to restart the stack, just let go of the link
+        ble_profile_host_scan_stop(bt->current_profile);
+        ble_profile_host_connect_cancel(bt->current_profile);
+        ble_profile_host_disconnect(bt->current_profile);
+        ble_profile_host_set_event_callback(bt->current_profile, NULL, NULL);
+    } else {
+        bt_profile_restore_default(bt);
+    }
 }
 
 void bt_disconnect(Bt* bt) {

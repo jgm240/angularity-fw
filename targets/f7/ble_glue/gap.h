@@ -83,6 +83,11 @@ typedef struct {
     uint8_t mac_address[GAP_MAC_ADDR_SIZE];
     char adv_name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH];
     GapConnectionParamsRequest conn_param;
+    // Also enable the GAP central role (scanning, initiating connections). Only takes effect on
+    // the full radio stack; the light stack is peripheral only.
+    bool role_central;
+    // Never advertise (Host mode): gap_start_advertising() does nothing
+    bool no_advertising;
 } GapConfig;
 
 typedef struct {

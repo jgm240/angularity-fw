@@ -18,7 +18,13 @@ typedef enum {
     BtStatusOff,
     BtStatusAdvertising,
     BtStatusConnected,
+    BtStatusHost, /**< Host mode: not advertising, free to scan and connect to other devices */
 } BtStatus;
+
+typedef enum {
+    BtModePeripheral, /**< Advertise, phones and computers connect to the Flipper (default) */
+    BtModeHost, /**< The Flipper scans and connects to other devices, see profiles/host_profile.h */
+} BtMode;
 
 typedef void (*BtStatusChangedCallback)(BtStatus status, void* context);
 
@@ -58,6 +64,39 @@ void bt_disconnect(Bt* bt);
  * @param context   pointer to context
  */
 void bt_set_status_changed_callback(Bt* bt, BtStatusChangedCallback callback, void* context);
+
+/** Get the Bluetooth mode that is active after a restart and used by bt_profile_restore_default()
+ *
+ * @param bt        Bt instance
+ */
+BtMode bt_get_mode(Bt* bt);
+
+/** Switch between Peripheral and Host mode. The choice is saved.
+ * @note Call of this function leads to 2nd core restart. Host mode needs the full radio stack.
+ *
+ * @param bt        Bt instance
+ * @param mode      new mode
+ *
+ * @return          true on success, false if the mode is not supported by the radio stack
+ */
+bool bt_set_mode(Bt* bt, BtMode mode);
+
+/** Get the BLE Host profile instance, starting it if needed (see profiles/host_profile.h).
+ * Pair with bt_host_stop(). In Host mode the profile is already running.
+ *
+ * @param bt        Bt instance
+ *
+ * @return          profile instance for ble_profile_host_*(), NULL if the radio stack
+ *                  cannot do Host mode
+ */
+FuriHalBleProfileBase* bt_host_start(Bt* bt);
+
+/** Finish using the Host profile: stops scanning and disconnects. Outside Host mode this also
+ * restores the default (serial) profile. The instance from bt_host_start() is invalid afterwards.
+ *
+ * @param bt        Bt instance
+ */
+void bt_host_stop(Bt* bt);
 
 /** Forget bonded devices
  * @note Leads to wipe ble key storage and deleting bt.keys

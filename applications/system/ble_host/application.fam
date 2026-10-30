@@ -1,0 +1,13 @@
+App(
+    appid="ble_host",
+    name="BLE Scanner",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ble_host_app",
+    requires=["gui", "bt"],
+    stack_size=4 * 1024,
+    fap_icon="icon.png",
+    fap_category="Bluetooth",
+    fap_author="Angularity FW",
+    fap_version="1.0",
+    fap_description="Scan for Bluetooth LE devices, connect, browse services and read, write or subscribe to characteristics (Host mode, needs the full radio stack)",
+)

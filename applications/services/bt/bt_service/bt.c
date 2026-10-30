@@ -8,6 +8,7 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <profiles/serial_profile.h>
+#include <profiles/host_profile.h>
 
 #define TAG "BtSrv"
 
@@ -30,6 +31,13 @@ static void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
         canvas_draw_icon(canvas, draw_offset, 0, &I_Bluetooth_Idle_5x8);
     } else if(bt->status == BtStatusConnected) {
         canvas_draw_icon(canvas, draw_offset, 0, &I_Bluetooth_Connected_16x8);
+    } else if(bt->status == BtStatusHost) {
+        canvas_draw_icon(canvas, draw_offset, 0, &I_Bluetooth_Idle_5x8);
+        // a small "H" next to it: Host mode
+        uint8_t x = draw_offset + icon_get_width(&I_Bluetooth_Idle_5x8) + 2;
+        canvas_draw_line(canvas, x, 1, x, 7);
+        canvas_draw_line(canvas, x + 4, 1, x + 4, 7);
+        canvas_draw_line(canvas, x, 4, x + 4, 4);
     }
 }
 
@@ -348,6 +356,8 @@ static void bt_statusbar_update(Bt* bt) {
         active_icon_width += icon_get_width(&I_Bluetooth_Idle_5x8);
     } else if(bt->status == BtStatusConnected) {
         active_icon_width += icon_get_width(&I_Bluetooth_Connected_16x8);
+    } else if(bt->status == BtStatusHost) {
+        active_icon_width += icon_get_width(&I_Bluetooth_Idle_5x8) + 2 + 5;
     }
 
     if(active_icon_width > 0) {
@@ -402,6 +412,17 @@ void bt_close_rpc_connection(Bt* bt) {
     }
 }
 
+const FuriHalBleProfileTemplate* bt_default_profile(Bt* bt) {
+    bool host = bt->bt_settings.mode == BT_SETTINGS_MODE_HOST && ble_profile_host_is_supported();
+    return host ? ble_profile_host : ble_profile_serial;
+}
+
+static void bt_post_status_update(Bt* bt) {
+    BtMessage message = {.type = BtMessageTypeUpdateStatus};
+    furi_check(
+        furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+}
+
 static void bt_change_profile(Bt* bt, BtMessage* message) {
     if(furi_hal_bt_is_gatt_gap_supported()) {
         bt_settings_load(&bt->bt_settings);
@@ -418,8 +439,17 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
             bt);
         if(bt->current_profile) {
             FURI_LOG_I(TAG, "Bt App started");
-            if(bt->bt_settings.enabled) {
-                furi_hal_bt_start_advertising();
+            if(furi_hal_bt_check_profile_type(bt->current_profile, ble_profile_host)) {
+                // Host mode never advertises; applications drive scanning and connections
+                bt->status = BtStatusHost;
+                bt_post_status_update(bt);
+            } else {
+                // The advertising events set the real status; clear a stale "Host"
+                if(bt->status == BtStatusHost) bt->status = BtStatusOff;
+                if(bt->bt_settings.enabled) {
+                    furi_hal_bt_start_advertising();
+                }
+                bt_post_status_update(bt);
             }
             furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
         } else {
@@ -449,6 +479,9 @@ static void bt_close_connection(Bt* bt) {
 }
 
 static void bt_apply_settings(Bt* bt) {
+    if(furi_hal_bt_check_profile_type(bt->current_profile, ble_profile_host)) {
+        return; // Host mode does not advertise, whatever the Bluetooth switch says
+    }
     if(bt->bt_settings.enabled) {
         furi_hal_bt_start_advertising();
     } else {
@@ -476,8 +509,10 @@ static void bt_load_keys(Bt* bt) {
 
 static void bt_start_application(Bt* bt) {
     if(!bt->current_profile) {
+        // the mode decides which profile is the default
+        bt_settings_load(&bt->bt_settings);
         bt->current_profile = furi_hal_bt_change_app(
-            ble_profile_serial,
+            bt_default_profile(bt),
             NULL,
             bt_keys_storage_get_root_keys(bt->keys_storage),
             bt_on_gap_event_callback,
@@ -486,6 +521,9 @@ static void bt_start_application(Bt* bt) {
         if(!bt->current_profile) {
             FURI_LOG_E(TAG, "BLE App start failed");
             bt->status = BtStatusUnavailable;
+        } else if(furi_hal_bt_check_profile_type(bt->current_profile, ble_profile_host)) {
+            bt->status = BtStatusHost;
+            bt_post_status_update(bt);
         }
     }
 }
@@ -499,8 +537,30 @@ static void bt_handle_get_settings(Bt* bt, BtMessage* message) {
     *message->data.settings = bt->bt_settings;
 }
 
+static void bt_handle_set_mode(Bt* bt, BtMessage* message) {
+    bool ok = !(message->data.mode == BtModeHost && !ble_profile_host_is_supported());
+    if(ok) {
+        bt_settings_load(&bt->bt_settings);
+        bt->bt_settings.mode = message->data.mode == BtModeHost ? BT_SETTINGS_MODE_HOST :
+                                                                  BT_SETTINGS_MODE_PERIPHERAL;
+        bt_settings_save(&bt->bt_settings);
+
+        // Restart the stack with the profile that is now the default
+        BtMessage switch_message = {
+            .type = BtMessageTypeSetProfile,
+            .data.profile.params = NULL,
+            .data.profile.template = bt_default_profile(bt),
+            .result = &ok,
+        };
+        bt_change_profile(bt, &switch_message);
+    }
+    if(message->result) *message->result = ok;
+}
+
 static void bt_handle_set_settings(Bt* bt, BtMessage* message) {
+    uint8_t mode = bt->bt_settings.mode; // only bt_set_mode() changes it
     bt->bt_settings = *message->data.csettings;
+    bt->bt_settings.mode = mode;
     bt_apply_settings(bt);
     bt_settings_save(&bt->bt_settings);
 }
@@ -592,6 +652,8 @@ int32_t bt_srv(void* p) {
             bt_handle_set_settings(bt, &message);
         } else if(message.type == BtMessageTypeReloadKeysSettings) {
             bt_handle_reload_keys_settings(bt);
+        } else if(message.type == BtMessageTypeSetMode) {
+            bt_handle_set_mode(bt, &message);
         }
 
         if(message.lock) api_lock_unlock(message.lock);
