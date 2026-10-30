@@ -1,9 +1,9 @@
 {
-  "version": "AngularityFW-release30",
-  "changelog": "BLE Host mode (Settings > Bluetooth > Mode, BLE Scanner app), SLIX/ISO15693 emulation crash fixes, Standby, WiFi setup and rollback in Angularity Update. Installs the full BLE radio stack (extra minutes on first install). The JS Runner is not included.",
-  "timestamp": 1793377412,
-  "size": 13009045,
-  "sha256": "e52f61b894ad67a8cfdf9c180e82e58d7083328f03cac3cd5831208d8ddc2bc0",
-  "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release30/AngularityFW-release30.tgz",
-  "wifi_url": "https://raw.githubusercontent.com/jgm240/angularity-fw/ota-files/AngularityFW-release30.tgz"
+  "version": "AngularityFW-release27",
+  "changelog": "App Permissions: separate Radio, NFC, RFID and IR kinds with per-kind switches; firmware apps are no longer prompted.",
+  "timestamp": 1792220835,
+  "size": 13111734,
+  "sha256": "667901c16c4fde0c7a1a53dcfe6c8219971cc757176457c893ded10baf589808",
+  "url": "https://github.com/jgm240/angularity-fw/releases/download/AngularityFW-release27/AngularityFW-release27.tgz",
+  "wifi_url": "https://raw.githubusercontent.com/jgm240/angularity-fw/ota-files/AngularityFW-release27.tgz"
 }
