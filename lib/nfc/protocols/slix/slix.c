@@ -384,7 +384,8 @@ const char* slix_get_device_name(const SlixData* data, NfcDeviceNameType name_ty
     UNUSED(name_type);
 
     const SlixType slix_type = slix_get_type(data);
-    furi_assert(slix_type < SlixTypeCount);
+    // Unrecognised UID: there is no name table entry, use the generic one
+    if(slix_type >= SlixTypeCount) return SLIX_DEVICE_NAME;
 
     return slix_nfc_device_name[slix_type];
 }
@@ -491,14 +492,16 @@ bool slix_is_counter_increment_protected(const SlixData* data) {
 }
 
 bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features) {
-    furi_check(slix_type < SlixTypeCount);
+    // A tag whose UID is not recognised as a SLIX variant (e.g. after editing the UID) has none
+    if(slix_type >= SlixTypeCount) return false;
 
     return (slix_type_features[slix_type] & features) == features;
 }
 
 bool slix_type_supports_password(SlixType slix_type, SlixPasswordType password_type) {
-    furi_check(slix_type < SlixTypeCount);
     furi_check(password_type < SlixPasswordTypeCount);
+    // A reader can send password commands to any emulated tag, recognised or not
+    if(slix_type >= SlixTypeCount) return false;
 
     return slix_type_features[slix_type] & slix_password_configs[password_type].feature_flag;
 }

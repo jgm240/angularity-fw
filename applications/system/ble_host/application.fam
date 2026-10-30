@@ -3,6 +3,7 @@ App(
     name="BLE Scanner",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ble_host_app",
+    sources=["ble_host.c"],
     requires=["gui", "bt"],
     stack_size=4 * 1024,
     fap_icon="icon.png",
