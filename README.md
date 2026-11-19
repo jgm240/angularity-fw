@@ -11,9 +11,7 @@ Stealth/Dummy mode
 
 2 new menu styles
 
-etc.
+and more
 
 # Flashing
-Flash the .tgz file using qFlipper
-OR
-extract the .tgz and put the folder on your Flipper, then in the file browser, click update.fuf
+Flash the .tgz file using qFlipper or extract the .tgz and put the folder on your Flipper, then in the file browser, click **update.fuf**
